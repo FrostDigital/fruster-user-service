@@ -2,6 +2,7 @@
 
 var bus = require('fruster-bus');
 var createUser = require('./lib/create-user');
+var validatePassword = require('./lib/validate-password');
 var mongo = require('mongodb-bluebird');
 var database;
 
@@ -18,7 +19,17 @@ module.exports = {
 			})
 			.then(x => {
 				createUser.init(database);
+				validatePassword.init(database);
+
+				//HTTP
 				bus.subscribe('http.post.user-service', createUser.handle);
+
+				//SERVICE
+				bus.subscribe('user-service.validate-password', validatePassword.handle);
+				bus.subscribe('user-service.create-user', createUser.handle);
+
+				//TEMP
+				bus.subscribe('http.post.validate-password', validatePassword.handle);
 			});
 	}
 
