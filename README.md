@@ -1,2 +1,2 @@
-# fruster-user-service
+# Fruster-user-service
 User service for fruster cluster
