@@ -6,7 +6,8 @@ var nsc = require("nats-server-control"),
 	embeddedMongo = require("embedded-mongo-spec"),
 	userService = require('../fruster-user-service'),
 	uuid = require("uuid"),
-	_ = require("lodash");
+	_ = require("lodash"),
+	utils = require('../lib/utils/utils');
 
 describe("Fruster - User service", () => {
 	var server;
@@ -57,7 +58,7 @@ describe("Fruster - User service", () => {
 			"firstName": "Viktor",
 			"middleName": "Ludvig",
 			"lastName": "Söderström",
-			"email": uuid.v4() + "@frostdigital.se",
+			"email": uuid.v4() + "@frostdigxital.se",
 			"password": "Localhost:8080"
 		};
 	}
@@ -78,6 +79,10 @@ describe("Fruster - User service", () => {
 				expect(response.data.middleName).toBe(user.middleName);
 				expect(response.data.lastName).toBe(user.lastName);
 				expect(response.data.email).toBe(user.email);
+
+				user.roles.forEach(role => {
+					expect(response.data.scopes.length).toBe(_.size(utils.getRoles()[role.toLowerCase()]));
+				});
 
 				done();
 			})
@@ -238,5 +243,150 @@ describe("Fruster - User service", () => {
 			});
 	});
 
+	it("should return user object when getting user by id", done => {
+		var user = getUserObject();
+		var createdUser;
+
+		bus.request("user-service.create-user", {
+				data: user
+			}, 1000)
+			.then(response => {
+				createdUser = response.data;
+
+				return bus.request("user-service.get-user", {
+					data: {
+						id: response.data.id
+					}
+				}, 1000);
+			})
+			.then(response => {
+				validateGetUser(response.data[0], createdUser, response);
+				done();
+			})
+			.catch(err => err);
+	});
+
+	it("should return user object when getting user by email", done => {
+		var user = getUserObject();
+		var createdUser;
+
+		bus.request("user-service.create-user", {
+				data: user
+			}, 1000)
+			.then(response => {
+				createdUser = response.data;
+
+				return bus.request("user-service.get-user", {
+					data: {
+						email: response.data.email
+					}
+				}, 1000);
+			})
+			.then(response => {
+				validateGetUser(response.data[0], createdUser, response);
+				done();
+			})
+			.catch(err => err);
+	});
+
+	it("should return user object when getting user by firstName", done => {
+		var user = getUserObject();
+		var createdUsers = {};
+		user.firstName = "veryUniqueNot" + Math.random();
+
+		createUser(user)
+			.then(created => {
+				createdUsers[created.data.id] = created.data;
+			})
+			.then(x => {
+				user.email = "241842" + user.email;
+				return createUser(user);
+			})
+			.then(created => {
+				createdUsers[created.data.id] = created.data;
+			})
+			.then(response => {
+				return bus.request("user-service.get-user", {
+					data: {
+						firstName: user.firstName
+					}
+				}, 1000);
+			})
+			.then(response => {
+				response.data.forEach(user => {
+					validateGetUser(user, createdUsers[user.id], response);
+				});
+				expect(response.data.length).toBe(2);
+
+				done();
+			})
+			.catch(err => err);
+	});
+
+	function validateGetUser(getUser, createdUser, response) {
+		expect(response.status).toBe(200);
+
+		expect(_.size(response.data)).not.toBe(0);
+		expect(_.size(response.error)).toBe(0);
+
+		expect(getUser.id).toBe(createdUser.id);
+		expect(getUser.firstName).toBe(createdUser.firstName);
+		expect(getUser.lastName).toBe(createdUser.lastName);
+		expect(getUser.middleName).toBe(createdUser.middleName);
+		expect(getUser.roles.length).toBe(createdUser.roles.length);
+
+		createdUser.roles.forEach(role => {
+			expect(getUser.scopes.length).toBe(_.size(utils.getRoles()[role]));
+		});
+	}
+
+	it("should return user object when getting user by firstName and lastName", done => {
+		var user = getUserObject();
+		var createdUsers = {};
+		user.firstName = "veryUniqueNot" + Math.random();
+
+		createUser(user)
+			.then(created => {
+				createdUsers[created.data.id] = created.data;
+			})
+			.then(x => {
+				user.email = "241842" + user.email;
+				return createUser(user);
+			})
+			.then(created => {
+				createdUsers[created.data.id] = created.data;
+			})
+			.then(response => {
+				return bus.request("user-service.get-user", {
+					data: {
+						firstName: user.firstName,
+						lastName: user.lastName
+					}
+				}, 1000);
+			})
+			.then(response => {
+				expect(response.data.length).toBe(2);
+
+				for (var i = 0; i < response.data.length; i++) {
+					var user = response.data[i];
+
+					expect(user.firstName).toBe(user.firstName);
+					expect(user.lastName).toBe(user.lastName);
+
+					if (i > 0) {
+						expect(user.email).not.toBe(response.data[i - 1].email);
+					}
+				}
+
+				done();
+			})
+			.catch(err => err);
+	});
+
+	function createUser(user) {
+		return bus.request("user-service.create-user", {
+			data: user
+		}, 1000);
+	}
 
 });
