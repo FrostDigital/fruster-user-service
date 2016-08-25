@@ -14,7 +14,6 @@ module.exports = {
 				return mongo.connect(mongoUrl);
 			})
 			.then(db => {
-				console.log("Connected to mongo.");
 				database = db.collection('users');
 			})
 			.then(x => {
@@ -29,7 +28,7 @@ module.exports = {
 				bus.subscribe('user-service.create-user', createUser.handle);
 
 				//TEMP
-				bus.subscribe('http.post.validate-password', validatePassword.handle);
+				// bus.subscribe('http.post.validate-password', validatePassword.handle);
 			});
 	}
 
