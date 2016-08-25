@@ -8,8 +8,8 @@ var database;
 
 module.exports = {
 
-	start: (busPort, mongoUrl) => {
-		bus.connect(busPort)
+	start: (busAddress, mongoUrl) => {
+		return bus.connect(busAddress)
 			.then(x => {
 				return mongo.connect(mongoUrl);
 			})
