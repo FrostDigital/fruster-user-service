@@ -473,23 +473,56 @@ describe("Fruster - User service", () => {
 		var user = getUserObject();
 		var id;
 
+		var email = "new-email" + Math.random() + "@gotmail.com";
+
 		createUser(user)
 			.then((createdUserResponse) => {
 				id = createdUserResponse.data.id;
-				user.email = "new-email" + Math.random() + "@gotmail.com";
+				user.email = email;
 				return createUser(user);
 			})
 			.then(createdUserResponse => {
 				return bus.request("user-service.update-user", {
 						data: {
 							id: id,
-							email: "new-email@gotmail.com"
+							email: email
 						}
 					}, 1000)
 					.catch(updateResponse => {
 						expect(updateResponse.status).toBe(400);
 						done();
 					});
+			});
+	});
+
+	it("Should return 200 when user is successfully removed", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(createdUserResponse => {
+				return bus.request("user-service.delete-user", {
+						data: {
+							id: createdUserResponse.data.id
+						}
+					}, 1000)
+					.then(updateResponse => {
+						expect(updateResponse.status).toBe(200);
+						done();
+					});
+			});
+	});
+
+	it("Should return 404 when trying to remove non-existent user", done => {
+		var user = getUserObject();
+
+		return bus.request("user-service.delete-user", {
+				data: {
+					id: uuid.v4()
+				}
+			}, 1000)
+			.catch(updateResponse => {
+				expect(updateResponse.status).toBe(404);
+				done();
 			});
 	});
 
