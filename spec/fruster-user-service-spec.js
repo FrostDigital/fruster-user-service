@@ -208,7 +208,7 @@ describe("Fruster - User service", () => {
 			.then(x => {
 				return bus.request("user-service.validate-password", {
 					data: {
-						email: user.email,
+						username: user.email,
 						password: user.password
 					}
 				}, 1000);
@@ -232,7 +232,7 @@ describe("Fruster - User service", () => {
 			.then(x => {
 				return bus.request("user-service.validate-password", {
 					data: {
-						email: user.email,
+						username: user.email,
 						password: "yoyoyo"
 					}
 				}, 1000);
