@@ -12,6 +12,7 @@ var createUser = require("./lib/create-user");
 var getUser = require("./lib/get-user");
 var getUsersHttp = require("./lib/http/get-users-http");
 var getUserByIdHttp = require("./lib/http/get-user-by-id-http");
+//TODO: Get users by Query http? => firstName=Viktor,Joel,Nils&lastName=Söderström ?
 
 // UPDATE
 var updateUser = require("./lib/update-user");
@@ -23,6 +24,13 @@ var deleteUserHttp = require("./lib/http/delete-user-http");
 
 // VALIDATE PASSWORD
 var validatePassword = require("./lib/validate-password");
+
+//TODO:
+//Update password
+
+//Add role(s)
+
+//Remove role(s)
 
 module.exports = {
 
