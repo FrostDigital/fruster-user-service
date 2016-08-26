@@ -63,6 +63,8 @@ describe("Fruster - User service", () => {
 		};
 	}
 
+	//CREATE
+
 	it("should be possible to create user", done => {
 		var user = getUserObject();
 
@@ -195,6 +197,8 @@ describe("Fruster - User service", () => {
 		}
 	});
 
+	//VALIDATE PASSWORD
+
 	it("should return 200 when validating correct password", done => {
 		var user = getUserObject();
 
@@ -242,6 +246,8 @@ describe("Fruster - User service", () => {
 				done();
 			});
 	});
+
+	//GET USER
 
 	it("should return user object when getting user by id", done => {
 		var user = getUserObject();
@@ -388,5 +394,14 @@ describe("Fruster - User service", () => {
 			data: user
 		}, 1000);
 	}
+
+	//UPDATE USER
+
+	it("should return user object when getting user by firstName and lastName", done => {
+
+
+
+	});
+
 
 });
