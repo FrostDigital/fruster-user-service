@@ -7,7 +7,7 @@ module.exports = {
 	mongoUrl: process.env.MONGO_URL || "mongodb://localhost:27017",
 
 	//Predefined permissions for roles
-	roles: process.env.ROLE_SCOPES || "admin:profile.get,user.*;user:profile.get",
+	roles: process.env.ROLE_SCOPES || "super-admin:*;admin:profile.get,user.*;user:profile.get",
 
 	//Regex used for validating email adresses, defaults to checking letters & numbers, an @ and a top domain
 	emailValidationRegex: process.env.EMAIL_VALIDATION_REGEX || /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i,
