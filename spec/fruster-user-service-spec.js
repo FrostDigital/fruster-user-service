@@ -239,9 +239,7 @@ describe("Fruster - User service", () => {
 			})
 			.catch(err => {
 				expect(err.status).toBe(401);
-
 				expect(_.size(err.data)).toBe(0);
-				expect(_.size(err.error)).toBe(0);
 
 				done();
 			});
@@ -397,11 +395,102 @@ describe("Fruster - User service", () => {
 
 	//UPDATE USER
 
-	it("should return user object when getting user by firstName and lastName", done => {
+	it("Should return updated user when updating user", done => {
+		var user = getUserObject();
 
+		createUser(user)
+			.then(createdUserResponse => {
+				var newFirstName = "Roland",
+					newLastName = "Svensson";
 
-
+				return bus.request("user-service.update-user", {
+						data: {
+							id: createdUserResponse.data.id,
+							firstName: newFirstName,
+							lastName: newLastName
+						}
+					}, 1000)
+					.then(updateResponse => {
+						expect(updateResponse.data.firstName).toBe(newFirstName);
+						expect(updateResponse.data.lastName).toBe(newLastName);
+						done();
+					});
+			});
 	});
 
+	it("Should return error when user can't be updated", done => {
+		return bus.request("user-service.update-user", {
+				data: {
+					id: "ID_",
+					email: "hello"
+				}
+			}, 1000)
+			.catch(updateResponse => {
+				expect(updateResponse.status).toBe(400);
+				done();
+			});
+	});
+
+	it("Should return error when trying to update password", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(createdUserResponse => {
+
+				return bus.request("user-service.update-user", {
+						data: {
+							id: createdUserResponse.data.id,
+							password: "new-password"
+						}
+					}, 1000)
+					.catch(updateResponse => {
+						expect(updateResponse.status).toBe(400);
+						expect(_.size(updateResponse.data)).toBe(0);
+						done();
+					});
+			});
+	});
+
+	it("Should return error when trying to update email with faulty email", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(createdUserResponse => {
+				return bus.request("user-service.update-user", {
+						data: {
+							id: createdUserResponse.data.id,
+							email: "hello"
+						}
+					}, 1000)
+					.catch(updateResponse => {
+						expect(updateResponse.status).toBe(400);
+						done();
+					});
+			});
+	});
+
+	it("Should return error when trying to update email with existing email", done => {
+		var user = getUserObject();
+		var id;
+
+		createUser(user)
+			.then((createdUserResponse) => {
+				id = createdUserResponse.data.id;
+				user.email = "new-email" + Math.random() + "@gotmail.com";
+				return createUser(user);
+			})
+			.then(createdUserResponse => {
+				return bus.request("user-service.update-user", {
+						data: {
+							id: id,
+							email: "new-email@gotmail.com"
+						}
+					}, 1000)
+					.catch(updateResponse => {
+						expect(updateResponse.status).toBe(400);
+						done();
+					});
+			});
+	});
 
 });
