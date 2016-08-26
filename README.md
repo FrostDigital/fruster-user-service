@@ -70,7 +70,7 @@ Returns information about which field was incorrectly inputted. E.g. _"Email is 
 _______________
 
 
-#### Get user(s)
+### Get user(s)
 Get user(s) by provided query on all fields except those hidden in user service (E.g. password, salt and scopes). It is possible to mix match as many fields as you want. 
 
 ##### Subject
