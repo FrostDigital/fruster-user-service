@@ -21,7 +21,7 @@ module.exports = {
 				validatePassword.init(database);
 
 				//HTTP
-				bus.subscribe('http.post.user-service', createUser.handle);
+				bus.subscribe('http.post.user', createUser.handle);
 
 				//SERVICE
 				bus.subscribe('user-service.validate-password', validatePassword.handle);
