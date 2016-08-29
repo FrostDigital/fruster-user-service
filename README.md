@@ -260,7 +260,37 @@ Returns information about which field was incorrectly inputted. E.g. _"Email is 
 	  "reqId": "4d572580-6a9f-11e6-bd14-679d45e439c0"
 	}
 
+_______________
 
+### Delete user 
+Delete user based on id.
+
+##### Subject
+    
+    user-service.delete-user || http.delete.user.:userId
+
+
+##### Success response
+
+	{
+	  "status": 200,
+	  "data": {},
+	  "error": {},
+	  "reqId": "fff70980-6ba3-11e6-a49f-65fa27f53766"
+	}
+
+##### Failure response
+
+	{
+	  "status": 404,
+	  "data": {},
+	  "error": {
+	    "code": "user-service.404.2",
+	    "title": "User not found",
+	    "detail": "No user with id cdc78c6a-8a31-48e3-9827-a5120b339524 was found"
+	  },
+	  "reqId": "04ab69d0-6ba4-11e6-a49f-65fa27f53766"
+	}
 _______________
 
 ### Validate password 
