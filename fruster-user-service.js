@@ -65,11 +65,11 @@ module.exports = {
 				//ACTIONS
 
 				//HTTP
-				bus.subscribe("http.post.user", createUser.handle);
-				bus.subscribe("http.get.user", getUsersHttp.handle);
-				bus.subscribe("http.get.user.>", getUserByIdHttp.handle);
-				bus.subscribe("http.put.user.>", updateUserHttp.handle);
-				bus.subscribe("http.delete.user.>", deleteUserHttp.handle);
+				bus.subscribe("http.post.user", createUser.handle).permissions("admin.*");
+				bus.subscribe("http.get.user", getUsersHttp.handle).permissions("admin.*");
+				bus.subscribe("http.get.user.>", getUserByIdHttp.handle).permissions("admin.*");
+				bus.subscribe("http.put.user.>", updateUserHttp.handle).permissions("admin.*");
+				bus.subscribe("http.delete.user.>", deleteUserHttp.handle).permissions("admin.*");
 
 				//SERVICE
 				bus.subscribe("user-service.validate-password", validatePassword.handle);
