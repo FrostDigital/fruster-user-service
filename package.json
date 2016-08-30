@@ -11,7 +11,7 @@
     "crypto-js": "^3.1.6",
     "csprng": "^0.1.1",
     "embedded-mongo-spec": "0.0.13",
-    "fruster-bus": "0.0.3",
+    "fruster-bus": "~0.0.7",
     "lodash": "^4.15.0",
     "mongodb-bluebird": "^0.1.1",
     "nats": "^0.6.4",
