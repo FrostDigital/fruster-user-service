@@ -1,5 +1,3 @@
-/*jslint latedef:false, esversion:6*/
-
 var bus = require("fruster-bus");
 var mongo = require("mongodb-bluebird");
 var database;
@@ -39,6 +37,7 @@ module.exports = {
 			.then(x => {
 				return mongo.connect(mongoUrl);
 			})
+			.then(db => createInitialUser(db))			
 			.then(db => {
 				database = db.collection("users");
 
