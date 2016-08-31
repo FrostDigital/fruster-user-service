@@ -1,7 +1,7 @@
 var bus = require("fruster-bus");
 var mongo = require("mongodb-bluebird");
+var conf = require("./config");
 var database;
-
 
 // CREATE
 var createUser = require("./lib/create-user");
@@ -23,6 +23,8 @@ var deleteUserHttp = require("./lib/http/delete-user-http");
 // VALIDATE PASSWORD
 var validatePassword = require("./lib/validate-password");
 
+var createInitialUser = require("./lib/create-initial-user");
+
 //TODO:
 //Update password
 
@@ -34,12 +36,10 @@ module.exports = {
 
 	start: (busAddress, mongoUrl) => {
 		return bus.connect(busAddress)
-			.then(x => {
-				return mongo.connect(mongoUrl);
-			})
-			.then(db => createInitialUser(db))			
+			.then(x => mongo.connect(mongoUrl))
+			.then(db => createInitialUser(db).then(x => db))			
 			.then(db => {
-				database = db.collection("users");
+				database = db.collection(conf.userCollection);
 
 				//INITS
 				//CREATE
@@ -64,11 +64,11 @@ module.exports = {
 				//ACTIONS
 
 				//HTTP
-				bus.subscribe("http.post.user", createUser.handle);
-				bus.subscribe("http.get.user", getUsersHttp.handle);
-				bus.subscribe("http.get.user.>", getUserByIdHttp.handle);
-				bus.subscribe("http.put.user.>", updateUserHttp.handle);
-				bus.subscribe("http.delete.user.>", deleteUserHttp.handle);
+				bus.subscribe("http.post.user", createUser.handle).permissions("admin.*");
+				bus.subscribe("http.get.user", getUsersHttp.handle).permissions("admin.*");
+				bus.subscribe("http.get.user.>", getUserByIdHttp.handle).permissions("admin.*");
+				bus.subscribe("http.put.user.>", updateUserHttp.handle).permissions("admin.*");
+				bus.subscribe("http.delete.user.>", deleteUserHttp.handle).permissions("admin.*");
 
 				//SERVICE
 				bus.subscribe("user-service.validate-password", validatePassword.handle);

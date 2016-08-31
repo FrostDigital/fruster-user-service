@@ -1,5 +1,3 @@
-/*jslint latedef:false, esversion:6*/
-
 var nsc = require("nats-server-control"),
 	bus = require("fruster-bus"),
 	mongo = require("mongodb-bluebird"),
@@ -31,7 +29,7 @@ describe("Fruster - User service", () => {
 				return connectBus()
 					.then(startEmbeddedMongo)
 					.then(() => {
-						return userService.start(busAddress, "mongodb://localhost:" + mongoPort);
+						return userService.start(busAddress, "mongodb://localhost:" + mongoPort + "/user-service");
 					})
 					.then(done)
 					.catch(done);
@@ -42,7 +40,7 @@ describe("Fruster - User service", () => {
 	afterAll((done) => {
 		nsc.stopServer(server);
 
-		return mongo.connect("mongodb://localhost:" + mongoPort)
+		return mongo.connect("mongodb://localhost:" + mongoPort + "/user-service")
 			.then((db) => {
 				return db.dropCollection("users");
 			})
