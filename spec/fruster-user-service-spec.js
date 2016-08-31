@@ -1,5 +1,3 @@
-/*jslint latedef:false, esversion:6*/
-
 var nsc = require("nats-server-control"),
 	bus = require("fruster-bus"),
 	mongo = require("mongodb-bluebird"),
