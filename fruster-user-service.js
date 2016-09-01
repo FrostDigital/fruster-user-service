@@ -20,8 +20,9 @@ var updateUserHttp = require("./lib/http/update-user-http");
 var deleteUser = require("./lib/delete-user");
 var deleteUserHttp = require("./lib/http/delete-user-http");
 
-// VALIDATE PASSWORD
+// PASSWORD
 var validatePassword = require("./lib/validate-password");
+var updatePassword = require("./lib/update-password");
 
 var createInitialUser = require("./lib/create-initial-user");
 
@@ -37,7 +38,7 @@ module.exports = {
 	start: (busAddress, mongoUrl) => {
 		return bus.connect(busAddress)
 			.then(x => mongo.connect(mongoUrl))
-			.then(db => createInitialUser(db).then(x => db))			
+			.then(db => createInitialUser(db).then(x => db))
 			.then(db => {
 				database = db.collection(conf.userCollection);
 
@@ -58,20 +59,22 @@ module.exports = {
 				deleteUser.init(database);
 				deleteUserHttp.init(deleteUser);
 
-				//VALIDATE PASSWORD
+				//PASSWORD
 				validatePassword.init(database);
+				updatePassword.init(database, validatePassword, getUser);
 
 				//ACTIONS
 
 				//HTTP
-				bus.subscribe("http.post.user", createUser.handle).permissions("admin.*");
-				bus.subscribe("http.get.user", getUsersHttp.handle).permissions("admin.*");
-				bus.subscribe("http.get.user.>", getUserByIdHttp.handle).permissions("admin.*");
-				bus.subscribe("http.put.user.>", updateUserHttp.handle).permissions("admin.*");
-				bus.subscribe("http.delete.user.>", deleteUserHttp.handle).permissions("admin.*");
+				bus.subscribe("http.post.admin.user", createUser.handle).permissions("admin.*");
+				bus.subscribe("http.get.admin.user", getUsersHttp.handle).permissions("admin.*");
+				bus.subscribe("http.get.admin.user.>", getUserByIdHttp.handle).permissions("admin.*");
+				bus.subscribe("http.put.admin.user.>", updateUserHttp.handle).permissions("admin.*");
+				bus.subscribe("http.delete.admin.user.>", deleteUserHttp.handle).permissions("admin.*");
 
 				//SERVICE
 				bus.subscribe("user-service.validate-password", validatePassword.handle);
+				bus.subscribe("user-service.update-password", updatePassword.handle);
 				bus.subscribe("user-service.create-user", createUser.handle);
 				bus.subscribe("user-service.get-user", getUser.handle);
 				bus.subscribe("user-service.update-user", updateUser.handle);
@@ -80,6 +83,7 @@ module.exports = {
 				//TEMP
 				// bus.subscribe("http.post.validate-password", validatePassword.handle);
 				// bus.subscribe("http.post.user-service-get", getUser.handle);
+				bus.subscribe("http.put.password", updatePassword.handle);
 			});
 	}
 

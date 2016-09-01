@@ -5,7 +5,10 @@ var nsc = require("nats-server-control"),
 	userService = require('../fruster-user-service'),
 	uuid = require("uuid"),
 	_ = require("lodash"),
-	utils = require('../lib/utils/utils');
+	utils = require('../lib/utils/utils'),
+	conf = require('../config');
+
+var mongoDb;
 
 describe("Fruster - User service", () => {
 	var server;
@@ -26,8 +29,17 @@ describe("Fruster - User service", () => {
 					return embeddedMongo.open(mongoPort);
 				}
 
+				function connectToMongoForTests() {
+					return mongo.connect("mongodb://localhost:" + mongoPort + "/user-service")
+						.then((db) => {
+							mongoDb = db;
+							return;
+						});
+				}
+
 				return connectBus()
 					.then(startEmbeddedMongo)
+					.then(connectToMongoForTests)
 					.then(() => {
 						return userService.start(busAddress, "mongodb://localhost:" + mongoPort + "/user-service");
 					})
@@ -40,10 +52,7 @@ describe("Fruster - User service", () => {
 	afterAll((done) => {
 		nsc.stopServer(server);
 
-		return mongo.connect("mongodb://localhost:" + mongoPort + "/user-service")
-			.then((db) => {
-				return db.dropCollection("users");
-			})
+		return mongoDb.dropCollection("users")
 			.then(x => {
 				embeddedMongo.close();
 				done();
@@ -214,7 +223,6 @@ describe("Fruster - User service", () => {
 			.then(response => {
 				expect(response.status).toBe(200);
 
-				expect(_.size(response.data)).toBe(0);
 				expect(_.size(response.error)).toBe(0);
 
 				done();
@@ -523,5 +531,93 @@ describe("Fruster - User service", () => {
 				done();
 			});
 	});
+
+	it("Should be possible to update password", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(response => {
+				var updatePassword = {
+					newPassword: "Localhost:8081",
+					oldPassword: user.password,
+					id: response.data.id
+				};
+
+				var oldUser;
+
+				return mongoDb.collection("users")
+					.find({
+						id: response.data.id
+					})
+					.then(userResp => {
+						oldUser = userResp[0];
+					})
+					.then(x => {
+						return bus.request("user-service.update-password", {
+								user: response.data,
+								data: updatePassword
+							}, 1000)
+							.then(x => {
+								return mongoDb.collection("users")
+									.find({
+										id: response.data.id
+									})
+									.then(userResp => {
+										var newUser = userResp[0];
+										expect(newUser.password).not.toBe(oldUser.password);
+										expect(newUser.salt).not.toBe(oldUser.salt);
+										done();
+									});
+							});
+					});
+			});
+	});
+
+	it("should not be possible to update someone else's password", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(response => {
+				var updatePassword = {
+					newPassword: "Localhost:8081",
+					oldPassword: user.password,
+					id: "someone else's id"
+				};
+
+				var oldUser;
+
+				return bus.request("user-service.update-password", {
+						user: response.data,
+						data: updatePassword
+					}, 1000)
+					.catch(err => {
+						done();
+					});
+			});
+	});
+
+	it("should not be possible to update password without validating the old password", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(response => {
+				var updatePassword = {
+					newPassword: "Localhost:8081",
+					oldPassword: "nothing",
+					id: response.data.id
+				};
+
+				var oldUser;
+
+				return bus.request("user-service.update-password", {
+						user: response.data,
+						data: updatePassword
+					}, 1000)
+					.catch(err => {
+						done();
+					});
+			});
+	});
+
 
 });
