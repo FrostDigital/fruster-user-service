@@ -1,9 +1,7 @@
-/*jslint latedef:false, esversion:6*/
-
 var bus = require("fruster-bus");
 var mongo = require("mongodb-bluebird");
+var conf = require("./config");
 var database;
-
 
 // CREATE
 var createUser = require("./lib/create-user");
@@ -25,6 +23,8 @@ var deleteUserHttp = require("./lib/http/delete-user-http");
 // VALIDATE PASSWORD
 var validatePassword = require("./lib/validate-password");
 
+var createInitialUser = require("./lib/create-initial-user");
+
 //TODO:
 //Update password
 
@@ -36,11 +36,10 @@ module.exports = {
 
 	start: (busAddress, mongoUrl) => {
 		return bus.connect(busAddress)
-			.then(x => {
-				return mongo.connect(mongoUrl);
-			})
+			.then(x => mongo.connect(mongoUrl))
+			.then(db => createInitialUser(db).then(x => db))			
 			.then(db => {
-				database = db.collection("users");
+				database = db.collection(conf.userCollection);
 
 				//INITS
 				//CREATE
