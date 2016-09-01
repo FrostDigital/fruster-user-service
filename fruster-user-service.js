@@ -83,7 +83,7 @@ module.exports = {
 				//TEMP
 				// bus.subscribe("http.post.validate-password", validatePassword.handle);
 				// bus.subscribe("http.post.user-service-get", getUser.handle);
-				bus.subscribe("http.put.password", updatePassword.handle);
+				// bus.subscribe("http.put.password", updatePassword.handle);
 			});
 	}
 
