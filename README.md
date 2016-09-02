@@ -15,7 +15,9 @@ See _Configuration_ in readme for default values.
 
 ##### Subject
     
-    user-service.create-user || http.post.user-service
+    user-service.create-user || http.post.admin.user-service
+
+Http subject requires admin.* scope.
 
 ##### Request 
     {
@@ -122,6 +124,8 @@ Get an user based on id.
     
 	http.get.user.:userId
 
+Requires admin.* scope.
+
 ##### Success response
 
 	{
@@ -215,6 +219,8 @@ Fields `firstName`, `lastName`, `middleName` and `email` are possbile to update.
     
     user-service.update-user || http.put.user.:userId
 
+Http subject requires admin.* scope.
+
 #### Request 
     {
 		//...
@@ -268,6 +274,8 @@ Delete user based on id.
 ##### Subject
     
     user-service.delete-user || http.delete.user.:userId
+
+Http subject requires admin.* scope.
 
 
 ##### Success response
@@ -330,7 +338,86 @@ Validate an inputted password with registered password of user, typically when l
 	  },
 	  "reqId": "dd0670f0-6a9f-11e6-bd14-679d45e439c0"
 	}
+_______________
 
+### Update password 
+Updates password of user. Requires user's old password to be validated before updated.
+
+##### Subject
+    
+    user-service.update-password
+
+##### Request 
+    
+	{
+		//...
+		data: 	{
+		    "id":"a51b7531-41be-44a3-a6a1-664ffdc35e60",
+		    "oldPassword":"bob",
+		    "newPassword":"von"
+		}
+	}
+
+##### Success response
+
+	{
+	  "status": 202,
+	  "data": {},
+	  "error": {},
+	  "reqId": "d4614e70-6a9f-11e6-bd14-679d45e439c0"
+	}
+
+##### Failure response
+
+	{
+	  "status": 403,
+	  "data": {},
+	  "error": {
+		"code" : "user-service.403.1"
+	  },
+	  "reqId": "dd0670f0-6a9f-11e6-bd14-679d45e439c0"
+	}
+
+_______________
+
+### Reset password 
+Reset password of user. Primarily used by password reset service to set password of user after a password reset is succesful.
+
+##### Subject
+    
+    user-service.reset-password
+
+##### Request 
+    
+	{
+		//...
+		data: 	{
+		    "id":"a51b7531-41be-44a3-a6a1-664ffdc35e60",
+		    "newPassword":"Localhost:8081"
+		}
+	}
+
+##### Success response
+
+	{
+	  "status": 202,
+	  "data": {},
+	  "error": {},
+	  "reqId": "d4614e70-6a9f-11e6-bd14-679d45e439c0"
+	}
+
+##### Failure response
+
+	{
+	  "status": 404,
+	  "error": {
+	    "code": "user-service.404.1",
+	    "id": "7d3e595d-df72-45a1-a96b-1ce96cc389e4",
+	    "title": "User not found",
+	    "detail": "User with id 932092a1-b2fb-4a61-9bdde9-096d1f3dadc2d was not found"
+	  },
+	  "reqId": "9d24c010-70e2-11e6-8f12-af9e23ee8aa7"
+	}
 
 
 ## Run
