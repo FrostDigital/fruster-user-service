@@ -170,6 +170,7 @@ Get all users.
 ##### Subject
     
 	http.get.user
+Requires admin.* scope.
 
 ##### Success response
 
