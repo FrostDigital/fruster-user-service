@@ -1,5 +1,3 @@
-/*jslint latedef:false*/
-
 module.exports = {
 
 	bus: parseArray(process.env.BUS) || ['nats://localhost:4222'],
