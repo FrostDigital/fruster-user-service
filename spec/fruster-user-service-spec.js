@@ -620,4 +620,45 @@ describe("Fruster - User service", () => {
 	});
 
 
+	it("Should be possible to reset password", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(response => {
+				var updatePassword = {
+					newPassword: "Localhost:8081",
+					id: response.data.id
+				};
+
+				var oldUser;
+
+				return mongoDb.collection("users")
+					.find({
+						id: response.data.id
+					})
+					.then(userResp => {
+						oldUser = userResp[0];
+					})
+					.then(x => {
+						return bus.request("user-service.reset-password", {
+								user: response.data,
+								data: updatePassword
+							}, 1000)
+							.then(x => {
+								return mongoDb.collection("users")
+									.find({
+										id: response.data.id
+									})
+									.then(userResp => {
+										var newUser = userResp[0];
+										expect(newUser.password).not.toBe(oldUser.password);
+										expect(newUser.salt).not.toBe(oldUser.salt);
+										done();
+									});
+							});
+					});
+			});
+	});
+
+
 });

@@ -23,6 +23,7 @@ var deleteUserHttp = require("./lib/http/delete-user-http");
 // PASSWORD
 var validatePassword = require("./lib/validate-password");
 var updatePassword = require("./lib/update-password");
+var resetPassword = require("./lib/reset-password");
 
 var createInitialUser = require("./lib/create-initial-user");
 
@@ -62,6 +63,7 @@ module.exports = {
 				//PASSWORD
 				validatePassword.init(database);
 				updatePassword.init(database, validatePassword, getUser);
+				resetPassword.init(database);
 
 				//ACTIONS
 
@@ -75,6 +77,7 @@ module.exports = {
 				//SERVICE
 				bus.subscribe("user-service.validate-password", validatePassword.handle);
 				bus.subscribe("user-service.update-password", updatePassword.handle);
+				bus.subscribe("user-service.reset-password", resetPassword.handle);
 				bus.subscribe("user-service.create-user", createUser.handle);
 				bus.subscribe("user-service.get-user", getUser.handle);
 				bus.subscribe("user-service.update-user", updateUser.handle);
@@ -84,6 +87,7 @@ module.exports = {
 				// bus.subscribe("http.post.validate-password", validatePassword.handle);
 				// bus.subscribe("http.post.user-service-get", getUser.handle);
 				// bus.subscribe("http.put.password", updatePassword.handle);
+				bus.subscribe("http.post.reset-password", resetPassword.handle);
 			});
 	}
 
