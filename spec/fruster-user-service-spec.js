@@ -30,7 +30,7 @@ describe("Fruster - User service", () => {
 				}
 
 				function connectToMongoForTests() {
-					return mongo.connect("mongodb://localhost:" + mongoPort + "/user-service")
+					return mongo.connect("mongodb://localhost:" + mongoPort + "/user-service-test")
 						.then((db) => {
 							mongoDb = db;
 							return;
@@ -41,7 +41,7 @@ describe("Fruster - User service", () => {
 					.then(startEmbeddedMongo)
 					.then(connectToMongoForTests)
 					.then(() => {
-						return userService.start(busAddress, "mongodb://localhost:" + mongoPort + "/user-service");
+						return userService.start(busAddress, "mongodb://localhost:" + mongoPort + "/user-service-test");
 					})
 					.then(done)
 					.catch(done);
@@ -53,6 +53,7 @@ describe("Fruster - User service", () => {
 		nsc.stopServer(server);
 
 		return mongoDb.dropCollection("users")
+			.then(mongoDb.dropDatabase("user-service-test"))
 			.then(x => {
 				embeddedMongo.close();
 				done();
@@ -660,5 +661,155 @@ describe("Fruster - User service", () => {
 			});
 	});
 
+	it("should be possible to add a role to a user", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.add-roles", {
+					data: {
+						id: createdUser.id,
+						roles: ["user"]
+					}
+				})
+				.then(x => {
+					return bus.request("user-service.get-user", {
+							data: {
+								id: createdUser.id
+							}
+						})
+						.then(userResponse => userResponse.data[0])
+						.then(user => {
+							expect(user.roles.includes("admin")).toBe(true);
+							expect(user.roles.includes("user")).toBe(true);
+							done();
+						});
+				}));
+	});
+
+	it("should be possible to add multiple roles to a user", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.add-roles", {
+					data: {
+						id: createdUser.id,
+						roles: ["user", "super-admin"]
+					}
+				})
+				.then(x => {
+					return bus.request("user-service.get-user", {
+							data: {
+								id: createdUser.id
+							}
+						})
+						.then(userResponse => userResponse.data[0])
+						.then(user => {
+							expect(user.roles.includes("admin")).toBe(true);
+							expect(user.roles.includes("user")).toBe(true);
+							expect(user.roles.includes("super-admin")).toBe(true);
+							done();
+						});
+				}));
+	});
+
+	it("should not be possible to add multiples of same role", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.add-roles", {
+					data: {
+						id: createdUser.id,
+						roles: ["admin"]
+					}
+				})
+				.then(x => {
+					return bus.request("user-service.get-user", {
+							data: {
+								id: createdUser.id
+							}
+						})
+						.then(userResponse => userResponse.data[0])
+						.then(user => {
+							expect(user.roles.length).toBe(1);
+							done();
+						});
+				}));
+	});
+
+	it("should be possible to remove a role from a user", done => {
+		var user = getUserObject();
+		user.roles = ["user", "admin"];
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.remove-roles", {
+					data: {
+						id: createdUser.id,
+						roles: ["admin"]
+					}
+				})
+				.then(x => {
+					return bus.request("user-service.get-user", {
+							data: {
+								id: createdUser.id
+							}
+						})
+						.then(userResponse => userResponse.data[0])
+						.then(user => {
+							expect(user.roles.includes("admin")).toBe(false);
+							expect(user.roles.length).toBe(1);
+							done();
+						});
+				}));
+	});
+
+	it("should be possible to remove multiple roles from a user", done => {
+		var user = getUserObject();
+		user.roles = ["user", "admin", "super-admin"];
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.remove-roles", {
+					data: {
+						id: createdUser.id,
+						roles: ["admin", "super-admin"]
+					}
+				})
+				.then(x => {
+					return bus.request("user-service.get-user", {
+							data: {
+								id: createdUser.id
+							}
+						})
+						.then(userResponse => userResponse.data[0])
+						.then(user => {
+							expect(user.roles.includes("admin")).toBe(false);
+							expect(user.roles.includes("super-admin")).toBe(false);
+							expect(user.roles.length).toBe(1);
+							done();
+						});
+				}));
+	});
+
+	it("should not be possible to remove all from a user", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.remove-roles", {
+				data: {
+					id: createdUser.id,
+					roles: ["admin"]
+				}
+			}))
+			.catch(err => {
+				expect(err.status).toBe(400);
+				expect(err.error.code).toBe("user-service.400.14");
+				done();
+			});
+	});
 
 });
