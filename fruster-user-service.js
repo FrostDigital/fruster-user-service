@@ -68,7 +68,7 @@ module.exports = {
 				//ACTIONS
 
 				//HTTP
-				bus.subscribe("http.post.admin.user", createUser.handle).permissions("admin.*");
+				bus.subscribe("http.post.admin.user", createUser.handle);
 				bus.subscribe("http.get.admin.user", getUsersHttp.handle).permissions("admin.*");
 				bus.subscribe("http.get.admin.user.>", getUserByIdHttp.handle).permissions("admin.*");
 				bus.subscribe("http.put.admin.user.>", updateUserHttp.handle).permissions("admin.*");
