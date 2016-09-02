@@ -381,12 +381,12 @@ Updates password of user. Requires user's old password to be validated before up
 
 _______________
 
-### Reset password 
-Reset password of user. Primarily used by password reset service to set password of user after a password reset is succesful.
+### Set password 
+Set password of user. Primarily used by password reset service to set password of user after a password reset is succesful.
 
 ##### Subject
     
-    user-service.reset-password
+    user-service.set-password
 
 ##### Request 
     
