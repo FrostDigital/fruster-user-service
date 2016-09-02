@@ -620,7 +620,7 @@ describe("Fruster - User service", () => {
 	});
 
 
-	it("Should be possible to reset password", done => {
+	it("Should be possible to set password", done => {
 		var user = getUserObject();
 
 		createUser(user)
@@ -640,7 +640,7 @@ describe("Fruster - User service", () => {
 						oldUser = userResp[0];
 					})
 					.then(x => {
-						return bus.request("user-service.reset-password", {
+						return bus.request("user-service.set-password", {
 								user: response.data,
 								data: updatePassword
 							}, 1000)
