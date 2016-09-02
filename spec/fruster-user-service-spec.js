@@ -30,7 +30,7 @@ describe("Fruster - User service", () => {
 				}
 
 				function connectToMongoForTests() {
-					return mongo.connect("mongodb://localhost:" + mongoPort + "/user-service")
+					return mongo.connect("mongodb://localhost:" + mongoPort + "/user-service-test")
 						.then((db) => {
 							mongoDb = db;
 							return;
@@ -41,7 +41,7 @@ describe("Fruster - User service", () => {
 					.then(startEmbeddedMongo)
 					.then(connectToMongoForTests)
 					.then(() => {
-						return userService.start(busAddress, "mongodb://localhost:" + mongoPort + "/user-service");
+						return userService.start(busAddress, "mongodb://localhost:" + mongoPort + "/user-service-test");
 					})
 					.then(done)
 					.catch(done);
@@ -53,6 +53,7 @@ describe("Fruster - User service", () => {
 		nsc.stopServer(server);
 
 		return mongoDb.dropCollection("users")
+			.then(mongoDb.dropDatabase("user-service-test"))
 			.then(x => {
 				embeddedMongo.close();
 				done();
