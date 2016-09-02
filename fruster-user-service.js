@@ -86,14 +86,6 @@ module.exports = {
 				bus.subscribe("user-service.set-password", setPassword.handle);
 				bus.subscribe("user-service.add-roles", addRoles.handle);
 				bus.subscribe("user-service.remove-roles", removeRoles.handle);
-
-				//TEMP
-				// bus.subscribe("http.post.user.validate-password", validatePassword.handle);
-				// bus.subscribe("http.post.user.get-user", getUser.handle);
-				// bus.subscribe("http.put.user.password", updatePassword.handle);
-				// bus.subscribe("http.post.user.set-password", setPassword.handle);
-				bus.subscribe("http.post.user.add-roles", addRoles.handle);
-				bus.subscribe("http.post.user.remove-roles", removeRoles.handle);
 			});
 	}
 
