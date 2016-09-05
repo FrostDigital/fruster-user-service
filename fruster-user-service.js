@@ -72,9 +72,9 @@ module.exports = {
 				//HTTP
 				bus.subscribe("http.post.admin.user", createUser.handle).permissions(["admin.*"]);
 				bus.subscribe("http.get.admin.user", getUsersHttp.handle).permissions(["admin.*"]);
-				bus.subscribe("http.get.admin.user.>", getUserByIdHttp.handle).permissions(["admin.*"]);
-				bus.subscribe("http.put.admin.user.>", updateUserHttp.handle).permissions(["admin.*"]);
-				bus.subscribe("http.delete.admin.user.>", deleteUserHttp.handle).permissions(["admin.*"]);
+				bus.subscribe("http.get.admin.user.*", getUserByIdHttp.handle).permissions(["admin.*"]);
+				bus.subscribe("http.put.admin.user.*", updateUserHttp.handle).permissions(["admin.*"]);
+				bus.subscribe("http.delete.admin.user.*", deleteUserHttp.handle).permissions(["admin.*"]);
 
 				//SERVICE
 				bus.subscribe("user-service.create-user", createUser.handle);
