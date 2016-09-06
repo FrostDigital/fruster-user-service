@@ -10,7 +10,7 @@ Service for handling creation, fetching, updating and deletion of users and vali
 Create a user. Fields `firstname`, `lastName`, `email` and `password` are required.
 Roles are validated according to environment variable ROLE_SCOPES.
 Password is validated according to regex in environment variable PASSWORD_VALIDATION_REGEX. 
-Password is validated according to regex in environment variable EMAIL_VALIDATION_REGEX. 
+Email is validated according to regex in environment variable EMAIL_VALIDATION_REGEX. 
 See _Configuration_ in readme for default values.
 
 ##### Subject
