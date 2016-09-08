@@ -10,7 +10,6 @@ var createUser = require("./lib/create-user");
 var getUser = require("./lib/get-user");
 var getUsersHttp = require("./lib/http/get-users-http");
 var getUserByIdHttp = require("./lib/http/get-user-by-id-http");
-//TODO: Get users by Query http? => firstName=Viktor,Joel,Nils&lastName=Söderström ?
 
 // UPDATE
 var updateUser = require("./lib/update-user");
@@ -20,28 +19,29 @@ var updateUserHttp = require("./lib/http/update-user-http");
 var deleteUser = require("./lib/delete-user");
 var deleteUserHttp = require("./lib/http/delete-user-http");
 
-// VALIDATE PASSWORD
+// PASSWORD
 var validatePassword = require("./lib/validate-password");
+var updatePassword = require("./lib/update-password");
+var setPassword = require("./lib/set-password");
 
+// ROLES
+var addRoles = require("./lib/add-roles");
+var removeRoles = require("./lib/remove-roles");
+
+// INITIAL USER
 var createInitialUser = require("./lib/create-initial-user");
-
-//TODO:
-//Update password
-
-//Add role(s)
-
-//Remove role(s)
 
 module.exports = {
 
 	start: (busAddress, mongoUrl) => {
 		return bus.connect(busAddress)
 			.then(x => mongo.connect(mongoUrl))
-			.then(db => createInitialUser(db).then(x => db))			
+			.then(db => createInitialUser(db).then(x => db))
 			.then(db => {
 				database = db.collection(conf.userCollection);
 
-				//INITS
+				//INITS//////////////////////////////////////////////////////////////////////////////////
+
 				//CREATE
 				createUser.init(database);
 
@@ -58,28 +58,34 @@ module.exports = {
 				deleteUser.init(database);
 				deleteUserHttp.init(deleteUser);
 
-				//VALIDATE PASSWORD
+				//PASSWORD
 				validatePassword.init(database);
+				updatePassword.init(database, validatePassword, getUser);
+				setPassword.init(database);
 
-				//ACTIONS
+				//ROLES
+				addRoles.init(database);
+				removeRoles.init(database);
+
+				//ACTIONS///////////////////////////////////////////////////////////////////////////////
 
 				//HTTP
-				bus.subscribe("http.post.user", createUser.handle).permissions("admin.*");
-				bus.subscribe("http.get.user", getUsersHttp.handle).permissions("admin.*");
-				bus.subscribe("http.get.user.>", getUserByIdHttp.handle).permissions("admin.*");
-				bus.subscribe("http.put.user.>", updateUserHttp.handle).permissions("admin.*");
-				bus.subscribe("http.delete.user.>", deleteUserHttp.handle).permissions("admin.*");
+				bus.subscribe("http.post.admin.user", createUser.handle).permissions(["admin.*"]);
+				bus.subscribe("http.get.admin.user", getUsersHttp.handle).permissions(["admin.*"]);
+				bus.subscribe("http.get.admin.user.*", getUserByIdHttp.handle).permissions(["admin.*"]);
+				bus.subscribe("http.put.admin.user.*", updateUserHttp.handle).permissions(["admin.*"]);
+				bus.subscribe("http.delete.admin.user.*", deleteUserHttp.handle).permissions(["admin.*"]);
 
 				//SERVICE
-				bus.subscribe("user-service.validate-password", validatePassword.handle);
 				bus.subscribe("user-service.create-user", createUser.handle);
 				bus.subscribe("user-service.get-user", getUser.handle);
 				bus.subscribe("user-service.update-user", updateUser.handle);
 				bus.subscribe("user-service.delete-user", deleteUser.handle);
-
-				//TEMP
-				// bus.subscribe("http.post.validate-password", validatePassword.handle);
-				// bus.subscribe("http.post.user-service-get", getUser.handle);
+				bus.subscribe("user-service.validate-password", validatePassword.handle);
+				bus.subscribe("user-service.update-password", updatePassword.handle);
+				bus.subscribe("user-service.set-password", setPassword.handle);
+				bus.subscribe("user-service.add-roles", addRoles.handle);
+				bus.subscribe("user-service.remove-roles", removeRoles.handle);
 			});
 	}
 

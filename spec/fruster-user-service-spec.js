@@ -5,7 +5,10 @@ var nsc = require("nats-server-control"),
 	userService = require('../fruster-user-service'),
 	uuid = require("uuid"),
 	_ = require("lodash"),
-	utils = require('../lib/utils/utils');
+	utils = require('../lib/utils/utils'),
+	conf = require('../config');
+
+var mongoDb;
 
 describe("Fruster - User service", () => {
 	var server;
@@ -13,7 +16,8 @@ describe("Fruster - User service", () => {
 	var mongoPort = /*Math.floor(Math.random() * 6000 + 2000);*/ 27017;
 	var busAddress = ["nats://localhost:" + busPort];
 	var mongoProcess;
-	var mongoUrl = "mongodb://localhost:" + mongoPort + "/user-service";
+	var testDb = "user-service-test";
+	var mongoUrl = "mongodb://localhost:" + mongoPort + "/" + testDb;
 
 	beforeAll(done => {
 
@@ -27,8 +31,17 @@ describe("Fruster - User service", () => {
 					return embeddedMongo.open(mongoPort);
 				}
 
+				function connectToMongoForTests() {
+					return mongo.connect(mongoUrl)
+						.then((db) => {
+							mongoDb = db;
+							return;
+						});
+				}
+
 				return connectBus()
 					.then(startEmbeddedMongo)
+					.then(connectToMongoForTests)
 					.then(() => {
 						return userService.start(busAddress, mongoUrl);
 					})
@@ -40,12 +53,8 @@ describe("Fruster - User service", () => {
 
 	afterAll((done) => {
 		nsc.stopServer(server);
-
-		return mongo.connect(mongoUrl)
-			.then((db) => {
-				return db.dropCollection("users")
-					.then(() => db.dropCollection("initial-user"));
-			})
+		
+		mongoDb.dropDatabase(testDb)
 			.then(x => {
 				embeddedMongo.close();
 				done();
@@ -216,7 +225,6 @@ describe("Fruster - User service", () => {
 			.then(response => {
 				expect(response.status).toBe(200);
 
-				expect(_.size(response.data)).toBe(0);
 				expect(_.size(response.error)).toBe(0);
 
 				done();
@@ -522,6 +530,285 @@ describe("Fruster - User service", () => {
 			}, 1000)
 			.catch(updateResponse => {
 				expect(updateResponse.status).toBe(404);
+				done();
+			});
+	});
+
+	it("Should be possible to update password", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(response => {
+				var updatePassword = {
+					newPassword: "Localhost:8081",
+					oldPassword: user.password,
+					id: response.data.id
+				};
+
+				var oldUser;
+
+				return mongoDb.collection("users")
+					.find({
+						id: response.data.id
+					})
+					.then(userResp => {
+						oldUser = userResp[0];
+					})
+					.then(x => {
+						return bus.request("user-service.update-password", {
+								user: response.data,
+								data: updatePassword
+							}, 1000)
+							.then(x => {
+								return mongoDb.collection("users")
+									.find({
+										id: response.data.id
+									})
+									.then(userResp => {
+										var newUser = userResp[0];
+										expect(newUser.password).not.toBe(oldUser.password);
+										expect(newUser.salt).not.toBe(oldUser.salt);
+										done();
+									});
+							});
+					});
+			});
+	});
+
+	it("should not be possible to update someone else's password", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(response => {
+				var updatePassword = {
+					newPassword: "Localhost:8081",
+					oldPassword: user.password,
+					id: "someone else's id"
+				};
+
+				var oldUser;
+
+				return bus.request("user-service.update-password", {
+						user: response.data,
+						data: updatePassword
+					}, 1000)
+					.catch(err => {
+						done();
+					});
+			});
+	});
+
+	it("should not be possible to update password without validating the old password", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(response => {
+				var updatePassword = {
+					newPassword: "Localhost:8081",
+					oldPassword: "nothing",
+					id: response.data.id
+				};
+
+				var oldUser;
+
+				return bus.request("user-service.update-password", {
+						user: response.data,
+						data: updatePassword
+					}, 1000)
+					.catch(err => {
+						done();
+					});
+			});
+	});
+
+
+	it("Should be possible to set password", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(response => {
+				var updatePassword = {
+					newPassword: "Localhost:8081",
+					id: response.data.id
+				};
+
+				var oldUser;
+
+				return mongoDb.collection("users")
+					.find({
+						id: response.data.id
+					})
+					.then(userResp => {
+						oldUser = userResp[0];
+					})
+					.then(x => {
+						return bus.request("user-service.set-password", {
+								user: response.data,
+								data: updatePassword
+							}, 1000)
+							.then(x => {
+								return mongoDb.collection("users")
+									.find({
+										id: response.data.id
+									})
+									.then(userResp => {
+										var newUser = userResp[0];
+										expect(newUser.password).not.toBe(oldUser.password);
+										expect(newUser.salt).not.toBe(oldUser.salt);
+										done();
+									});
+							});
+					});
+			});
+	});
+
+	it("should be possible to add a role to a user", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.add-roles", {
+					data: {
+						id: createdUser.id,
+						roles: ["user"]
+					}
+				})
+				.then(x => {
+					return bus.request("user-service.get-user", {
+							data: {
+								id: createdUser.id
+							}
+						})
+						.then(userResponse => userResponse.data[0])
+						.then(user => {
+							expect(user.roles.includes("admin")).toBe(true);
+							expect(user.roles.includes("user")).toBe(true);
+							done();
+						});
+				}));
+	});
+
+	it("should be possible to add multiple roles to a user", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.add-roles", {
+					data: {
+						id: createdUser.id,
+						roles: ["user", "super-admin"]
+					}
+				})
+				.then(x => {
+					return bus.request("user-service.get-user", {
+							data: {
+								id: createdUser.id
+							}
+						})
+						.then(userResponse => userResponse.data[0])
+						.then(user => {
+							expect(user.roles.includes("admin")).toBe(true);
+							expect(user.roles.includes("user")).toBe(true);
+							expect(user.roles.includes("super-admin")).toBe(true);
+							done();
+						});
+				}));
+	});
+
+	it("should not be possible to add multiples of same role", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.add-roles", {
+					data: {
+						id: createdUser.id,
+						roles: ["admin"]
+					}
+				})
+				.then(x => {
+					return bus.request("user-service.get-user", {
+							data: {
+								id: createdUser.id
+							}
+						})
+						.then(userResponse => userResponse.data[0])
+						.then(user => {
+							expect(user.roles.length).toBe(1);
+							done();
+						});
+				}));
+	});
+
+	it("should be possible to remove a role from a user", done => {
+		var user = getUserObject();
+		user.roles = ["user", "admin"];
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.remove-roles", {
+					data: {
+						id: createdUser.id,
+						roles: ["admin"]
+					}
+				})
+				.then(x => {
+					return bus.request("user-service.get-user", {
+							data: {
+								id: createdUser.id
+							}
+						})
+						.then(userResponse => userResponse.data[0])
+						.then(user => {
+							expect(user.roles.includes("admin")).toBe(false);
+							expect(user.roles.length).toBe(1);
+							done();
+						});
+				}));
+	});
+
+	it("should be possible to remove multiple roles from a user", done => {
+		var user = getUserObject();
+		user.roles = ["user", "admin", "super-admin"];
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.remove-roles", {
+					data: {
+						id: createdUser.id,
+						roles: ["admin", "super-admin"]
+					}
+				})
+				.then(x => {
+					return bus.request("user-service.get-user", {
+							data: {
+								id: createdUser.id
+							}
+						})
+						.then(userResponse => userResponse.data[0])
+						.then(user => {
+							expect(user.roles.includes("admin")).toBe(false);
+							expect(user.roles.includes("super-admin")).toBe(false);
+							expect(user.roles.length).toBe(1);
+							done();
+						});
+				}));
+	});
+
+	it("should not be possible to remove all from a user", done => {
+		var user = getUserObject();
+
+		createUser(user)
+			.then(createdUserResponse => createdUserResponse.data)
+			.then(createdUser => bus.request("user-service.remove-roles", {
+				data: {
+					id: createdUser.id,
+					roles: ["admin"]
+				}
+			}))
+			.catch(err => {
+				expect(err.status).toBe(400);
+				expect(err.error.code).toBe("user-service.400.14");
 				done();
 			});
 	});

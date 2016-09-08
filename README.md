@@ -10,12 +10,14 @@ Service for handling creation, fetching, updating and deletion of users and vali
 Create a user. Fields `firstname`, `lastName`, `email` and `password` are required.
 Roles are validated according to environment variable ROLE_SCOPES.
 Password is validated according to regex in environment variable PASSWORD_VALIDATION_REGEX. 
-Password is validated according to regex in environment variable EMAIL_VALIDATION_REGEX. 
+Email is validated according to regex in environment variable EMAIL_VALIDATION_REGEX. 
 See _Configuration_ in readme for default values.
 
 ##### Subject
     
-    user-service.create-user || http.post.user-service
+    user-service.create-user || http.post.admin.user-service
+
+Http subject requires admin.* scope.
 
 ##### Request 
     {
@@ -122,6 +124,8 @@ Get an user based on id.
     
 	http.get.user.:userId
 
+Requires admin.* scope.
+
 ##### Success response
 
 	{
@@ -166,6 +170,7 @@ Get all users.
 ##### Subject
     
 	http.get.user
+Requires admin.* scope.
 
 ##### Success response
 
@@ -214,6 +219,8 @@ Fields `firstName`, `lastName`, `middleName` and `email` are possbile to update.
 ##### Subject
     
     user-service.update-user || http.put.user.:userId
+
+Http subject requires admin.* scope.
 
 #### Request 
     {
@@ -268,6 +275,8 @@ Delete user based on id.
 ##### Subject
     
     user-service.delete-user || http.delete.user.:userId
+
+Http subject requires admin.* scope.
 
 
 ##### Success response
@@ -330,8 +339,182 @@ Validate an inputted password with registered password of user, typically when l
 	  },
 	  "reqId": "dd0670f0-6a9f-11e6-bd14-679d45e439c0"
 	}
+_______________
+
+### Update password 
+Updates password of user. Requires user's old password to be validated before updated.
+
+##### Subject
+    
+    user-service.update-password
+
+##### Request 
+    
+	{
+		//...
+		data: 	{
+		    "id":"a51b7531-41be-44a3-a6a1-664ffdc35e60",
+		    "oldPassword":"bob",
+		    "newPassword":"von"
+		}
+	}
+
+##### Success response
+
+	{
+	  "status": 202,
+	  "data": {},
+	  "error": {},
+	  "reqId": "d4614e70-6a9f-11e6-bd14-679d45e439c0"
+	}
+
+##### Failure response
+
+	{
+	  "status": 403,
+	  "data": {},
+	  "error": {
+		"code" : "user-service.403.1"
+	  },
+	  "reqId": "dd0670f0-6a9f-11e6-bd14-679d45e439c0"
+	}
+
+_______________
+
+### Set password 
+Set password of user. Primarily used by password reset service to set password of user after a password reset is succesful.
+
+##### Subject
+    
+    user-service.set-password
+
+##### Request 
+    
+	{
+		//...
+		data: 	{
+		    "id":"a51b7531-41be-44a3-a6a1-664ffdc35e60",
+		    "newPassword":"Localhost:8081"
+		}
+	}
+
+##### Success response
+
+	{
+	  "status": 202,
+	  "data": {},
+	  "error": {},
+	  "reqId": "d4614e70-6a9f-11e6-bd14-679d45e439c0"
+	}
+
+##### Failure response
+
+	{
+	  "status": 404,
+	  "error": {
+	    "code": "user-service.404.1",
+	    "id": "7d3e595d-df72-45a1-a96b-1ce96cc389e4",
+	    "title": "User not found",
+	    "detail": "User with id 932092a1-b2fb-4a61-9bdde9-096d1f3dadc2d was not found"
+	  },
+	  "reqId": "9d24c010-70e2-11e6-8f12-af9e23ee8aa7"
+	}
 
 
+_______________
+
+
+### Add role(s)
+Add roles to a user. Must be any of the predefined roles (Config ROLE_SCOPES). Accepts any number (above 0) of roles.
+
+##### Subject
+    
+    user-service.add-roles
+
+
+#### Request 
+    {
+		//...
+		data: 	{
+		    "id":"b5383008-76c8-4041-a474-a54210377766",
+		   "roles":["super-admin", "user"]
+		}
+	}
+
+##### Success response
+
+	{
+	  "status": 202,
+	  "data": {},
+	  "error": {},
+	  "reqId": "741f5380-70f4-11e6-8e65-9f5683970205"
+	}
+
+##### Failure response
+	{
+	  "status": 404,
+	  "error": {
+	    "code": "user-service.404.1",
+	    "id": "7d3e595d-df72-45a1-a96b-1ce96cc389e4",
+	    "title": "User not found",
+	    "detail": "User with id 932092a1-b2fb-4a61-9bdde9-096d1f3dadc2d was not found"
+	  },
+	  "reqId": "9d24c010-70e2-11e6-8f12-af9e23ee8aa7"
+	}
+
+_______________
+
+
+### Remove role(s)
+Remove roles from a user. Must be any of the predefined roles (Config ROLE_SCOPES). Accepts any number (above 0) of roles. Cannot remove all roles from user.
+
+##### Subject
+    
+    user-service.remove-roles
+
+
+#### Request 
+    {
+		//...
+		data: 	{
+		    "id":"b5383008-76c8-4041-a474-a54210377766",
+		   "roles":["super-admin", "user"]
+		}
+	}
+
+##### Success response
+
+	{
+	  "status": 202,
+	  "data": {},
+	  "error": {},
+	  "reqId": "741f5380-70f4-11e6-8e65-9f5683970205"
+	}
+
+##### Failure response
+	{
+	  "status": 404,
+	  "error": {
+	    "code": "user-service.404.1",
+	    "id": "7d3e595d-df72-45a1-a96b-1ce96cc389e4",
+	    "title": "User not found",
+	    "detail": "User with id 932092a1-b2fb-4a61-9bdde9-096d1f3dadc2d was not found"
+	  },
+	  "reqId": "9d24c010-70e2-11e6-8f12-af9e23ee8aa7"
+	}
+
+||
+
+	{
+	  "status": 400,
+	  "error": {
+	    "code": "user-service.400.14",
+	    "id": "e73fa27a-532e-4637-8be3-442e3f9a83f6",
+	    "title": "Cannot remove last role",
+	    "detail": "User must have at least one role"
+	  },
+	  "reqId": "d7550fb0-7105-11e6-b8ca-89c1f45db148"
+	}
 
 ## Run
 
@@ -353,7 +536,7 @@ Configuration is set with environment variables. All config defaults to values t
     
     MONGO_URL = "mongodb://localhost:27017"
 
-    ROLE_SCOPES = "admin:profile.get,user.*;user:profile.get"
+    ROLE_SCOPES = "super-admin:*;admin:profile.get,user.*;user:profile.get"
 
 	#Checks for letters & numbers, an @ and a top domain
     EMAIL_VALIDATION_REGEX = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}
