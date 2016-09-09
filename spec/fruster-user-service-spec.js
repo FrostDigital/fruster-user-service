@@ -16,6 +16,8 @@ describe("Fruster - User service", () => {
 	var mongoPort = /*Math.floor(Math.random() * 6000 + 2000);*/ 27017;
 	var busAddress = ["nats://localhost:" + busPort];
 	var mongoProcess;
+	var testDb = "user-service-test";
+	var mongoUrl = "mongodb://localhost:" + mongoPort + "/" + testDb;
 
 	beforeAll(done => {
 
@@ -30,7 +32,7 @@ describe("Fruster - User service", () => {
 				}
 
 				function connectToMongoForTests() {
-					return mongo.connect("mongodb://localhost:" + mongoPort + "/user-service-test")
+					return mongo.connect(mongoUrl)
 						.then((db) => {
 							mongoDb = db;
 							return;
@@ -41,7 +43,7 @@ describe("Fruster - User service", () => {
 					.then(startEmbeddedMongo)
 					.then(connectToMongoForTests)
 					.then(() => {
-						return userService.start(busAddress, "mongodb://localhost:" + mongoPort + "/user-service-test");
+						return userService.start(busAddress, mongoUrl);
 					})
 					.then(done)
 					.catch(done);
@@ -51,9 +53,8 @@ describe("Fruster - User service", () => {
 
 	afterAll((done) => {
 		nsc.stopServer(server);
-
-		return mongoDb.dropCollection("users")
-			.then(mongoDb.dropDatabase("user-service-test"))
+		
+		mongoDb.dropDatabase(testDb)
 			.then(x => {
 				embeddedMongo.close();
 				done();
