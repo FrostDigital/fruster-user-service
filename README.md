@@ -11,7 +11,7 @@ Create a user. Fields `firstname`, `lastName`, `email` and `password` are requir
 Roles are validated according to environment variable ROLE_SCOPES.
 Password is validated according to regex in environment variable PASSWORD_VALIDATION_REGEX. 
 Email is validated according to regex in environment variable EMAIL_VALIDATION_REGEX. 
-See _Configuration_ in readme for default values.
+See _Configuration_ in readme for default values. Fields `firstname`, `middleName`, `lastName` and `email` are saved as lowercase in the database.
 
 ##### Subject
     

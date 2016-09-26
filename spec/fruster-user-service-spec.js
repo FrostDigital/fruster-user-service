@@ -53,7 +53,7 @@ describe("Fruster - User service", () => {
 
 	afterAll((done) => {
 		nsc.stopServer(server);
-		
+
 		mongoDb.dropDatabase(testDb)
 			.then(x => {
 				embeddedMongo.close();
@@ -320,7 +320,7 @@ describe("Fruster - User service", () => {
 			.then(response => {
 				return bus.request("user-service.get-user", {
 					data: {
-						firstName: user.firstName
+						firstName: user.firstName.toLowerCase()
 					}
 				}, 1000);
 			})
@@ -371,8 +371,8 @@ describe("Fruster - User service", () => {
 			.then(response => {
 				return bus.request("user-service.get-user", {
 					data: {
-						firstName: user.firstName,
-						lastName: user.lastName
+						firstName: user.firstName.toLowerCase(),
+						lastName: user.lastName.toLowerCase()
 					}
 				}, 1000);
 			})
