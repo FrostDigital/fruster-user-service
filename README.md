@@ -11,11 +11,11 @@ Create a user. Fields `firstname`, `lastName`, `email` and `password` are requir
 Roles are validated according to environment variable ROLE_SCOPES.
 Password is validated according to regex in environment variable PASSWORD_VALIDATION_REGEX. 
 Email is validated according to regex in environment variable EMAIL_VALIDATION_REGEX. 
-See _Configuration_ in readme for default values. Fields `firstname`, `middleName`, `lastName` and `email` are saved as lowercase in the database.
+See _Configuration_ in readme for default values. Fields `firstname`, `middleName`, `lastName` and `email` are saved as lowercase in the database. **NOTE:** The password is hashed using the user's unique salt and a pepper containing(**NOT** exlcusive to) the id of the user.
 
 ##### Subject
     
-    user-service.create-user || http.post.admin.user-service
+    user-service.create-user || http.post.admin.user-serv
 
 Http subject requires admin.* scope.
 
