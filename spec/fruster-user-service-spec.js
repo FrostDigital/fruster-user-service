@@ -278,6 +278,29 @@ describe("Fruster - User service", () => {
 			.catch(err => err);
 	});
 
+	it("should return empty array when sending in faulty query/query without result", done => {
+		var user = getUserObject();
+		var createdUser;
+
+		bus.request("user-service.create-user", {
+				data: user
+			}, 1000)
+			.then(response => {
+				createdUser = response.data;
+
+				return bus.request("user-service.get-user", {
+					data: {
+						$or: []
+					}
+				}, 1000);
+			})
+			.then(response => {
+				expect(response.data.length).toBe(0);
+				done();
+			})
+			.catch(err => err);
+	});
+
 	it("should return user object when getting user by email", done => {
 		var user = getUserObject();
 		var createdUser;
