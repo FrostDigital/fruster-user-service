@@ -20,8 +20,9 @@ module.exports = {
 
 	initialUserPassword: "FrusterR0ckS",
 
-	userCollection: "users"
+	userCollection: "users",
 
+	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true")
 };
 
 function parseArray(str) {
@@ -30,4 +31,8 @@ function parseArray(str) {
 	}
 
 	return null;
+}
+
+function parseBool(boolStr) {
+	return boolStr == "true";	
 }

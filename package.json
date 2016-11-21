@@ -10,19 +10,18 @@
     "bluebird": "^3.4.6",
     "crypto-js": "^3.1.8",
     "csprng": "^0.1.1",
-    "embedded-mongo-spec": "0.0.13",
     "fruster-bus": "~0.0.17",
     "fruster-health": "0.0.6",
-    "lodash": "^4.16.6",
+    "lodash": "^4.17.2",
     "mongodb-bluebird": "^0.1.1",
     "nats": "^0.6.8",
     "nats-server-control": "0.0.1",
-    "npm": "^3.10.9",
-    "uuid": "^2.0.3"
+    "npm": "^4.0.2",
+    "uuid": "^3.0.0"
   },
   "devDependencies": {
     "jasmine": "^2.5.2",
-    "request": "^2.78.0",
+    "request": "^2.79.0",
     "jasmine-spec-reporter": "^2.7.0"
   },
   "engines": {

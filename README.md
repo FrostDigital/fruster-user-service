@@ -538,12 +538,17 @@ Configuration is set with environment variables. All config defaults to values t
 
     ROLE_SCOPES = "super-admin:*;admin:profile.get,user.*;user:profile.get"
 
-	#Checks for letters & numbers, an @ and a top domain
+		# Checks for letters & numbers, an @ and a top domain
     EMAIL_VALIDATION_REGEX = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}
 							{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.
 							(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|
 							name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}
 							\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i
 
-	#Checks for at least one uppercase letter, one lowercase letter and one digit, between 6 and 50 characters long
+	# Checks for at least one uppercase letter, one lowercase letter and one digit, between 6 and 50 characters long
 	PASSWORD_VALIDATION_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,50}$/
+		
+	# If user object is requried to have a password since this may not be needed when
+	# using external auth, such as BankID
+	REQUIRE_PASSWORD = true
+	
