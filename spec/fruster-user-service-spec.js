@@ -1,7 +1,6 @@
 var nsc = require("nats-server-control"),
 	bus = require("fruster-bus"),
 	mongo = require("mongodb-bluebird"),
-	embeddedMongo = require("embedded-mongo-spec"),
 	userService = require('../fruster-user-service'),
 	uuid = require("uuid"),
 	_ = require("lodash"),
@@ -12,12 +11,10 @@ var mongoDb;
 
 describe("Fruster - User service", () => {
 	var server;
-	var busPort = Math.floor(Math.random() * 6000 + 2000);
-	var mongoPort = /*Math.floor(Math.random() * 6000 + 2000);*/ 27017;
-	var busAddress = ["nats://localhost:" + busPort];
-	var mongoProcess;
+	var busPort = Math.floor(Math.random() * 6000 + 2000);	
+	var busAddress = "nats://localhost:" + busPort;
 	var testDb = "user-service-test";
-	var mongoUrl = "mongodb://localhost:" + mongoPort + "/" + testDb;
+	var mongoUrl = "mongodb://localhost:27017/" + testDb;
 
 	beforeAll(done => {
 
@@ -25,10 +22,6 @@ describe("Fruster - User service", () => {
 			.then(() => {
 				function connectBus() {
 					return bus.connect(busAddress);
-				}
-
-				function startEmbeddedMongo() {
-					return embeddedMongo.open(mongoPort);
 				}
 
 				function connectToMongoForTests() {
@@ -40,7 +33,6 @@ describe("Fruster - User service", () => {
 				}
 
 				return connectBus()
-					.then(startEmbeddedMongo)
 					.then(connectToMongoForTests)
 					.then(() => {
 						return userService.start(busAddress, mongoUrl);
@@ -53,12 +45,7 @@ describe("Fruster - User service", () => {
 
 	afterAll((done) => {
 		nsc.stopServer(server);
-
-		mongoDb.dropDatabase(testDb)
-			.then(x => {
-				embeddedMongo.close();
-				done();
-			});
+		mongoDb.dropDatabase(testDb).then(done);
 	});
 
 	function getUserObject() {
@@ -204,6 +191,20 @@ describe("Fruster - User service", () => {
 					});
 			});
 		}
+	});
+
+	it("should not require password to be set if configured not to", done => {
+		conf.requirePassword = false;
+
+		var user = getUserObject();
+		delete user.password;
+
+		bus.request("user-service.create-user", { data: user })
+		.then(savedUser => {			
+			expect(savedUser.data.id).toBeDefined();			
+			conf.requirePassword = true;
+			done();
+		});		
 	});
 
 	//VALIDATE PASSWORD
