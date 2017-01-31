@@ -212,6 +212,20 @@ Requires admin.* scope.
 
 _______________
 
+### Get scopes for role
+Return the scopes for requested role set in the configuration. 
+
+##### Subject
+    
+	user-service.get-scopes
+
+##### Success response
+	{ 
+		status: 200,
+  		data: [ 'profile.get', 'user.*' ]
+  	}
+
+_______________
 
 ### Update user 
 Fields `firstName`, `lastName`, `middleName` and `email` are possbile to update.
