@@ -219,6 +219,12 @@ Return the scopes for requested role set in the configuration.
     
 	user-service.get-scopes
 
+#### Request 
+    {
+		//...
+		data: ["admin"]
+	}
+
 ##### Success response
 	{ 
 		status: 200,
