@@ -10,6 +10,7 @@ var createUser = require("./lib/create-user");
 var getUser = require("./lib/get-user");
 var getUsersHttp = require("./lib/http/get-users-http");
 var getUserByIdHttp = require("./lib/http/get-user-by-id-http");
+var getScopes = require("./lib/get-scopes");
 
 // UPDATE
 var updateUser = require("./lib/update-user");
@@ -86,6 +87,7 @@ module.exports = {
 				bus.subscribe("user-service.set-password", setPassword.handle);
 				bus.subscribe("user-service.add-roles", addRoles.handle);
 				bus.subscribe("user-service.remove-roles", removeRoles.handle);
+				bus.subscribe("user-service.get-scopes", getScopes.handle);
 			});
 	}
 
