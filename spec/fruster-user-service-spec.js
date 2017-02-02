@@ -11,7 +11,7 @@ var mongoDb;
 
 describe("Fruster - User service", () => {
 	var server;
-	var busPort = Math.floor(Math.random() * 6000 + 2000);	
+	var busPort = Math.floor(Math.random() * 6000 + 2000);
 	var busAddress = "nats://localhost:" + busPort;
 	var testDb = "user-service-test";
 	var mongoUrl = "mongodb://localhost:27017/" + testDb;
@@ -199,12 +199,14 @@ describe("Fruster - User service", () => {
 		var user = getUserObject();
 		delete user.password;
 
-		bus.request("user-service.create-user", { data: user })
-		.then(savedUser => {			
-			expect(savedUser.data.id).toBeDefined();			
-			conf.requirePassword = true;
-			done();
-		});		
+		bus.request("user-service.create-user", {
+				data: user
+			})
+			.then(savedUser => {
+				expect(savedUser.data.id).toBeDefined();
+				conf.requirePassword = true;
+				done();
+			});
 	});
 
 	//VALIDATE PASSWORD
@@ -424,6 +426,19 @@ describe("Fruster - User service", () => {
 			data: user
 		}, 1000);
 	}
+
+	// get scopes
+	it("should return scopes for requested role", done => {
+		var roles = ["admin"];
+		return bus.request("user-service.get-scopes", {
+				data: roles
+			})
+			.then(resp => {
+				expect(resp.data[0]).toBe("profile.get");
+				done();
+			});
+	});
+
 
 	//UPDATE USER
 
