@@ -542,6 +542,57 @@ describe("Fruster - User service", () => {
 			});
 	});
 
+	it("Should be possible to send old email with update request", done => {
+		let user = getUserObject(),
+			id,
+			email = user.email;
+
+		createUser(user)
+			.then((createdUserResponse) => {
+				id = createdUserResponse.data.id;
+				user.email = email;
+			})
+			.then(createdUserResponse => {
+				return bus.request("user-service.update-user", {
+						data: {
+							id: id,
+							email: email,
+							firstName: "greg"
+						}
+					}, 1000)
+					.then(updateResponse => {
+						expect(updateResponse.status).toBe(200);
+						done();
+					});
+			});
+	});
+
+	it("Should not return error if no fields are updated", done => {
+		let user = getUserObject(),
+			id,
+			email = user.email;
+
+		createUser(user)
+			.then((createdUserResponse) => {
+				id = createdUserResponse.data.id;
+				user.email = email;
+			})
+			.then(createdUserResponse => {
+				return bus.request("user-service.update-user", {
+						data: {
+							id: id,
+							email: email,
+							firstName: user.firstName,
+							lastName: user.lastName
+						}
+					}, 1000)
+					.then(updateResponse => {
+						expect(updateResponse.status).toBe(200);
+						done();
+					});
+			});
+	});
+
 	it("Should return 200 when user is successfully removed", done => {
 		var user = getUserObject();
 
