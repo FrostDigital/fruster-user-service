@@ -15,11 +15,11 @@
     "lodash": "^4.17.2",
     "mongodb-bluebird": "^0.1.1",
     "nats": "^0.6.8",
-    "nats-server-control": "0.0.1",
     "npm": "^4.0.2",
     "uuid": "^3.0.0"
   },
   "devDependencies": {
+    "nats-server-control": "0.0.1",
     "jasmine": "^2.5.2",
     "request": "^2.79.0",
     "jasmine-spec-reporter": "^2.7.0"
