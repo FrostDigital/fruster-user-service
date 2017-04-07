@@ -11,7 +11,7 @@ var mongoDb;
 
 describe("Fruster - User service", () => {
 	var server;
-	var busPort = Math.floor(Math.random() * 6000 + 2000);	
+	var busPort = Math.floor(Math.random() * 6000 + 2000);
 	var busAddress = "nats://localhost:" + busPort;
 	var testDb = "user-service-test";
 	var mongoUrl = "mongodb://localhost:27017/" + testDb;
@@ -199,12 +199,14 @@ describe("Fruster - User service", () => {
 		var user = getUserObject();
 		delete user.password;
 
-		bus.request("user-service.create-user", { data: user })
-		.then(savedUser => {			
-			expect(savedUser.data.id).toBeDefined();			
-			conf.requirePassword = true;
-			done();
-		});		
+		bus.request("user-service.create-user", {
+				data: user
+			})
+			.then(savedUser => {
+				expect(savedUser.data.id).toBeDefined();
+				conf.requirePassword = true;
+				done();
+			});
 	});
 
 	//VALIDATE PASSWORD
@@ -425,6 +427,19 @@ describe("Fruster - User service", () => {
 		}, 1000);
 	}
 
+	// get scopes
+	it("should return scopes for requested role", done => {
+		var roles = ["admin"];
+		return bus.request("user-service.get-scopes", {
+				data: roles
+			})
+			.then(resp => {
+				expect(resp.data[0]).toBe("profile.get");
+				done();
+			});
+	});
+
+
 	//UPDATE USER
 
 	it("Should return updated user when updating user", done => {
@@ -522,6 +537,57 @@ describe("Fruster - User service", () => {
 					}, 1000)
 					.catch(updateResponse => {
 						expect(updateResponse.status).toBe(400);
+						done();
+					});
+			});
+	});
+
+	it("Should be possible to send old email with update request", done => {
+		let user = getUserObject(),
+			id,
+			email = user.email;
+
+		createUser(user)
+			.then((createdUserResponse) => {
+				id = createdUserResponse.data.id;
+				user.email = email;
+			})
+			.then(createdUserResponse => {
+				return bus.request("user-service.update-user", {
+						data: {
+							id: id,
+							email: email,
+							firstName: "greg"
+						}
+					}, 1000)
+					.then(updateResponse => {
+						expect(updateResponse.status).toBe(200);
+						done();
+					});
+			});
+	});
+
+	it("Should not return error if no fields are updated", done => {
+		let user = getUserObject(),
+			id,
+			email = user.email;
+
+		createUser(user)
+			.then((createdUserResponse) => {
+				id = createdUserResponse.data.id;
+				user.email = email;
+			})
+			.then(createdUserResponse => {
+				return bus.request("user-service.update-user", {
+						data: {
+							id: id,
+							email: email,
+							firstName: user.firstName,
+							lastName: user.lastName
+						}
+					}, 1000)
+					.then(updateResponse => {
+						expect(updateResponse.status).toBe(200);
 						done();
 					});
 			});
@@ -836,5 +902,7 @@ describe("Fruster - User service", () => {
 				done();
 			});
 	});
+
+
 
 });
