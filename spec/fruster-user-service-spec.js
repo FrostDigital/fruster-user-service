@@ -17,8 +17,7 @@ describe("Fruster - User service", () => {
 	var mongoUrl = "mongodb://localhost:27017/" + testDb;
 
 	beforeAll(done => {
-
-		var server = nsc.startServer(busPort, {})
+		var server = nsc.startServer(busPort)
 			.then(() => {
 				function connectBus() {
 					return bus.connect(busAddress);
@@ -37,10 +36,12 @@ describe("Fruster - User service", () => {
 					.then(() => {
 						return userService.start(busAddress, mongoUrl);
 					})
-					.then(done)
-					.catch(done);
+					.then(done);
 			})
-			.catch(err => {});
+			.catch(err => {
+				console.log(err);
+				done.fail();
+			});
 	});
 
 	afterAll((done) => {
