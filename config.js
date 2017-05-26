@@ -2,7 +2,8 @@ module.exports = {
 
 	bus: parseArray(process.env.BUS) || ['nats://localhost:4222'],
 
-	mongoUrl: process.env.MONGO_URL || "mongodb://localhost:27017/user-service",
+	//mongoUrl: process.env.MONGO_URL || "mongodb://localhost:27017/user-service",
+	mongoUrl: process.env.MONGO_URL || "mongodb://agada:r9vW4vaTiyqghtXOfQEn@aws-eu-west-1-portal.5.dblayer.com:10257/ag-fruster-user-service",
 
 	//Predefined permissions for roles
 	roles: process.env.ROLE_SCOPES || "super-admin:*;admin:profile.get,user.*;user:profile.get",
@@ -33,6 +34,6 @@ function parseArray(str) {
 	return null;
 }
 
-function parseBool(boolStr) {
-	return boolStr == "true";	
+function parseBool(boolStr)  {
+	return boolStr == "true";
 }
