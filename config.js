@@ -33,6 +33,6 @@ function parseArray(str) {
 	return null;
 }
 
-function parseBool(boolStr) {
-	return boolStr == "true";	
+function parseBool(boolStr)  {
+	return boolStr == "true";
 }
