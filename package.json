@@ -12,7 +12,7 @@
     "csprng": "^0.1.1",
     "fruster-bus": "0.1.5",
     "fruster-log": "0.0.9",
-    "fruster-health": "0.0.6",
+    "fruster-health": "0.0.9",
     "lodash": "^4.17.2",
     "mongodb-bluebird": "^0.1.1",
     "nats": "^0.6.8",
