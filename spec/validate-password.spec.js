@@ -112,13 +112,13 @@ describe("fruster user service validate password", () => {
         }
     });
 
-    it("should return 400 when user without validated email logs in with config.requireEmailValidation set to true", async done => {
+    it("should return 400 when user without verified email logs in with config.requireEmailVerification set to true", async done => {
         try {
             mocks.mockMailService();
-            conf.requireEmailValidation = true;
+            conf.requireEmailVerification = true;
 
             const user = mocks.getUserObject();
-            user.emailValidated = false;
+            user.emailVerified = false;
 
             await bus.request("user-service.create-user", { data: user });
             const response = await bus.request("user-service.validate-password",
@@ -127,10 +127,10 @@ describe("fruster user service validate password", () => {
             testUtils.fail(done, response);
         } catch (err) {
             expect(err.status).toBe(400);
-            expect(err.error.code).toBe(errors.get("EMAIL_NOT_VALIDATED").error.code);
+            expect(err.error.code).toBe(errors.get("EMAIL_NOT_VERIFIED").error.code);
 
             done();
-            conf.requireEmailValidation = false;
+            conf.requireEmailVerification = false;
         }
     });
 

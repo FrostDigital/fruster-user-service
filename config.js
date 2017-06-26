@@ -24,15 +24,15 @@ module.exports = {
 
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
-	requireEmailValidation: parseBool(process.env.REQUIRE_EMAIL_VALIDATION || "false"),
+	requireEmailVerification: parseBool(process.env.REQUIRE_EMAIL_VERIFICATION || "false"),
 
 	// :user-{field}: can be used to display user information in the email. e.g. :user-firstName:
-	// :token is the email validation token to be used to validate the email address. 
-	emailValidationMessage: process.env.EMAIL_VALIDATION_MESSAGE || "Hello :user-firstName: :user-lastName:, \nVisit http://deis.c1.fruster.se/validate-email?token=:token: to validate your email.",
+	// :token is the email verification token to be used to validate the email address. 
+	emailVerificationMessage: process.env.EMAIL_VERIFICATION_MESSAGE || "Hello :user-firstName: :user-lastName:, \nVisit http://deis.c1.fruster.se/validate-email?token=:token: to validate your email.",
 
-	emailValidationSubject: process.env.EMAIL_VALIDATION_SUBJECT || "Validate email",
+	emailVerificationSubject: process.env.EMAIL_VERIFICATION_SUBJECT || "Validate email",
 
-	emailValidationFrom: process.env.EMAIL_VALIDATION_FROM || "validation@fruster.se"
+	emailVerificationFrom: process.env.EMAIL_VERIFICATION_FROM || "verification@fruster.se"
 };
 
 function parseArray(str) {

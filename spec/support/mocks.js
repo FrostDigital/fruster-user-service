@@ -29,7 +29,7 @@ module.exports = {
         };
     },
 
-    getUserWithUnvalidatedEmailObject: () => {
+    getUserWithUnverifiedEmailObject: () => {
         return {
             "roles": ["ADMIN"],
             "firstName": "Pedro",
@@ -37,8 +37,8 @@ module.exports = {
             "lastName": "Damn",
             "email": uuid.v4() + "@frostdigxitalx.se",
             "password": "Localhost:8080",
-            "emailValidated": false,
-            "emailValidationToken": "hello-token"
+            "emailVerified": false,
+            "emailVerificationToken": "hello-token"
         };
     },
 

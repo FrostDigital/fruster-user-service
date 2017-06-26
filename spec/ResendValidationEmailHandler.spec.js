@@ -15,7 +15,7 @@ const constants = require('../lib/constants.js');
 
 let mongoDb;
 
-describe("fruster user service resend validation email", () => {
+describe("fruster user service resend verification email", () => {
     let server;
     const busPort = Math.floor(Math.random() * 6000 + 2000);
     const busAddress = "nats://localhost:" + busPort;
@@ -36,16 +36,16 @@ describe("fruster user service resend validation email", () => {
     });
 
     it("should resend email", async (done) => {
-        conf.requireEmailValidation = true;
+        conf.requireEmailVerification = true;
 
-        const testUserData = mocks.getUserWithUnvalidatedEmailObject();
-        let validationToken;
+        const testUserData = mocks.getUserWithUnverifiedEmailObject();
+        let verificationToken;
         let initialUserCreated = false;
 
         bus.subscribe("mail-service.send", (req) => {
             if (initialUserCreated) {
-                expect(req.data.message.includes(validationToken)).toBe(false, "should generate new validation token");
-                expect(req.data.from).toBe(conf.emailValidationFrom, "req.data.from");
+                expect(req.data.message.includes(verificationToken)).toBe(false, "should generate new verification token");
+                expect(req.data.from).toBe(conf.emailVerificationFrom, "req.data.from");
                 expect(req.data.to[0]).toBe(testUserData.email, "req.data.to[0]");
 
                 done();
@@ -59,9 +59,9 @@ describe("fruster user service resend validation email", () => {
         const createUserResponse = (await mocks.createUser(testUserData)).data;
         const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: createUserResponse.id });
 
-        validationToken = testUser.emailValidationToken;
+        verificationToken = testUser.emailVerificationToken;
 
-        const validationResponse = await bus.request(constants.endpoints.http.RESEND_VALIDATION_EMAIL, {
+        await bus.request(constants.endpoints.http.RESEND_VERIFICATION_EMAIL, {
             reqId: uuid.v4(), data: {}, params: { email: createUserResponse.email }
         });
     });

@@ -32,9 +32,9 @@ const removeRoles = require("./lib/remove-roles");
 // INITIAL USER
 const createInitialUser = require("./lib/create-initial-user");
 
-// EMAIL VALIDATION
-const ValidateEmailAddressHandler = require('./lib/email-validation/ValidateEmailAddressHandler.js');
-const ResendValidationEmailHandler = require('./lib/email-validation/ResendValidationEmailHandler.js');
+// EMAIL VERIFICATION
+const VerifyEmailAddressHandler = require('./lib/email-verification/VerifyEmailAddressHandler.js');
+const ResendVerificationEmailHandler = require('./lib/email-verification/ResendVerificationEmailHandler.js');
 
 
 module.exports = {
@@ -73,9 +73,9 @@ module.exports = {
 		addRoles.init(database);
 		removeRoles.init(database);
 
-		//EMAIL VALIDATION
-		const validateEmailAddressHandler = new ValidateEmailAddressHandler(database, updateUser);
-		const resendValidationEmailHandler = new ResendValidationEmailHandler(database);
+		//EMAIL VERIFICATION
+		const verifyEmailAddressHandler = new VerifyEmailAddressHandler(database, updateUser);
+		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(database);
 
 		// ENDPOINTS ///////////////////////////////////////////////////////////////////////////////
 
@@ -85,8 +85,8 @@ module.exports = {
 		bus.subscribe(constants.endpoints.http.admin.GET_USER, getUserByIdHttp.handle).permissions(["admin.*"]);
 		bus.subscribe(constants.endpoints.http.admin.UPDATE_USER, updateUserHttp.handle).permissions(["admin.*"]);
 		bus.subscribe(constants.endpoints.http.admin.DELETE_USER, deleteUserHttp.handle).permissions(["admin.*"]);
-		bus.subscribe(constants.endpoints.http.VERIFY_EMAIL, (req) => validateEmailAddressHandler.handle(req));
-		bus.subscribe(constants.endpoints.http.RESEND_VALIDATION_EMAIL, (req) => resendValidationEmailHandler.handle(req));
+		bus.subscribe(constants.endpoints.http.VERIFY_EMAIL, (req) => verifyEmailAddressHandler.handle(req));
+		bus.subscribe(constants.endpoints.http.RESEND_VERIFICATION_EMAIL, (req) => resendVerificationEmailHandler.handle(req));
 
 		//SERVICE
 		bus.subscribe(constants.endpoints.service.CREATE_USER, createUser.handle);

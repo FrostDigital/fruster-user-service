@@ -197,10 +197,10 @@ describe("fruster user service create user", () => {
         }
     });
 
-    it("should generate email validation token when config requireEmailValidation is true", async done => {
+    it("should generate email verification token when config requireEmailVerification is true", async done => {
         mocks.mockMailService();
         try {
-            conf.requireEmailValidation = true;
+            conf.requireEmailVerification = true;
 
             const user = mocks.getUserObject();
             const response = await bus.request("user-service.create-user", {
@@ -216,18 +216,18 @@ describe("fruster user service create user", () => {
             expect(response.data.middleName).toBe(user.middleName, "response.data.middleName");
             expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
             expect(response.data.email).toBe(user.email, "response.data.email");
-            expect(response.data.emailValidated).toBe(false, "response.data.emailValidated");
-            expect(response.data.emailValidationToken).toBeUndefined("response.data.emailValidationToken");
+            expect(response.data.emailVerified).toBe(false, "response.data.emailVerified");
+            expect(response.data.emailVerificationToken).toBeUndefined("response.data.emailVerificationToken");
 
             const userFromDatabase = await (mongoDb.collection(conf.userCollection).findOne({ id: response.data.id }));
-            expect(userFromDatabase.emailValidated).toBe(false, "userFromDatabase.emailValidated");
-            expect(userFromDatabase.emailValidationToken).toBeDefined("userFromDatabase.emailValidationToken");
+            expect(userFromDatabase.emailVerified).toBe(false, "userFromDatabase.emailVerified");
+            expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
 
             user.roles.forEach(role => {
                 expect(response.data.scopes.length).toBe(_.size(utils.getRoles()[role.toLowerCase()]));
             });
 
-            conf.requireEmailValidation = false;
+            conf.requireEmailVerification = false;
             done();
         } catch (err) {
             log.error(err);
