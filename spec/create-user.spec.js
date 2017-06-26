@@ -9,6 +9,8 @@ const userService = require('../fruster-user-service');
 const utils = require('../lib/utils/utils');
 const conf = require('../config');
 const mocks = require('./support/mocks.js');
+const constants = require('../lib/constants.js');
+const testUtils = require('./support/test-utils.js');
 
 let mongoDb;
 
@@ -41,7 +43,7 @@ describe("fruster user service create user", () => {
         mocks.mockMailService();
         try {
             const user = mocks.getUserObject();
-            const response = await bus.request("user-service.create-user", {
+            const response = await bus.request(constants.endpoints.service.CREATE_USER, {
                 data: user
             }, 1000);
 
@@ -75,7 +77,7 @@ describe("fruster user service create user", () => {
             user.roles.push("adMin");
             user.roles.push("user");
 
-            const response = await bus.request("user-service.create-user", {
+            const response = await bus.request(constants.endpoints.service.CREATE_USER, {
                 data: user
             }, 1000);
 
@@ -99,7 +101,7 @@ describe("fruster user service create user", () => {
         user.password = "hej";
 
         try {
-            await bus.request("user-service.create-user", {
+            await bus.request(constants.endpoints.service.CREATE_USER, {
                 data: user
             }, 1000);
 
@@ -119,7 +121,7 @@ describe("fruster user service create user", () => {
         const user = mocks.getUserObject();
         user.email = "email";
         try {
-            await bus.request("user-service.create-user", {
+            await bus.request(constants.endpoints.service.CREATE_USER, {
                 data: user
             }, 1000);
 
@@ -160,7 +162,7 @@ describe("fruster user service create user", () => {
 
         function doRequest(userToCreate) {
             return new Promise(resolve => {
-                bus.request("user-service.create-user", {
+                bus.request(constants.endpoints.service.CREATE_USER, {
                     data: userToCreate
                 }, 1000)
                     .catch(err => {
@@ -183,7 +185,7 @@ describe("fruster user service create user", () => {
             const user = mocks.getUserObject();
             delete user.password;
 
-            const savedUser = await bus.request("user-service.create-user", {
+            const savedUser = await bus.request(constants.endpoints.service.CREATE_USER, {
                 data: user
             });
 
@@ -203,7 +205,7 @@ describe("fruster user service create user", () => {
             conf.requireEmailVerification = true;
 
             const user = mocks.getUserObject();
-            const response = await bus.request("user-service.create-user", {
+            const response = await bus.request(constants.endpoints.service.CREATE_USER, {
                 data: user
             }, 1000);
 
@@ -232,6 +234,33 @@ describe("fruster user service create user", () => {
         } catch (err) {
             log.error(err);
             done.fail(err);
+        }
+    });
+
+    it("should not allow multiple users with the same email to be created", async done => {
+        mocks.mockMailService();
+        const user = mocks.getUserObject();
+        await testUtils.createUser(user);
+
+        try {
+            await Promise.all([
+                testUtils.createUser(user),
+                testUtils.createUser(user),
+                testUtils.createUser(user),
+                testUtils.createUser(user),
+                testUtils.createUser(user),
+                testUtils.createUser(user),
+                testUtils.createUser(user)
+            ]);
+
+            done.fail();
+        } catch (err) {
+            expect(err.status).toBe(400);
+
+            expect(_.size(err.data)).toBe(0);
+            expect(_.size(err.error)).not.toBe(0);
+
+            done();
         }
     });
 

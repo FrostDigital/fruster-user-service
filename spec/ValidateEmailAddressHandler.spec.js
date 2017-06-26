@@ -60,8 +60,8 @@ describe("fruster user service validate email address", () => {
 
         const updatedTestUser = await mongoDb.collection(conf.userCollection).findOne({ id: createUserResponse.id });
 
-        expect(updatedTestUser.emailVerificationToken).toBeUndefined("Should remove emailVerificationToken");
-        expect(updatedTestUser.emailVerified).toBe(true, "Should set emailVerified to true");
+        expect(updatedTestUser.emailVerificationToken).toBeUndefined("should remove emailVerificationToken");
+        expect(updatedTestUser.emailVerified).toBe(true, "should set emailVerified to true");
 
         conf.requireEmailVerification = false;
         done();

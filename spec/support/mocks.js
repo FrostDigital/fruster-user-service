@@ -1,5 +1,6 @@
 const uuid = require("uuid");
 const bus = require("fruster-bus");
+const constants = require('../../lib/constants.js');
 
 module.exports = {
 
@@ -10,7 +11,8 @@ module.exports = {
             "middleName": "Ludvig",
             "lastName": "Söderström",
             "email": uuid.v4() + "@frostdigxital.se",
-            "password": "Localhost:8080"
+            "password": "Localhost:8080",
+            "emailVerified": true
         };
     },
 
@@ -43,7 +45,7 @@ module.exports = {
     },
 
     createUser: async (userObj) => {
-        return await bus.request("user-service.create-user", { reqId: uuid.v4(), data: userObj });
+        return await bus.request(constants.endpoints.service.CREATE_USER, { reqId: uuid.v4(), data: userObj });
     },
 
     mockMailService: () => {

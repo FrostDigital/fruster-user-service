@@ -11,6 +11,7 @@ const conf = require('../config');
 const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const errors = require('../lib/errors.js');
+const constants = require('../lib/constants.js');
 
 let mongoDb;
 
@@ -42,8 +43,8 @@ describe("fruster user service validate password", () => {
     it("should return 200 when validating correct password", async done => {
         try {
             const user = mocks.getUserObject();
-            await bus.request("user-service.create-user", { data: user });
-            const response = await bus.request("user-service.validate-password",
+            await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
                 { data: { username: user.email, password: user.password } });
 
             expect(response.status).toBe(200);
@@ -61,7 +62,7 @@ describe("fruster user service validate password", () => {
             const user = mocks.getOldUserObject();
             await mongoDb.collection(conf.userCollection).update({ id: user.id }, user, { upsert: true })
 
-            const response = await bus.request("user-service.validate-password",
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
                 { data: { username: user.email, password: conf.initialUserPassword } });
 
             expect(response.status).toBe(200);
@@ -80,8 +81,27 @@ describe("fruster user service validate password", () => {
             user.hashDate = new Date("1970");
             await mongoDb.collection(conf.userCollection).update({ id: user.id }, user, { upsert: true })
 
-            const response = await bus.request("user-service.validate-password",
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
                 { data: { username: user.email, password: conf.initialUserPassword } });
+
+            expect(response.status).toBe(200);
+            expect(_.size(response.error)).toBe(0);
+
+            done();
+        } catch (err) {
+            log.error(err);
+            testUtils.fail(done, err);
+        }
+    });
+
+    it("should be possible to login with non case sensitive username", async done => {
+        try {
+            const user = mocks.getUserObject();
+            user.email = "urban@hello.se";
+
+            await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
+                { data: { username: "UrbAn@HeLlO.se", password: user.password } });
 
             expect(response.status).toBe(200);
             expect(_.size(response.error)).toBe(0);
@@ -96,10 +116,10 @@ describe("fruster user service validate password", () => {
     it("should return 401 when validating incorrect password", async done => {
         try {
             const user = mocks.getUserObject();
-            await bus.request("user-service.create-user", { data: user });
+            await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
 
             try {
-                await bus.request("user-service.validate-password", { data: { username: user.email, password: "yoyoyo" } });
+                await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, { data: { username: user.email, password: "yoyoyo" } });
             } catch (err) {
                 expect(err.status).toBe(401);
                 expect(_.size(err.data)).toBe(0);
@@ -120,8 +140,8 @@ describe("fruster user service validate password", () => {
             const user = mocks.getUserObject();
             user.emailVerified = false;
 
-            await bus.request("user-service.create-user", { data: user });
-            const response = await bus.request("user-service.validate-password",
+            await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
                 { data: { username: user.email, password: user.password } });
 
             testUtils.fail(done, response);
