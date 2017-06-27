@@ -1,7 +1,7 @@
 const nsc = require("nats-server-control");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
-const mongo = require("mongodb-bluebird");
+const mongo = require("mongodb");
 const uuid = require("uuid");
 const _ = require("lodash");
 
@@ -213,6 +213,7 @@ describe("Fruster - User service", () => {
 					.find({
 						id: response.data.id
 					})
+					.toArray()	
 					.then(userResp => {
 						oldUser = userResp[0];
 					})
@@ -226,6 +227,7 @@ describe("Fruster - User service", () => {
 									.find({
 										id: response.data.id
 									})
+									.toArray()
 									.then(userResp => {
 										var newUser = userResp[0];
 										expect(newUser.password).not.toBe(oldUser.password);
@@ -299,6 +301,7 @@ describe("Fruster - User service", () => {
 					.find({
 						id: response.data.id
 					})
+					.toArray()
 					.then(userResp => {
 						oldUser = userResp[0];
 					})
@@ -312,6 +315,7 @@ describe("Fruster - User service", () => {
 									.find({
 										id: response.data.id
 									})
+									.toArray()
 									.then(userResp => {
 										var newUser = userResp[0];
 										expect(newUser.password).not.toBe(oldUser.password);

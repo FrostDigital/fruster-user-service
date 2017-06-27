@@ -1,7 +1,7 @@
 const nsc = require("nats-server-control");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
-const mongo = require("mongodb-bluebird");
+const mongo = require("mongodb");
 const uuid = require("uuid");
 const _ = require("lodash");
 
@@ -43,6 +43,7 @@ describe("fruster user service validate password", () => {
     it("should return 200 when validating correct password", async done => {
         try {
             const user = mocks.getUserObject();
+            await mongoDb.dropDatabase(conf.userCollection);
             await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
             const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
                 { data: { username: user.email, password: user.password } });
@@ -60,6 +61,7 @@ describe("fruster user service validate password", () => {
     it("should return 200 when validating correct password without hashDate", async done => {
         try {
             const user = mocks.getOldUserObject();
+            await mongoDb.dropDatabase(conf.userCollection);
             await mongoDb.collection(conf.userCollection).update({ id: user.id }, user, { upsert: true })
 
             const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
@@ -79,6 +81,7 @@ describe("fruster user service validate password", () => {
         try {
             const user = mocks.getOldUserObject();
             user.hashDate = new Date("1970");
+            await mongoDb.dropDatabase(conf.userCollection);
             await mongoDb.collection(conf.userCollection).update({ id: user.id }, user, { upsert: true })
 
             const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
