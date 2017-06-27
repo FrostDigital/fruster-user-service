@@ -1,5 +1,5 @@
 const bus = require("fruster-bus");
-const mongo = require("mongodb-bluebird");
+const mongo = require("mongodb");
 const conf = require("./config");
 const constants = require('./lib/constants.js');
 
@@ -45,6 +45,7 @@ module.exports = {
 		const db = await mongo.connect(mongoUrl);
 		await createInitialUser(db);
 		const database = db.collection(conf.userCollection);
+		createIndexes(db);
 
 		//INITS//////////////////////////////////////////////////////////////////////////////////
 
@@ -103,3 +104,9 @@ module.exports = {
 	}
 
 };
+
+function createIndexes(db) {
+	db.collection(conf.userCollection)
+		.createIndex({ "email": 1 }, { unique: true });
+	return db;
+}
