@@ -1,94 +1,105 @@
-var bus = require("fruster-bus");
-var mongo = require("mongodb-bluebird");
-var conf = require("./config");
-var database;
+const bus = require("fruster-bus");
+const mongo = require("mongodb-bluebird");
+const conf = require("./config");
+const constants = require('./lib/constants.js');
 
 // CREATE
-var createUser = require("./lib/create-user");
+const createUser = require("./lib/create-user");
 
 // READ
-var getUser = require("./lib/get-user");
-var getUsersHttp = require("./lib/http/get-users-http");
-var getUserByIdHttp = require("./lib/http/get-user-by-id-http");
-var getScopes = require("./lib/get-scopes");
+const getUser = require("./lib/get-user");
+const getUsersHttp = require("./lib/http/get-users-http");
+const getUserByIdHttp = require("./lib/http/get-user-by-id-http");
+const getScopes = require("./lib/get-scopes");
 
 // UPDATE
-var updateUser = require("./lib/update-user");
-var updateUserHttp = require("./lib/http/update-user-http");
+const updateUser = require("./lib/update-user");
+const updateUserHttp = require("./lib/http/update-user-http");
 
 // DELETE
-var deleteUser = require("./lib/delete-user");
-var deleteUserHttp = require("./lib/http/delete-user-http");
+const deleteUser = require("./lib/delete-user");
+const deleteUserHttp = require("./lib/http/delete-user-http");
 
 // PASSWORD
-var validatePassword = require("./lib/validate-password");
-var updatePassword = require("./lib/update-password");
-var setPassword = require("./lib/set-password");
+const validatePassword = require("./lib/validate-password");
+const updatePassword = require("./lib/update-password");
+const setPassword = require("./lib/set-password");
 
 // ROLES
-var addRoles = require("./lib/add-roles");
-var removeRoles = require("./lib/remove-roles");
+const addRoles = require("./lib/add-roles");
+const removeRoles = require("./lib/remove-roles");
 
 // INITIAL USER
-var createInitialUser = require("./lib/create-initial-user");
+const createInitialUser = require("./lib/create-initial-user");
+
+// EMAIL VERIFICATION
+const VerifyEmailAddressHandler = require('./lib/email-verification/VerifyEmailAddressHandler.js');
+const ResendVerificationEmailHandler = require('./lib/email-verification/ResendVerificationEmailHandler.js');
+
 
 module.exports = {
 
-	start: (busAddress, mongoUrl) => {
-		return bus.connect(busAddress)
-			.then(x => mongo.connect(mongoUrl))
-			.then(db => createInitialUser(db).then(x => db))
-			.then(db => {
-				database = db.collection(conf.userCollection);
+	start: async (busAddress, mongoUrl) => {
 
-				//INITS//////////////////////////////////////////////////////////////////////////////////
+		await bus.connect(busAddress);
+		const db = await mongo.connect(mongoUrl);
+		await createInitialUser(db);
+		const database = db.collection(conf.userCollection);
 
-				//CREATE
-				createUser.init(database);
+		//INITS//////////////////////////////////////////////////////////////////////////////////
 
-				//READ
-				getUser.init(database);
-				getUsersHttp.init(getUser);
-				getUserByIdHttp.init(getUser);
+		//CREATE
+		createUser.init(database);
 
-				//UPDATE
-				updateUser.init(database);
-				updateUserHttp.init(updateUser);
+		//READ
+		getUser.init(database);
+		getUsersHttp.init(getUser);
+		getUserByIdHttp.init(getUser);
 
-				//DELETE
-				deleteUser.init(database);
-				deleteUserHttp.init(deleteUser);
+		//UPDATE
+		updateUser.init(database);
+		updateUserHttp.init(updateUser);
 
-				//PASSWORD
-				validatePassword.init(database);
-				updatePassword.init(database, validatePassword, getUser);
-				setPassword.init(database);
+		//DELETE
+		deleteUser.init(database);
+		deleteUserHttp.init(deleteUser);
 
-				//ROLES
-				addRoles.init(database);
-				removeRoles.init(database);
+		//PASSWORD
+		validatePassword.init(database);
+		updatePassword.init(database, validatePassword, getUser);
+		setPassword.init(database);
 
-				//ACTIONS///////////////////////////////////////////////////////////////////////////////
+		//ROLES
+		addRoles.init(database);
+		removeRoles.init(database);
 
-				//HTTP
-				bus.subscribe("http.post.admin.user", createUser.handle).permissions(["admin.*"]);
-				bus.subscribe("http.get.admin.user", getUsersHttp.handle).permissions(["admin.*"]);
-				bus.subscribe("http.get.admin.user.*", getUserByIdHttp.handle).permissions(["admin.*"]);
-				bus.subscribe("http.put.admin.user.*", updateUserHttp.handle).permissions(["admin.*"]);
-				bus.subscribe("http.delete.admin.user.*", deleteUserHttp.handle).permissions(["admin.*"]);
+		//EMAIL VERIFICATION
+		const verifyEmailAddressHandler = new VerifyEmailAddressHandler(database, updateUser);
+		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(database);
 
-				//SERVICE
-				bus.subscribe("user-service.create-user", createUser.handle);
-				bus.subscribe("user-service.get-user", getUser.handle);
-				bus.subscribe("user-service.update-user", updateUser.handle);
-				bus.subscribe("user-service.delete-user", deleteUser.handle);
-				bus.subscribe("user-service.validate-password", validatePassword.handle);
-				bus.subscribe("user-service.update-password", updatePassword.handle);
-				bus.subscribe("user-service.set-password", setPassword.handle);
-				bus.subscribe("user-service.add-roles", addRoles.handle);
-				bus.subscribe("user-service.remove-roles", removeRoles.handle);
-				bus.subscribe("user-service.get-scopes", getScopes.handle);
-			});
+		// ENDPOINTS ///////////////////////////////////////////////////////////////////////////////
+
+		//HTTP
+		bus.subscribe(constants.endpoints.http.admin.CREATE_USER, createUser.handle).permissions(["admin.*"]);
+		bus.subscribe(constants.endpoints.http.admin.GET_USERS, getUsersHttp.handle).permissions(["admin.*"]);
+		bus.subscribe(constants.endpoints.http.admin.GET_USER, getUserByIdHttp.handle).permissions(["admin.*"]);
+		bus.subscribe(constants.endpoints.http.admin.UPDATE_USER, updateUserHttp.handle).permissions(["admin.*"]);
+		bus.subscribe(constants.endpoints.http.admin.DELETE_USER, deleteUserHttp.handle).permissions(["admin.*"]);
+		bus.subscribe(constants.endpoints.http.VERIFY_EMAIL, (req) => verifyEmailAddressHandler.handle(req));
+		bus.subscribe(constants.endpoints.http.RESEND_VERIFICATION_EMAIL, (req) => resendVerificationEmailHandler.handle(req));
+
+		//SERVICE
+		bus.subscribe(constants.endpoints.service.CREATE_USER, createUser.handle);
+		bus.subscribe(constants.endpoints.service.GET_USER, getUser.handle);
+		bus.subscribe(constants.endpoints.service.UPDATE_USER, updateUser.handle);
+		bus.subscribe(constants.endpoints.service.DELETE_USER, deleteUser.handle);
+		bus.subscribe(constants.endpoints.service.VALIDATE_PASSWORD, validatePassword.handle);
+		bus.subscribe(constants.endpoints.service.UPDATE_PASSWORD, updatePassword.handle);
+		bus.subscribe(constants.endpoints.service.SET_PASSWORD, setPassword.handle);
+		bus.subscribe(constants.endpoints.service.ADD_ROLES, addRoles.handle);
+		bus.subscribe(constants.endpoints.service.REMOVE_ROLES, removeRoles.handle);
+		bus.subscribe(constants.endpoints.service.GET_SCOPES, getScopes.handle);
+
 	}
 
 };
