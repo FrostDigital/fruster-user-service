@@ -72,9 +72,9 @@ describe("fruster user service create user", () => {
         mocks.mockMailService();
         try {
             const user = mocks.getUserObject();
-            user.roles.push("ADMIN");
             user.roles.push("admin");
-            user.roles.push("adMin");
+            user.roles.push("admin");
+            user.roles.push("admin");
             user.roles.push("user");
 
             const response = await bus.request(constants.endpoints.service.CREATE_USER, {
