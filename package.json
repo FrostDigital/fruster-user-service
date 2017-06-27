@@ -11,7 +11,6 @@
     "csprng": "^0.1.1",
     "fruster-errors": "0.0.7",
     "fruster-bus": "^0.2.5",
-    "fruster-errors": "0.0.7",
     "fruster-health": "^0.0.10",
     "fruster-log": "0.0.10",
     "lodash": "^4.17.2",
