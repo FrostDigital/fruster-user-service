@@ -53,6 +53,8 @@ describe("fruster user service resend verification email", () => {
                 initialUserCreated = true;
             }
 
+            conf.requireEmailVerification = false;
+
             return { reqId: req.reqId, status: 200 };
         });
 

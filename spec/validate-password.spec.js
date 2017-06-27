@@ -96,6 +96,7 @@ describe("fruster user service validate password", () => {
 
     it("should be possible to login with non case sensitive username", async done => {
         try {
+            mocks.mockMailService();
             const user = mocks.getUserObject();
             user.email = "urban@hello.se";
 
@@ -115,6 +116,7 @@ describe("fruster user service validate password", () => {
 
     it("should return 401 when validating incorrect password", async done => {
         try {
+            mocks.mockMailService();
             const user = mocks.getUserObject();
             await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
 

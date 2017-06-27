@@ -326,7 +326,7 @@ describe("Fruster - User service", () => {
 	it("should be possible to add a role to a user", done => {
 		const user = mocks.getUserObject();
 
-		testUtils.createUser(user)
+		return testUtils.createUser(user)
 			.then(createdUserResponse => createdUserResponse.data)
 			.then(createdUser => bus.request(constants.endpoints.service.ADD_ROLES, {
 				data: {
@@ -334,7 +334,7 @@ describe("Fruster - User service", () => {
 					roles: ["user"]
 				}
 			})
-				.then(x => {
+				.then(() => {
 					return bus.request(constants.endpoints.service.GET_USER, {
 						data: {
 							id: createdUser.id
