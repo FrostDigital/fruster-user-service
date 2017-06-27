@@ -6,7 +6,7 @@ module.exports = {
 
     getUserObject: () => {
         return {
-            "roles": ["ADMIN"],
+            "roles": ["admin"],
             "firstName": "Viktor",
             "middleName": "Ludvig",
             "lastName": "Söderström",
@@ -33,7 +33,7 @@ module.exports = {
 
     getUserWithUnverifiedEmailObject: () => {
         return {
-            "roles": ["ADMIN"],
+            "roles": ["admin"],
             "firstName": "Pedro",
             "middleName": "Von",
             "lastName": "Damn",
