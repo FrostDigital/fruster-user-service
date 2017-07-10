@@ -20,7 +20,7 @@ module.exports = {
 
 	initialUserPassword: "FrusterR0ckS",
 
-	initialUserRole: "super-admin",
+	initialUserRole: process.env.INITIAL_USER_ROLE || "super-admin",
 
 	userCollection: "users",
 
