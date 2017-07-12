@@ -20,6 +20,8 @@ module.exports = {
 
 	initialUserPassword: "FrusterR0ckS",
 
+	initialUserRole: process.env.INITIAL_USER_ROLE || "super-admin",
+
 	userCollection: "users",
 
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
