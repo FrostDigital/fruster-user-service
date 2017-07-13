@@ -108,5 +108,11 @@ module.exports = {
 function createIndexes(db) {
 	db.collection(conf.userCollection)
 		.createIndex({ "email": 1 }, { unique: true });
+
+	conf.uniqueIndexes.forEach(index => {
+		db.collection(conf.userCollection)
+			.createIndex({ index: 1 }, { unique: true });
+	});
+
 	return db;
 }
