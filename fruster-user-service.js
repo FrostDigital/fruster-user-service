@@ -110,8 +110,10 @@ function createIndexes(db) {
 		.createIndex({ "email": 1 }, { unique: true });
 
 	conf.uniqueIndexes.forEach(index => {
+		const indexObj = {};
+		indexObj[index] = 1;
 		db.collection(conf.userCollection)
-			.createIndex({ index: 1 }, { unique: true });
+			.createIndex(indexObj, { unique: true });
 	});
 
 	return db;
