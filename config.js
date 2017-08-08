@@ -1,6 +1,6 @@
 module.exports = {
 
-	bus: parseArray(process.env.BUS) || ['nats://localhost:4222'],
+	bus: process.env.BUS || "nats://localhost:4222",
 
 	mongoUrl: process.env.MONGO_URL || "mongodb://localhost:27017/user-service",
 
@@ -36,7 +36,10 @@ module.exports = {
 
 	emailVerificationSubject: process.env.EMAIL_VERIFICATION_SUBJECT || "Validate email",
 
-	emailVerificationFrom: process.env.EMAIL_VERIFICATION_FROM || "verification@fruster.se"
+	emailVerificationFrom: process.env.EMAIL_VERIFICATION_FROM || "verification@fruster.se",
+
+	// Will lowercase names (firstname, lastname and middle name) during create and update if set to true
+	lowerCaseName: process.env.LOWER_CASE_NAME === "true"
 };
 
 function parseArray(str) {
