@@ -84,7 +84,7 @@ describe("Fruster - User service", () => {
 		created = await testUtils.createUser(user);
 		createdUsers[created.data.id] = created.data;
 
-		const response = await bus.request(constants.endpoints.service.GET_USER, { data: { firstName: user.firstName.toLowerCase() } }, 1000);
+		const response = await bus.request(constants.endpoints.service.GET_USER, { data: { firstName: user.firstName } }, 1000);
 
 		response.data.forEach(user => { validateGetUser(user, createdUsers[user.id], response); });
 		expect(response.data.length).toBe(2);
@@ -128,8 +128,8 @@ describe("Fruster - User service", () => {
 			.then(response => {
 				return bus.request(constants.endpoints.service.GET_USER, {
 					data: {
-						firstName: user.firstName.toLowerCase(),
-						lastName: user.lastName.toLowerCase()
+						firstName: user.firstName,
+						lastName: user.lastName
 					}
 				}, 1000);
 			})

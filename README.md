@@ -571,4 +571,8 @@ Configuration is set with environment variables. All config defaults to values t
 	# If user object is requried to have a password since this may not be needed when
 	# using external auth, such as BankID
 	REQUIRE_PASSWORD = true
+
+	# Will lowercase names (firstname, lastname and middle name) during create and update if set to true
+	LOWER_CASE_NAME = false
+
 	
