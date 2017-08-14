@@ -231,7 +231,8 @@ describe("Fruster - User service", () => {
 									.then(userResp => {
 										var newUser = userResp[0];
 										expect(newUser.password).not.toBe(oldUser.password);
-										expect(newUser.salt).not.toBe(oldUser.salt);
+										expect(newUser.salt).not.toBe(oldUser.salt);										
+										expect(newUser.hashDate).not.toBe(oldUser.hashDate);
 										done();
 									});
 							});
@@ -320,6 +321,7 @@ describe("Fruster - User service", () => {
 										var newUser = userResp[0];
 										expect(newUser.password).not.toBe(oldUser.password);
 										expect(newUser.salt).not.toBe(oldUser.salt);
+										expect(newUser.hashDate).not.toBe(oldUser.hashDate);
 										done();
 									});
 							});
