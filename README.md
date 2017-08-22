@@ -7,11 +7,11 @@ Service for handling creation, fetching, updating and deletion of users and vali
 ### Create user 
 
 
-Create a user. Fields `firstname`, `lastName`, `email` and `password` are required.
+Create a user. Fields `firstName`, `lastName`, `email` and `password` are required.
 Roles are validated according to environment variable ROLE_SCOPES.
 Password is validated according to regex in environment variable PASSWORD_VALIDATION_REGEX. 
 Email is validated according to regex in environment variable EMAIL_VALIDATION_REGEX. 
-See _Configuration_ in readme for default values. Fields `firstname`, `middleName`, `lastName` and `email` are saved as lowercase in the database. **NOTE:** The password is hashed using the user's unique salt and a pepper containing(**NOT** exlcusive to) the id of the user.
+See _Configuration_ in readme for default values. Fields `firstName`, `middleName`, `lastName` and `email` are saved as lowercase in the database. **NOTE:** The password is hashed using the user's unique salt and a pepper containing(**NOT** exlcusive to) the id of the user.
 
 ##### Subject
     
@@ -212,6 +212,26 @@ Requires admin.* scope.
 
 _______________
 
+### Get scopes for role
+Return the scopes for requested role set in the configuration. 
+
+##### Subject
+    
+	user-service.get-scopes
+
+#### Request 
+    {
+		//...
+		data: ["admin"]
+	}
+
+##### Success response
+	{ 
+		status: 200,
+  		data: [ 'profile.get', 'user.*' ]
+  	}
+
+_______________
 
 ### Update user 
 Fields `firstName`, `lastName`, `middleName` and `email` are possbile to update.
@@ -551,4 +571,8 @@ Configuration is set with environment variables. All config defaults to values t
 	# If user object is requried to have a password since this may not be needed when
 	# using external auth, such as BankID
 	REQUIRE_PASSWORD = true
+
+	# Will lowercase names (firstname, lastname and middle name) during create and update if set to true
+	LOWER_CASE_NAME = false
+
 	
