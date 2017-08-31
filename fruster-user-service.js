@@ -106,8 +106,9 @@ module.exports = {
 };
 
 function createIndexes(db) {
+	// Create unique index but allow null values in cases where email is not used
 	db.collection(conf.userCollection)
-		.createIndex({ email: 1 }, { unique: true, partialFilterExpression: { email: { $exists: true } } });
+		.createIndex({ email: 1 }, { unique: true, partialFilterExpression: { email: { $type: "string" } } });
 
 	conf.uniqueIndexes.forEach(index => {
 		const indexObj = {};
