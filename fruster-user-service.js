@@ -107,7 +107,7 @@ module.exports = {
 
 function createIndexes(db) {
 	db.collection(conf.userCollection)
-		.createIndex({ "email": 1 }, { unique: true });
+		.createIndex({ email: 1 }, { unique: true, partialFilterExpression: { email: { $exists: true } } });
 
 	conf.uniqueIndexes.forEach(index => {
 		const indexObj = {};
