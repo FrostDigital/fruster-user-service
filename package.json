@@ -9,13 +9,12 @@
   "dependencies": {
     "crypto-js": "^3.1.8",
     "csprng": "^0.1.1",
-    "fruster-bus": "^0.2.8",
+    "fruster-bus": "0.2.9",
     "fruster-errors": "0.0.7",
     "fruster-health": "0.0.11",
     "fruster-log": "0.0.11",
     "lodash": "^4.17.2",
     "mongodb": "^2.2.31",
-    "nats": "^0.6.8",
     "npm": "^4.6.1",
     "uuid": "^3.1.0"
   },
