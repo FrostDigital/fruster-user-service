@@ -10,8 +10,6 @@ const createUser = require("./lib/create-user");
 // READ
 const GetUserHandler = require("./lib/GetUserHandler");
 const GetUserByIdHandler = require("./lib/GetUserByIdHandler");
-const getUser = require("./lib/get-user");
-//const getUserByIdHttp = require("./lib/http/get-user-by-id-http");
 const getScopes = require("./lib/get-scopes");
 
 // UPDATE
