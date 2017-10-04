@@ -574,5 +574,9 @@ Configuration is set with environment variables. All config defaults to values t
 
 	# Will lowercase names (firstname, lastname and middle name) during create and update if set to true
 	LOWER_CASE_NAME = false
+	
+	# If user service accepts queries for ALL users
+	# This is disabled by default for security reasons.
+	ALLOW_GET_ALL = false
 
 	

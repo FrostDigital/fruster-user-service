@@ -2,14 +2,14 @@ const bus = require("fruster-bus");
 const mongo = require("mongodb");
 const conf = require("./config");
 const constants = require('./lib/constants.js');
+const UserRepo = require("./lib/repos/UserRepo");
 
 // CREATE
 const createUser = require("./lib/create-user");
 
 // READ
-const getUser = require("./lib/get-user");
-const getUsersHttp = require("./lib/http/get-users-http");
-const getUserByIdHttp = require("./lib/http/get-user-by-id-http");
+const GetUserHandler = require("./lib/GetUserHandler");
+const GetUserByIdHandler = require("./lib/GetUserByIdHandler");
 const getScopes = require("./lib/get-scopes");
 
 // UPDATE
@@ -46,6 +46,7 @@ module.exports = {
 		await createInitialUser(db);
 		const database = db.collection(conf.userCollection);
 		createIndexes(db);
+		const userRepo = new UserRepo(db);
 
 		//INITS//////////////////////////////////////////////////////////////////////////////////
 
@@ -53,10 +54,9 @@ module.exports = {
 		createUser.init(database);
 
 		//READ
-		getUser.init(database);
-		getUsersHttp.init(getUser);
-		getUserByIdHttp.init(getUser);
-
+		const getUserHandler = new GetUserHandler(userRepo);
+		const getUserByIdHandler = new GetUserByIdHandler(userRepo);
+		
 		//UPDATE
 		updateUser.init(database);
 		updateUserHttp.init(updateUser);
@@ -67,7 +67,7 @@ module.exports = {
 
 		//PASSWORD
 		validatePassword.init(database);
-		updatePassword.init(database, validatePassword, getUser);
+		updatePassword.init(database, validatePassword, userRepo);
 		setPassword.init(database);
 
 		//ROLES
@@ -82,8 +82,8 @@ module.exports = {
 
 		//HTTP
 		bus.subscribe(constants.endpoints.http.admin.CREATE_USER, createUser.handle).permissions(["admin.*"]);
-		bus.subscribe(constants.endpoints.http.admin.GET_USERS, getUsersHttp.handle).permissions(["admin.*"]);
-		bus.subscribe(constants.endpoints.http.admin.GET_USER, getUserByIdHttp.handle).permissions(["admin.*"]);
+		bus.subscribe(constants.endpoints.http.admin.GET_USERS, (req) => getUserHandler.handleHttp(req)).permissions(["admin.*"]);
+		bus.subscribe(constants.endpoints.http.admin.GET_USER, (req) => getUserByIdHandler.handleHttp(req)).permissions(["admin.*"]);
 		bus.subscribe(constants.endpoints.http.admin.UPDATE_USER, updateUserHttp.handle).permissions(["admin.*"]);
 		bus.subscribe(constants.endpoints.http.admin.DELETE_USER, deleteUserHttp.handle).permissions(["admin.*"]);
 		bus.subscribe(constants.endpoints.http.VERIFY_EMAIL, (req) => verifyEmailAddressHandler.handle(req));
@@ -91,7 +91,7 @@ module.exports = {
 
 		//SERVICE
 		bus.subscribe(constants.endpoints.service.CREATE_USER, createUser.handle);
-		bus.subscribe(constants.endpoints.service.GET_USER, getUser.handle);
+		bus.subscribe(constants.endpoints.service.GET_USER, (req) => getUserHandler.handle(req));
 		bus.subscribe(constants.endpoints.service.UPDATE_USER, updateUser.handle);
 		bus.subscribe(constants.endpoints.service.DELETE_USER, deleteUser.handle);
 		bus.subscribe(constants.endpoints.service.VALIDATE_PASSWORD, validatePassword.handle);
