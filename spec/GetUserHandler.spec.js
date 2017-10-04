@@ -48,21 +48,6 @@ describe("GetUserHandler", () => {
 			});
 	});
 
-	it("should fail to get ALL users when query is empty", (done) => {
-		const req = {
-			reqId: "reqId"
-		};
-
-		bus.request(constants.endpoints.service.GET_USER, req)
-			.then(res => {
-				done.fail();
-			})
-			.catch(err => {
-				expect(err.error.code).toBe("user-service.400.13");				
-				done();
-			});
-	});
-
 	it("should fail to query by password", (done) => {
 		const req = {
 			reqId: "reqId",
