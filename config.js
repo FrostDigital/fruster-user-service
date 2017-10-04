@@ -39,7 +39,11 @@ module.exports = {
 	emailVerificationFrom: process.env.EMAIL_VERIFICATION_FROM || "verification@fruster.se",
 
 	// Will lowercase names (firstname, lastname and middle name) during create and update if set to true
-	lowerCaseName: process.env.LOWER_CASE_NAME === "true"
+	lowerCaseName: process.env.LOWER_CASE_NAME === "true",
+
+	// If user service accepts queries for ALL users
+	// This is disabled by default for security reasons.
+	allowGetAll: process.env.ALLOW_GET_ALL === "true"
 };
 
 function parseArray(str) {
