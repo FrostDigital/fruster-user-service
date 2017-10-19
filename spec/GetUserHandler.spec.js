@@ -142,6 +142,24 @@ describe("GetUserHandler", () => {
 			});
 	});
 
+	it("should get internal server error if passing an invalid query", (done) => {
+		const req = {
+			reqId: "reqId",			
+			query: {
+				$$$$: "$$$$"
+			},
+			user: {
+				scopes: ["admin.*"]
+			}
+		};
+
+		bus.request(constants.endpoints.http.admin.GET_USERS, req)
+			.catch(err => {
+				expect(err.status).toBe(500);				
+				done();
+			});
+	});
+
 	it("should return empty array when sending in faulty query/query without result", async done => {		
 		bus.request(constants.endpoints.service.GET_USER, { data: { $or: [] } })
 			.then(res => {
