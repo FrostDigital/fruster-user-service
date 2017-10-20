@@ -121,6 +121,45 @@ describe("GetUserHandler", () => {
 			});
 	});
 
+	it("should get paginated users as admin using HTTP endpoint", (done) => {
+		const req = {
+			reqId: "reqId",			
+			query: {
+				start: 1,
+				limit: 2
+			},
+			user: {
+				scopes: ["admin.*"]
+			}
+		};
+
+		bus.request(constants.endpoints.http.admin.GET_USERS, req)
+			.then(res => {
+				expect(res.data.length).toBe(2);
+				expect(res.data[0].id).toBe("user1");				
+				expect(res.data[1].id).toBe("user2");								
+				done();
+			});
+	});
+
+	it("should get internal server error if passing an invalid query", (done) => {
+		const req = {
+			reqId: "reqId",			
+			query: {
+				$$$$: "$$$$"
+			},
+			user: {
+				scopes: ["admin.*"]
+			}
+		};
+
+		bus.request(constants.endpoints.http.admin.GET_USERS, req)
+			.catch(err => {
+				expect(err.status).toBe(500);				
+				done();
+			});
+	});
+
 	it("should return empty array when sending in faulty query/query without result", async done => {		
 		bus.request(constants.endpoints.service.GET_USER, { data: { $or: [] } })
 			.then(res => {
