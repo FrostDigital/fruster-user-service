@@ -143,7 +143,6 @@ describe("fruster user service validate password", () => {
             conf.requireEmailVerification = true;
 
             const user = mocks.getUserObject();
-            user.emailVerified = false;
 
             await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
             const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
@@ -157,6 +156,30 @@ describe("fruster user service validate password", () => {
             done();
             conf.requireEmailVerification = false;
         }
+    });
+
+    it("should be possible for old accounts to login even if the email has not been verified", async done => {
+        try {
+            mocks.mockMailService();
+
+            const user = mocks.getUserObject();
+
+            await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
+
+            conf.requireEmailVerification = true;
+
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
+                { data: { username: user.email, password: user.password } });
+
+            expect(response.status).toBe(200);
+            expect(_.size(response.error)).toBe(0);
+
+            done();
+        } catch (err) {
+            testUtils.fail(done, err);
+        }
+
+        conf.requireEmailVerification = false;
     });
 
 });
