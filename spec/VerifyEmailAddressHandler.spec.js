@@ -15,7 +15,7 @@ const constants = require('../lib/constants.js');
 
 let mongoDb;
 
-describe("fruster user service validate email address", () => {
+describe("VerifyEmailAddressHandler", () => {
     let server;
     const busPort = Math.floor(Math.random() * 6000 + 2000);
     const busAddress = "nats://localhost:" + busPort;
