@@ -2,6 +2,7 @@ const bus = require("fruster-bus");
 const mongo = require("mongodb");
 const conf = require("./config");
 const constants = require('./lib/constants.js');
+const expressApp = require("./web/express-app");
 const UserRepo = require("./lib/repos/UserRepo");
 
 // CREATE
@@ -56,7 +57,7 @@ module.exports = {
 		//READ
 		const getUserHandler = new GetUserHandler(userRepo);
 		const getUserByIdHandler = new GetUserByIdHandler(userRepo);
-		
+
 		//UPDATE
 		updateUser.init(database);
 		updateUserHttp.init(updateUser);
@@ -100,7 +101,19 @@ module.exports = {
 		bus.subscribe(constants.endpoints.service.ADD_ROLES, addRoles.handle);
 		bus.subscribe(constants.endpoints.service.REMOVE_ROLES, removeRoles.handle);
 		bus.subscribe(constants.endpoints.service.GET_SCOPES, getScopes.handle);
+		bus.subscribe(constants.endpoints.service.VERIFY_EMAIL, (req) => verifyEmailAddressHandler.handle(req));
+		bus.subscribe(constants.endpoints.service.RESEND_VERIFICATION_EMAIL, (req) => resendVerificationEmailHandler.handle(req));
 
+		if (conf.requireEmailVerification) {
+			expressApp.start(conf.port);
+		}
+
+	},
+
+	stop: () => {
+		if (conf.requireEmailVerification) {
+			expressApp.stop();
+		}
 	}
 
 };
