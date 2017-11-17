@@ -1,0 +1,78 @@
+<html>
+
+<head>
+
+    <title>Resend verification email</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="https://code.jquery.com/jquery-3.1.0.js" integrity="sha256-slogkvB1K3VOkzAI8QITxV3VzpOnkeNVsKvtkYLMjfk=" crossorigin="anonymous"></script>
+
+    <style type="text/css">
+        body {
+            font-family: sans-serif;
+            padding: 1em;
+            margin: 0;
+        }
+
+        #error {
+            color: red;
+        }
+    </style>
+
+    <script>
+        $(function () {
+
+            $("#submit-btn")
+                .click(function () {
+                    var email = $("#email-input").val();
+
+                    $("#loading").show();
+                    $("#form").hide();
+
+                    $.post("./resend-verification", {
+                        email
+                    })
+                        .then(function () {
+                            $("#loading").hide();
+                            $("#verified").show();
+                        })
+                        .fail(function (err) {
+                            $("#loading").hide();
+                            $("#error").show();
+                        });
+                });
+
+        });
+
+    </script>
+
+</head>
+
+<body>
+
+    <div id="loading" hidden>
+        <p>Please wait...</p>
+    </div>
+
+    <div id="verified" hidden>
+        <p>A new verification email has been sent! </p>
+    </div>
+
+    <div id="error" hidden>
+        <p>Something went wrong, please try again!</p>
+    </div>
+
+    <div id="form">
+        <p>Resend verification email</p>
+
+        <input id="email-input" type="email" placeholder="Email address">
+
+        <button id="submit-btn">
+            Submit
+        </button>
+    </div>
+
+</body>
+
+</html>
