@@ -18,8 +18,6 @@ module.exports.get = async (req, res) => {
 
 module.exports.post = async (req, res) => {
 
-    console.log(req.body);
-
     try {
         const response = await bus.request(constants.endpoints.service.VERIFY_EMAIL, {
             reqId: uuid.v4(),
@@ -29,11 +27,8 @@ module.exports.post = async (req, res) => {
         });
 
         res.json(response);
-        res.end();
     } catch (err) {
-        res.status(err.status);
-        res.json(err);
-        res.end();
+        res.status(err.status).json(err);
     }
 
 };
