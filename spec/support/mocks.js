@@ -44,13 +44,19 @@ module.exports = {
         };
     },
 
-    createUser: async (userObj) => {
-        return await bus.request(constants.endpoints.service.CREATE_USER, { reqId: uuid.v4(), data: userObj });
+    createUser: async(userObj) => {
+        return await bus.request(constants.endpoints.service.CREATE_USER, {
+            reqId: uuid.v4(),
+            data: userObj
+        });
     },
 
     mockMailService: () => {
         bus.subscribe("mail-service.send", (req) => {
-            return { reqId: req.reqId, status: 200 }
+            return {
+                reqId: req.reqId,
+                status: 200
+            }
         });
     }
 

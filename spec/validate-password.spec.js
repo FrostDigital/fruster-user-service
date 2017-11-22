@@ -22,7 +22,7 @@ describe("fruster user service validate password", () => {
     const testDb = "user-service-test";
     const mongoUrl = "mongodb://localhost:27017/" + testDb;
 
-    beforeAll(async (done) => {
+    beforeAll(async(done) => {
         try {
             server = await nsc.startServer(busPort);
             await bus.connect(busAddress);
@@ -35,7 +35,7 @@ describe("fruster user service validate password", () => {
         }
     });
 
-    afterAll(async (done) => {
+    afterAll(async(done) => {
         await mongoDb.dropDatabase(testDb)
         done();
     });
@@ -44,9 +44,15 @@ describe("fruster user service validate password", () => {
         try {
             const user = mocks.getUserObject();
             await mongoDb.dropDatabase(conf.userCollection);
-            await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
-                { data: { username: user.email, password: user.password } });
+            await bus.request(constants.endpoints.service.CREATE_USER, {
+                data: user
+            });
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
+                data: {
+                    username: user.email,
+                    password: user.password
+                }
+            });
 
             expect(response.status).toBe(200);
             expect(_.size(response.error)).toBe(0);
@@ -62,10 +68,18 @@ describe("fruster user service validate password", () => {
         try {
             const user = mocks.getOldUserObject();
             await mongoDb.dropDatabase(conf.userCollection);
-            await mongoDb.collection(conf.userCollection).update({ id: user.id }, user, { upsert: true })
+            await mongoDb.collection(conf.userCollection).update({
+                id: user.id
+            }, user, {
+                upsert: true
+            })
 
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
-                { data: { username: user.email, password: conf.initialUserPassword } });
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
+                data: {
+                    username: user.email,
+                    password: conf.initialUserPassword
+                }
+            });
 
             expect(response.status).toBe(200);
             expect(_.size(response.error)).toBe(0);
@@ -82,10 +96,18 @@ describe("fruster user service validate password", () => {
             const user = mocks.getOldUserObject();
             user.hashDate = new Date("1970");
             await mongoDb.dropDatabase(conf.userCollection);
-            await mongoDb.collection(conf.userCollection).update({ id: user.id }, user, { upsert: true })
+            await mongoDb.collection(conf.userCollection).update({
+                id: user.id
+            }, user, {
+                upsert: true
+            })
 
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
-                { data: { username: user.email, password: conf.initialUserPassword } });
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
+                data: {
+                    username: user.email,
+                    password: conf.initialUserPassword
+                }
+            });
 
             expect(response.status).toBe(200);
             expect(_.size(response.error)).toBe(0);
@@ -103,9 +125,15 @@ describe("fruster user service validate password", () => {
             const user = mocks.getUserObject();
             user.email = "urban@hello.se";
 
-            await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
-                { data: { username: "UrbAn@HeLlO.se", password: user.password } });
+            await bus.request(constants.endpoints.service.CREATE_USER, {
+                data: user
+            });
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
+                data: {
+                    username: "UrbAn@HeLlO.se",
+                    password: user.password
+                }
+            });
 
             expect(response.status).toBe(200);
             expect(_.size(response.error)).toBe(0);
@@ -121,10 +149,17 @@ describe("fruster user service validate password", () => {
         try {
             mocks.mockMailService();
             const user = mocks.getUserObject();
-            await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
+            await bus.request(constants.endpoints.service.CREATE_USER, {
+                data: user
+            });
 
             try {
-                await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, { data: { username: user.email, password: "yoyoyo" } });
+                await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
+                    data: {
+                        username: user.email,
+                        password: "yoyoyo"
+                    }
+                });
             } catch (err) {
                 expect(err.status).toBe(401);
                 expect(_.size(err.data)).toBe(0);
@@ -144,17 +179,24 @@ describe("fruster user service validate password", () => {
 
             const user = mocks.getUserObject();
 
-            await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
-                { data: { username: user.email, password: user.password } });
+            await bus.request(constants.endpoints.service.CREATE_USER, {
+                data: user
+            });
+
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
+                data: {
+                    username: user.email,
+                    password: user.password
+                }
+            });
 
             testUtils.fail(done, response);
         } catch (err) {
             expect(err.status).toBe(400);
             expect(err.error.code).toBe(errors.get("EMAIL_NOT_VERIFIED").error.code);
 
-            done();
             conf.requireEmailVerification = false;
+            done();
         }
     });
 
@@ -164,22 +206,27 @@ describe("fruster user service validate password", () => {
 
             const user = mocks.getUserObject();
 
-            await bus.request(constants.endpoints.service.CREATE_USER, { data: user });
+            await bus.request(constants.endpoints.service.CREATE_USER, {
+                data: user
+            });
 
             conf.requireEmailVerification = true;
 
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD,
-                { data: { username: user.email, password: user.password } });
+            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
+                data: {
+                    username: user.email,
+                    password: user.password
+                }
+            });
 
             expect(response.status).toBe(200);
             expect(_.size(response.error)).toBe(0);
 
+            conf.requireEmailVerification = false;
             done();
         } catch (err) {
             testUtils.fail(done, err);
         }
-
-        conf.requireEmailVerification = false;
     });
 
 });
