@@ -29,7 +29,7 @@ module.exports = {
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
 	// Wether or not to require the users to verify their email address before being able to signin. If this is set to true a web server will run providing a simple request new token / verify frontend @ /resend-verification & /verify-email:tokenId
-	requireEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === "true",
+	requireEmailVerification: parseBool(process.env.REQUIRE_EMAIL_VERIFICATION) ||  false,
 
 	// HTTP port where email verification web will run
 	port: process.env.PORT || 3120,
