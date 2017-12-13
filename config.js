@@ -29,7 +29,8 @@ module.exports = {
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
 	// Wether or not to require the users to verify their email address before being able to signin. If this is set to true a web server will run providing a simple request new token / verify frontend @ /resend-verification & /verify-email:tokenId
-	requireEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === "true",
+	// requireEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === "true",
+	requireEmailVerification: true,
 
 	// HTTP port where email verification web will run
 	port: process.env.PORT || 3120,
@@ -44,6 +45,9 @@ module.exports = {
 
 	// Template to use for emails about verifying email. If not set, the standard inline email will be used. 
 	emailVerificationEmailTempate: process.env.EMAIL_VERIFICATION_TEMPLATE || undefined,
+
+	// If set, after an email has been verified the web redirects to this url. Example http://flamingo.education?email=verified
+	emailVerificationRedirectUrl: process.env.EMAIL_VERIFICATION_REDIRECT_URL || undefined,
 
 	// Will lowercase names (firstname, lastname and middle name) during create and update if set to true
 	lowerCaseName: process.env.LOWER_CASE_NAME === "true",

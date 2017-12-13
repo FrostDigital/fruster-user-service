@@ -3,6 +3,7 @@ const uuid = require("uuid");
 const log = require("fruster-log");
 const fs = require("fs");
 const constants = require("../../lib/constants");
+const config = require("../../config");
 
 
 module.exports.get = async (req, res) => {
@@ -25,6 +26,12 @@ module.exports.post = async (req, res) => {
                 tokenId: req.body.tokenId
             }
         });
+
+        if (response.status === 200 && config.emailVerificationRedirectUrl) {
+            response.data = {
+                redirectTo: config.emailVerificationRedirectUrl
+            };
+        }
 
         res.json(response);
     } catch (err) {

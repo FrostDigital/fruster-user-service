@@ -27,7 +27,10 @@
             $.post("./verify-email", {
                 tokenId
             })
-                .then(function () {
+                .then(function (response) {
+                    if (response.data && response.data.redirectTo)
+                        location.replace(response.data.redirectTo);
+
                     $("#loading").hide();
                     $("#verified").show();
                 })
