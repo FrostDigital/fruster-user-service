@@ -5,7 +5,7 @@ module.exports = {
 	mongoUrl: process.env.MONGO_URL || "mongodb://localhost:27017/user-service",
 
 	// Predefined permissions for roles
-	roles: process.env.ROLE_SCOPES || "super-admin:*;admin:profile.get,user.*;user:profile.get,websocket.connect.id",
+	roles: process.env.ROLE_SCOPES || "super-admin:*;admin:profile.get,user.*;user:profile.get",
 
 	// Regex used for validating email adresses, defaults to checking letters & numbers, an @ and a top domain
 	emailValidationRegex: process.env.EMAIL_VALIDATION_REGEX || /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i,
@@ -29,8 +29,7 @@ module.exports = {
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
 	// Wether or not to require the users to verify their email address before being able to signin. If this is set to true a web server will run providing a simple request new token / verify frontend @ /resend-verification & /verify-email:tokenId
-	// requireEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === "true",
-	requireEmailVerification: true,
+	requireEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === "true",
 
 	// HTTP port where email verification web will run
 	port: process.env.PORT || 3120,
