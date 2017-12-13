@@ -48,11 +48,14 @@ describe("VerifyEmailAddressHandler", () => {
 
         const createUserResponse = (await mocks.createUser(testUserData)).data;
         const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: createUserResponse.id });
-        const verificationResponse = await bus.request(constants.endpoints.http.VERIFY_EMAIL, {
-            reqId: uuid.v4(),
-            data: {},
-            params: {
-                tokenId: testUser.emailVerificationToken
+        const verificationResponse = await bus.request({
+            subject: constants.endpoints.http.VERIFY_EMAIL,
+            message: {
+                reqId: uuid.v4(),
+                data: {},
+                params: {
+                    tokenId: testUser.emailVerificationToken
+                }
             }
         });
 
@@ -65,6 +68,25 @@ describe("VerifyEmailAddressHandler", () => {
 
         conf.requireEmailVerification = false;
         done();
+    });
+
+    it("should use sendgrid mail template if specified in config", async (done) => {
+        conf.requireEmailVerification = true;
+        conf.emailVerificationEmailTempate = "band-ola";
+
+        const testUserData = mocks.getUserWithUnverifiedEmailObject();
+
+        bus.subscribe("mail-service.send", (req) => {
+            expect(req.data.from).toBe(conf.emailVerificationFrom);
+            expect(req.data.to[0]).toBe(testUserData.email);
+            expect(req.data.templateId).toBe(conf.emailVerificationEmailTempate);
+            conf.requireEmailVerification = false;
+            conf.emailVerificationEmailTempate = undefined;
+
+            done();
+        });
+
+        await mocks.createUser(testUserData);
     });
 
 });

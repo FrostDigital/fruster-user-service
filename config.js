@@ -5,7 +5,7 @@ module.exports = {
 	mongoUrl: process.env.MONGO_URL || "mongodb://localhost:27017/user-service",
 
 	// Predefined permissions for roles
-	roles: process.env.ROLE_SCOPES || "super-admin:*;admin:profile.get,user.*;user:profile.get",
+	roles: process.env.ROLE_SCOPES || "super-admin:*;admin:profile.get,user.*;user:profile.get,websocket.connect.id",
 
 	// Regex used for validating email adresses, defaults to checking letters & numbers, an @ and a top domain
 	emailValidationRegex: process.env.EMAIL_VALIDATION_REGEX || /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i,
@@ -41,6 +41,9 @@ module.exports = {
 	emailVerificationSubject: process.env.EMAIL_VERIFICATION_SUBJECT || "Verify email",
 
 	emailVerificationFrom: process.env.EMAIL_VERIFICATION_FROM || "verification@fruster.se",
+
+	// Template to use for emails about verifying email. If not set, the standard inline email will be used. 
+	emailVerificationEmailTempate: process.env.EMAIL_VERIFICATION_TEMPLATE || undefined,
 
 	// Will lowercase names (firstname, lastname and middle name) during create and update if set to true
 	lowerCaseName: process.env.LOWER_CASE_NAME === "true",
