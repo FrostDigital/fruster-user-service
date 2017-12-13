@@ -28,18 +28,26 @@ module.exports = {
 
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
-	requireEmailVerification: parseBool(process.env.REQUIRE_EMAIL_VERIFICATION || "false"),
+	// Wether or not to require the users to verify their email address before being able to signin. If this is set to true a web server will run providing a simple request new token / verify frontend @ /resend-verification & /verify-email:tokenId
+	requireEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === "true",
+
+	// HTTP port where email verification web will run
+	port: process.env.PORT || 3120,
 
 	// :user-{field}: can be used to display user information in the email. e.g. :user-firstName:
 	// :token is the email verification token to be used to validate the email address. 
-	emailVerificationMessage: process.env.EMAIL_VERIFICATION_MESSAGE || "Hello :user-firstName: :user-lastName:, \nVisit http://deis.c1.fruster.se/validate-email?token=:token: to validate your email.",
+	emailVerificationMessage: process.env.EMAIL_VERIFICATION_MESSAGE || "Hello :user-firstName: :user-lastName:, \nVisit http://localhost:3120/verify-email#:token: to validate your email.",
 
-	emailVerificationSubject: process.env.EMAIL_VERIFICATION_SUBJECT || "Validate email",
+	emailVerificationSubject: process.env.EMAIL_VERIFICATION_SUBJECT || "Verify email",
 
 	emailVerificationFrom: process.env.EMAIL_VERIFICATION_FROM || "verification@fruster.se",
 
 	// Will lowercase names (firstname, lastname and middle name) during create and update if set to true
-	lowerCaseName: process.env.LOWER_CASE_NAME === "true"
+	lowerCaseName: process.env.LOWER_CASE_NAME === "true",
+
+	// If user service accepts queries for ALL users
+	// This is disabled by default for security reasons.
+	allowGetAll: process.env.ALLOW_GET_ALL === "true"
 };
 
 function parseArray(str) {
