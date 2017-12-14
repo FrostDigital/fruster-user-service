@@ -44,7 +44,7 @@ module.exports = {
         };
     },
 
-    createUser: async(userObj) => {
+    createUser: async (userObj) => {
         return await bus.request(constants.endpoints.service.CREATE_USER, {
             reqId: uuid.v4(),
             data: userObj

@@ -6,36 +6,58 @@ const constants = require("../../lib/constants");
 const config = require("../../config");
 
 
+/**
+ * @param {Object} req 
+ * @param {Object} res 
+ */
 module.exports.get = async (req, res) => {
+    try {
+        const verificationResponse = await verifyToken(req.query.token);
 
-    fs.readFile("./web/verify-email/index.html", {}, (err, data) => {
-        if (err)
-            throw err;
-        else
-            res.end(data);
-    });
-
+        if (config.emailVerificationRedirectUrl) {
+            res.redirect(`${config.emailVerificationRedirectUrl}?verified=${verificationResponse.data.verifiedEmail}`);
+        } else {
+            const html = await getHtml("./web/verify-email/success.html");
+            res.end(html);
+        }
+    } catch (err) {
+        if (config.emailVerificationRedirectUrl) {
+            res.redirect(`${config.emailVerificationRedirectUrl}?error=${err.error.code.split(".")[1]}`);
+        } else {
+            const html = await getHtml("./web/verify-email/error.html");
+            res.end(html);
+        }
+    }
 };
 
-module.exports.post = async (req, res) => {
+/**
+ * @param {String} filePath 
+ */
+function getHtml(filePath) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(filePath, {}, (err, data) => {
+            if (err)
+                reject(err);
+            else
+                resolve(data);
+        });
+    });
+}
 
+/**
+ * @param {String} token 
+ */
+async function verifyToken(token) {
     try {
         const response = await bus.request(constants.endpoints.service.VERIFY_EMAIL, {
             reqId: uuid.v4(),
             data: {
-                tokenId: req.body.tokenId
+                tokenId: token
             }
         });
 
-        if (response.status === 200 && config.emailVerificationRedirectUrl) {
-            response.data = {
-                redirectTo: config.emailVerificationRedirectUrl
-            };
-        }
-
-        res.json(response);
+        return response;
     } catch (err) {
-        res.status(err.status).json(err);
+        throw err;
     }
-
-};
+}
