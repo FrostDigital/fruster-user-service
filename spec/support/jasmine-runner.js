@@ -7,5 +7,6 @@ jrunner.configureDefaultReporter({ print: noop });    // remove default reporter
 jasmine.getEnv().addReporter(new SpecReporter());   // add jasmine-spec-reporter
 jrunner.loadConfigFile();                           // load jasmine.json configuration
 jrunner.execute();
+jrunner.randomizeTests(true);
 
 module.exports = jrunner;

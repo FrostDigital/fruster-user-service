@@ -44,10 +44,14 @@ module.exports = {
         };
     },
 
-    createUser: async(userObj) => {
-        return await bus.request(constants.endpoints.service.CREATE_USER, {
-            reqId: uuid.v4(),
-            data: userObj
+    createUser: async (userObj) => {
+        return await bus.request({
+            subject: constants.endpoints.service.CREATE_USER,
+            skipOptionsRequest: true,
+            message: {
+                reqId: uuid.v4(),
+                data: userObj
+            }
         });
     },
 
