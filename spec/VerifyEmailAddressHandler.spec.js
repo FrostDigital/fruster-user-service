@@ -39,6 +39,7 @@ describe("VerifyEmailAddressHandler", () => {
         conf.requireEmailVerification = true;
 
         const testUserData = mocks.getUserWithUnverifiedEmailObject();
+        testUserData.email = "olabandola@frost.se";
 
         bus.subscribe("mail-service.send", (req) => {
             expect(req.data.from).toBe(conf.emailVerificationFrom);
