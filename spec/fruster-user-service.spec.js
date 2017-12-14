@@ -11,41 +11,32 @@ const conf = require('../config');
 const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
+const frusterTestUtils = require("fruster-test-utils");
 
-let mongoDb;
 
 describe("Fruster - User service", () => {
-	let server;
-	const busPort = Math.floor(Math.random() * 6000 + 2000);
-	const busAddress = "nats://localhost:" + busPort;
-	const testDb = "user-service-test";
-	const mongoUrl = "mongodb://localhost:27017/" + testDb;
 
-	beforeAll(async (done) => {
-		try {
-			server = await nsc.startServer(busPort);
-			await bus.connect(busAddress);
-			mongoDb = await mongo.connect(mongoUrl);
-			await userService.start(busAddress, mongoUrl);
-			done();
-		} catch (err) {
-			log.error(err);
-			done.fail();
+	let mongoDb;
+
+	frusterTestUtils.startBeforeEach({
+		mockNats: true,
+		mongoUrl: "mongodb://localhost:27017/user-service-test",
+		service: userService,
+		afterStart: (connection) => {
+			mongoDb = connection.db;
 		}
-	});
-
-	afterAll(async (done) => {
-		await nsc.stopServer(server);
-		await mongoDb.dropDatabase(testDb)
-		done();
 	});
 
 	// get scopes
 	it("should return scopes for requested role", done => {
 		const roles = ["admin"];
-		return bus.request(constants.endpoints.service.GET_SCOPES, {
-			reqId: uuid.v4(),
-			data: roles
+		return bus.request({
+			subject: constants.endpoints.service.GET_SCOPES,
+			skipOptionsRequest: true,
+			message: {
+				reqId: uuid.v4(),
+				data: roles
+			}
 		})
 			.then(resp => {
 				expect(resp.data[0]).toBe("profile.get");
@@ -59,12 +50,17 @@ describe("Fruster - User service", () => {
 
 		testUtils.createUser(user)
 			.then(createdUserResponse => {
-				return bus.request(constants.endpoints.service.DELETE_USER, {
-					reqId: uuid.v4(),
-					data: {
-						id: createdUserResponse.data.id
+				return bus.request({
+					subject: constants.endpoints.service.DELETE_USER,
+					skipOptionsRequest: true,
+					timeout: 1000,
+					message: {
+						reqId: uuid.v4(),
+						data: {
+							id: createdUserResponse.data.id
+						}
 					}
-				}, 1000)
+				})
 					.then(deleteResponse => {
 						expect(deleteResponse.status).toBe(200);
 						done();
@@ -75,12 +71,17 @@ describe("Fruster - User service", () => {
 	it("should return 404 when trying to remove non-existent user", done => {
 		const user = mocks.getUserObject();
 
-		return bus.request(constants.endpoints.service.DELETE_USER, {
-			reqId: uuid.v4(),
-			data: {
-				id: uuid.v4()
+		return bus.request({
+			subject: constants.endpoints.service.DELETE_USER,
+			timeout: 1000,
+			skipOptionsRequest: true,
+			message: {
+				reqId: uuid.v4(),
+				data: {
+					id: uuid.v4()
+				}
 			}
-		}, 1000)
+		})
 			.catch(deleteResponse => {
 				expect(deleteResponse.status).toBe(404);
 				done();
@@ -111,11 +112,13 @@ describe("Fruster - User service", () => {
 					.then(x => {
 						return bus.request({
 							subject: constants.endpoints.service.UPDATE_PASSWORD,
+							skipOptionsRequest: true,
 							message: {
 								reqId: uuid.v4(),
 								user: response.data,
 								data: updatePassword
-							}, timeout: 1000
+							},
+							timeout: 1000
 						})
 							.then(x => {
 								return mongoDb.collection("users")
@@ -151,6 +154,7 @@ describe("Fruster - User service", () => {
 				return bus.request({
 					subject: constants.endpoints.service.UPDATE_PASSWORD,
 					timeout: 1000,
+					skipOptionsRequest: true,
 					message: {
 						reqId: uuid.v4(),
 						user: response.data,
@@ -176,11 +180,16 @@ describe("Fruster - User service", () => {
 
 				let oldUser;
 
-				return bus.request(constants.endpoints.service.UPDATE_PASSWORD, {
-					reqId: uuid.v4(),
-					user: response.data,
-					data: updatePassword
-				}, 1000)
+				return bus.request({
+					subject: constants.endpoints.service.UPDATE_PASSWORD,
+					timeout: 1000,
+					skipOptionsRequest: true,
+					message: {
+						reqId: uuid.v4(),
+						user: response.data,
+						data: updatePassword
+					}
+				})
 					.catch(err => {
 						done();
 					});
@@ -208,11 +217,16 @@ describe("Fruster - User service", () => {
 						oldUser = userResp[0];
 					})
 					.then(x => {
-						return bus.request(constants.endpoints.service.SET_PASSWORD, {
-							reqId: uuid.v4(),
-							user: response.data,
-							data: updatePassword
-						}, 1000)
+						return bus.request({
+							subject: constants.endpoints.service.SET_PASSWORD,
+							timeout: 1000,
+							skipOptionsRequest: true,
+							message: {
+								reqId: uuid.v4(),
+								user: response.data,
+								data: updatePassword
+							}
+						})
 							.then(x => {
 								return mongoDb.collection("users")
 									.find({
@@ -220,10 +234,12 @@ describe("Fruster - User service", () => {
 									})
 									.toArray()
 									.then(userResp => {
-										var newUser = userResp[0];
+										const newUser = userResp[0];
+
 										expect(newUser.password).not.toBe(oldUser.password);
 										expect(newUser.salt).not.toBe(oldUser.salt);
 										expect(newUser.hashDate).not.toBe(oldUser.hashDate);
+
 										done();
 									});
 							});
@@ -236,11 +252,15 @@ describe("Fruster - User service", () => {
 
 		return testUtils.createUser(user)
 			.then(createdUserResponse => createdUserResponse.data)
-			.then(createdUser => bus.request(constants.endpoints.service.ADD_ROLES, {
-				reqId: uuid.v4(),
-				data: {
-					id: createdUser.id,
-					roles: ["user"]
+			.then(createdUser => bus.request({
+				subject: constants.endpoints.service.ADD_ROLES,
+				skipOptionsRequest: true,
+				message: {
+					reqId: uuid.v4(),
+					data: {
+						id: createdUser.id,
+						roles: ["user"]
+					}
 				}
 			})
 				.then(() => {
@@ -264,18 +284,26 @@ describe("Fruster - User service", () => {
 
 		testUtils.createUser(user)
 			.then(createdUserResponse => createdUserResponse.data)
-			.then(createdUser => bus.request(constants.endpoints.service.ADD_ROLES, {
-				reqId: uuid.v4(),
-				data: {
-					id: createdUser.id,
-					roles: ["user", "super-admin"]
+			.then(createdUser => bus.request({
+				subject: constants.endpoints.service.ADD_ROLES,
+				skipOptionsRequest: true,
+				message: {
+					reqId: uuid.v4(),
+					data: {
+						id: createdUser.id,
+						roles: ["user", "super-admin"]
+					}
 				}
 			})
 				.then(x => {
-					return bus.request(constants.endpoints.service.GET_USER, {
-						reqId: uuid.v4(),
-						data: {
-							id: createdUser.id
+					return bus.request({
+						subject: constants.endpoints.service.GET_USER,
+						skipOptionsRequest: true,
+						message: {
+							reqId: uuid.v4(),
+							data: {
+								id: createdUser.id
+							}
 						}
 					})
 						.then(userResponse => userResponse.data[0])
@@ -293,18 +321,26 @@ describe("Fruster - User service", () => {
 
 		testUtils.createUser(user)
 			.then(createdUserResponse => createdUserResponse.data)
-			.then(createdUser => bus.request(constants.endpoints.service.ADD_ROLES, {
-				reqId: uuid.v4(),
-				data: {
-					id: createdUser.id,
-					roles: ["admin"]
+			.then(createdUser => bus.request({
+				subject: constants.endpoints.service.ADD_ROLES,
+				skipOptionsRequest: true,
+				message: {
+					reqId: uuid.v4(),
+					data: {
+						id: createdUser.id,
+						roles: ["admin"]
+					}
 				}
 			})
 				.then(x => {
-					return bus.request(constants.endpoints.service.GET_USER, {
-						reqId: uuid.v4(),
-						data: {
-							id: createdUser.id
+					return bus.request({
+						subject: constants.endpoints.service.GET_USER,
+						skipOptionsRequest: true,
+						message: {
+							reqId: uuid.v4(),
+							data: {
+								id: createdUser.id
+							}
 						}
 					})
 						.then(userResponse => userResponse.data[0])
@@ -321,18 +357,26 @@ describe("Fruster - User service", () => {
 
 		testUtils.createUser(user)
 			.then(createdUserResponse => createdUserResponse.data)
-			.then(createdUser => bus.request(constants.endpoints.service.REMOVE_ROLES, {
-				reqId: uuid.v4(),
-				data: {
-					id: createdUser.id,
-					roles: ["admin"]
+			.then(createdUser => bus.request({
+				subject: constants.endpoints.service.REMOVE_ROLES,
+				skipOptionsRequest: true,
+				message: {
+					reqId: uuid.v4(),
+					data: {
+						id: createdUser.id,
+						roles: ["admin"]
+					}
 				}
 			})
 				.then(x => {
-					return bus.request(constants.endpoints.service.GET_USER, {
-						reqId: uuid.v4(),
-						data: {
-							id: createdUser.id
+					return bus.request({
+						subject: constants.endpoints.service.GET_USER,
+						skipOptionsRequest: true,
+						message: {
+							reqId: uuid.v4(),
+							data: {
+								id: createdUser.id
+							}
 						}
 					})
 						.then(userResponse => userResponse.data[0])
@@ -350,18 +394,26 @@ describe("Fruster - User service", () => {
 
 		testUtils.createUser(user)
 			.then(createdUserResponse => createdUserResponse.data)
-			.then(createdUser => bus.request(constants.endpoints.service.REMOVE_ROLES, {
-				reqId: uuid.v4(),
-				data: {
-					id: createdUser.id,
-					roles: ["admin", "super-admin"]
+			.then(createdUser => bus.request({
+				subject: constants.endpoints.service.REMOVE_ROLES,
+				skipOptionsRequest: true,
+				message: {
+					reqId: uuid.v4(),
+					data: {
+						id: createdUser.id,
+						roles: ["admin", "super-admin"]
+					}
 				}
 			})
 				.then(x => {
-					return bus.request(constants.endpoints.service.GET_USER, {
-						reqId: uuid.v4(),
-						data: {
-							id: createdUser.id
+					return bus.request({
+						subject: constants.endpoints.service.GET_USER,
+						skipOptionsRequest: true,
+						message: {
+							reqId: uuid.v4(),
+							data: {
+								id: createdUser.id
+							}
 						}
 					})
 						.then(userResponse => userResponse.data[0])
@@ -379,11 +431,15 @@ describe("Fruster - User service", () => {
 
 		testUtils.createUser(user)
 			.then(createdUserResponse => createdUserResponse.data)
-			.then(createdUser => bus.request(constants.endpoints.service.REMOVE_ROLES, {
-				reqId: uuid.v4(),
-				data: {
-					id: createdUser.id,
-					roles: ["admin"]
+			.then(createdUser => bus.request({
+				subject: constants.endpoints.service.REMOVE_ROLES,
+				skipOptionsRequest: true,
+				message: {
+					reqId: uuid.v4(),
+					data: {
+						id: createdUser.id,
+						roles: ["admin"]
+					}
 				}
 			}))
 			.catch(err => {
@@ -392,7 +448,5 @@ describe("Fruster - User service", () => {
 				done();
 			});
 	});
-
-
 
 });

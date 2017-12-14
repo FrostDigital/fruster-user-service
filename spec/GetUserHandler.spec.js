@@ -3,15 +3,16 @@ const userService = require("../fruster-user-service");
 const bus = require("fruster-bus");
 const UserRepo = require("../lib/repos/UserRepo");
 const constants = require("../lib/constants");
+const uuid = require("uuid");
 
 describe("GetUserHandler", () => {
-	
+
 	testUtils.startBeforeEach({
 		mockNats: true,
 		service: userService,
 		bus: bus,
 		mongoUrl: "mongodb://localhost:27017/fruster-user-service-test",
-		afterStart: (connection) => {			
+		afterStart: (connection) => {
 			return insertTestUsers(connection.db);
 		}
 	});
@@ -23,12 +24,16 @@ describe("GetUserHandler", () => {
 			data: {}
 		};
 
-		bus.request(constants.endpoints.service.GET_USER, req)
+		bus.request({
+			subject: constants.endpoints.service.GET_USER,
+			skipOptionsRequest: true,
+			message: req
+		})
 			.then(res => {
 				done.fail();
 			})
 			.catch(err => {
-				expect(err.error.code).toBe("user-service.400.13");				
+				expect(err.error.code).toBe("user-service.400.13");
 				done();
 			});
 	});
@@ -38,12 +43,16 @@ describe("GetUserHandler", () => {
 			reqId: "reqId"
 		};
 
-		bus.request(constants.endpoints.service.GET_USER, req)
+		bus.request({
+			subject: constants.endpoints.service.GET_USER,
+			skipOptionsRequest: true,
+			message: req
+		})
 			.then(res => {
 				done.fail();
 			})
 			.catch(err => {
-				expect(err.error.code).toBe("user-service.400.13");				
+				expect(err.error.code).toBe("user-service.400.13");
 				done();
 			});
 	});
@@ -56,12 +65,15 @@ describe("GetUserHandler", () => {
 			}
 		};
 
-		bus.request(constants.endpoints.service.GET_USER, req)
+		bus.request({
+			subject: constants.endpoints.service.GET_USER,
+			skipOptionsRequest: true, message: req
+		})
 			.then(res => {
 				done.fail();
 			})
 			.catch(err => {
-				expect(err.error.code).toBe("user-service.400.13");				
+				expect(err.error.code).toBe("user-service.400.13");
 				done();
 			});
 	});
@@ -74,12 +86,16 @@ describe("GetUserHandler", () => {
 			}
 		};
 
-		bus.request(constants.endpoints.service.GET_USER, req)
+		bus.request({
+			subject: constants.endpoints.service.GET_USER,
+			skipOptionsRequest: true,
+			message: req
+		})
 			.then(res => {
 				done.fail();
 			})
 			.catch(err => {
-				expect(err.error.code).toBe("user-service.400.13");				
+				expect(err.error.code).toBe("user-service.400.13");
 				done();
 			});
 	});
@@ -92,18 +108,22 @@ describe("GetUserHandler", () => {
 			}
 		};
 
-		bus.request(constants.endpoints.service.GET_USER, req)
+		bus.request({
+			subject: constants.endpoints.service.GET_USER,
+			skipOptionsRequest: true,
+			message: req
+		})
 			.then(res => {
-				expect(res.data.length).toBe(1);				
-				expect(res.data[0].id).toBe("user1");				
-				expect(res.data[0].password).toBeUndefined();				
+				expect(res.data.length).toBe(1);
+				expect(res.data[0].id).toBe("user1");
+				expect(res.data[0].password).toBeUndefined();
 				done();
 			});
 	});
 
 	it("should get users as admin using HTTP endpoint", (done) => {
 		const req = {
-			reqId: "reqId",			
+			reqId: "reqId",
 			query: {
 				email: "user1@example.com"
 			},
@@ -112,18 +132,22 @@ describe("GetUserHandler", () => {
 			}
 		};
 
-		bus.request(constants.endpoints.http.admin.GET_USERS, req)
+		bus.request({
+			subject: constants.endpoints.http.admin.GET_USERS,
+			skipOptionsRequest: true,
+			message: req
+		})
 			.then(res => {
-				expect(res.data.length).toBe(1);				
-				expect(res.data[0].id).toBe("user1");				
-				expect(res.data[0].password).toBeUndefined();				
+				expect(res.data.length).toBe(1);
+				expect(res.data[0].id).toBe("user1");
+				expect(res.data[0].password).toBeUndefined();
 				done();
 			});
 	});
 
 	it("should get paginated users as admin using HTTP endpoint", (done) => {
 		const req = {
-			reqId: "reqId",			
+			reqId: "reqId",
 			query: {
 				start: 1,
 				limit: 2
@@ -133,18 +157,22 @@ describe("GetUserHandler", () => {
 			}
 		};
 
-		bus.request(constants.endpoints.http.admin.GET_USERS, req)
+		bus.request({
+			subject: constants.endpoints.http.admin.GET_USERS,
+			skipOptionsRequest: true,
+			message: req
+		})
 			.then(res => {
 				expect(res.data.length).toBe(2);
-				expect(res.data[0].id).toBe("user1");				
-				expect(res.data[1].id).toBe("user2");								
+				expect(res.data[0].id).toBe("user1");
+				expect(res.data[1].id).toBe("user2");
 				done();
 			});
 	});
 
 	it("should get internal server error if passing an invalid query", (done) => {
 		const req = {
-			reqId: "reqId",			
+			reqId: "reqId",
 			query: {
 				$$$$: "$$$$"
 			},
@@ -153,17 +181,28 @@ describe("GetUserHandler", () => {
 			}
 		};
 
-		bus.request(constants.endpoints.http.admin.GET_USERS, req)
+		bus.request({
+			subject: constants.endpoints.http.admin.GET_USERS,
+			skipOptionsRequest: true,
+			message: req
+		})
 			.catch(err => {
-				expect(err.status).toBe(500);				
+				expect(err.status).toBe(500);
 				done();
 			});
 	});
 
-	it("should return empty array when sending in faulty query/query without result", async done => {		
-		bus.request(constants.endpoints.service.GET_USER, { data: { $or: [] } })
+	it("should return empty array when sending in faulty query/query without result", async done => {
+		bus.request({
+			subject: constants.endpoints.service.GET_USER,
+			skipOptionsRequest: true,
+			message: {
+				reqId: uuid.v4(),
+				data: { $or: [] }
+			}
+		})
 			.then(res => {
-				expect(res.data.length).toBe(0);								
+				expect(res.data.length).toBe(0);
 				done();
 			});
 	});
@@ -179,10 +218,10 @@ function insertTestUsers(db) {
 			lastName: `${username}-lastName`,
 			email: `${username}@example.com`,
 			salt: `${username}-salt`,
-			roles: [ "user" ],
+			roles: ["user"],
 			password: username
 		}
 	});
 
-	return db.collection("users").insert(users);	
+	return db.collection("users").insert(users);
 }

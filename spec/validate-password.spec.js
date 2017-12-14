@@ -12,45 +12,43 @@ const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const errors = require('../lib/errors.js');
 const constants = require('../lib/constants.js');
+const frusterTestUtils = require("fruster-test-utils");
 
-let mongoDb;
 
 describe("fruster user service validate password", () => {
-    let server;
-    const busPort = Math.floor(Math.random() * 6000 + 2000);
-    const busAddress = "nats://localhost:" + busPort;
-    const testDb = "user-service-test";
-    const mongoUrl = "mongodb://localhost:27017/" + testDb;
 
-    beforeAll(async(done) => {
-        try {
-            server = await nsc.startServer(busPort);
-            await bus.connect(busAddress);
-            mongoDb = await mongo.connect(mongoUrl);
-            await userService.start(busAddress, mongoUrl);
-            done();
-        } catch (err) {
-            log.error(err);
-            done.fail();
+    let mongoDb;
+
+    frusterTestUtils.startBeforeEach({
+        mockNats: true,
+        mongoUrl: "mongodb://localhost:27017/user-service-test",
+        service: userService,
+        afterStart: (connection) => {
+            mongoDb = connection.db;
         }
-    });
-
-    afterAll(async(done) => {
-        await mongoDb.dropDatabase(testDb)
-        done();
     });
 
     it("should return 200 when validating correct password", async done => {
         try {
             const user = mocks.getUserObject();
             await mongoDb.dropDatabase(conf.userCollection);
-            await bus.request(constants.endpoints.service.CREATE_USER, {
-                data: user
+            await bus.request({
+                subject: constants.endpoints.service.CREATE_USER,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: user
+                }
             });
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
-                data: {
-                    username: user.email,
-                    password: user.password
+            const response = await bus.request({
+                subject: constants.endpoints.service.VALIDATE_PASSWORD,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {
+                        username: user.email,
+                        password: user.password
+                    }
                 }
             });
 
@@ -71,13 +69,18 @@ describe("fruster user service validate password", () => {
             await mongoDb.collection(conf.userCollection).update({
                 id: user.id
             }, user, {
-                upsert: true
-            })
+                    upsert: true
+                })
 
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
-                data: {
-                    username: user.email,
-                    password: conf.initialUserPassword
+            const response = await bus.request({
+                subject: constants.endpoints.service.VALIDATE_PASSWORD,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {
+                        username: user.email,
+                        password: conf.initialUserPassword
+                    }
                 }
             });
 
@@ -99,13 +102,18 @@ describe("fruster user service validate password", () => {
             await mongoDb.collection(conf.userCollection).update({
                 id: user.id
             }, user, {
-                upsert: true
-            })
+                    upsert: true
+                })
 
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
-                data: {
-                    username: user.email,
-                    password: conf.initialUserPassword
+            const response = await bus.request({
+                subject: constants.endpoints.service.VALIDATE_PASSWORD,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {
+                        username: user.email,
+                        password: conf.initialUserPassword
+                    }
                 }
             });
 
@@ -125,13 +133,23 @@ describe("fruster user service validate password", () => {
             const user = mocks.getUserObject();
             user.email = "urban@hello.se";
 
-            await bus.request(constants.endpoints.service.CREATE_USER, {
-                data: user
+            await bus.request({
+                subject: constants.endpoints.service.CREATE_USER,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: user
+                }
             });
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
-                data: {
-                    username: "UrbAn@HeLlO.se",
-                    password: user.password
+            const response = await bus.request({
+                subject: constants.endpoints.service.VALIDATE_PASSWORD,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {
+                        username: "UrbAn@HeLlO.se",
+                        password: user.password
+                    }
                 }
             });
 
@@ -149,15 +167,25 @@ describe("fruster user service validate password", () => {
         try {
             mocks.mockMailService();
             const user = mocks.getUserObject();
-            await bus.request(constants.endpoints.service.CREATE_USER, {
-                data: user
+            await bus.request({
+                subject: constants.endpoints.service.CREATE_USER,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: user
+                }
             });
 
             try {
-                await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
-                    data: {
-                        username: user.email,
-                        password: "yoyoyo"
+                await bus.request({
+                    subject: constants.endpoints.service.VALIDATE_PASSWORD,
+                    skipOptionsRequest: true,
+                    message: {
+                        reqId: uuid.v4(),
+                        data: {
+                            username: user.email,
+                            password: "yoyoyo"
+                        }
                     }
                 });
             } catch (err) {
@@ -179,14 +207,24 @@ describe("fruster user service validate password", () => {
 
             const user = mocks.getUserObject();
 
-            await bus.request(constants.endpoints.service.CREATE_USER, {
-                data: user
+            await bus.request({
+                subject: constants.endpoints.service.CREATE_USER,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: user
+                }
             });
 
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
-                data: {
-                    username: user.email,
-                    password: user.password
+            const response = await bus.request({
+                subject: constants.endpoints.service.VALIDATE_PASSWORD,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {
+                        username: user.email,
+                        password: user.password
+                    }
                 }
             });
 
@@ -206,16 +244,26 @@ describe("fruster user service validate password", () => {
 
             const user = mocks.getUserObject();
 
-            await bus.request(constants.endpoints.service.CREATE_USER, {
-                data: user
+            await bus.request({
+                subject: constants.endpoints.service.CREATE_USER,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: user
+                }
             });
 
             conf.requireEmailVerification = true;
 
-            const response = await bus.request(constants.endpoints.service.VALIDATE_PASSWORD, {
-                data: {
-                    username: user.email,
-                    password: user.password
+            const response = await bus.request({
+                subject: constants.endpoints.service.VALIDATE_PASSWORD,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {
+                        username: user.email,
+                        password: user.password
+                    }
                 }
             });
 

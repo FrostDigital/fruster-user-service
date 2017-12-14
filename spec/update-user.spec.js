@@ -11,32 +11,21 @@ const conf = require('../config');
 const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
+const frusterTestUtils = require("fruster-test-utils");
 
 let mongoDb;
 
 describe("fruster user service update user", () => {
-    let server;
-    const busPort = Math.floor(Math.random() * 6000 + 2000);
-    const busAddress = "nats://localhost:" + busPort;
-    const testDb = "user-service-test";
-    const mongoUrl = "mongodb://localhost:27017/" + testDb;
 
-    beforeAll(async (done) => {
-        try {
-            server = await nsc.startServer(busPort);
-            await bus.connect(busAddress);
-            mongoDb = await mongo.connect(mongoUrl);
-            await userService.start(busAddress, mongoUrl);
-            done();
-        } catch (err) {
-            log.error(err);
-            done.fail();
+    let mongoDb;
+
+    frusterTestUtils.startBeforeEach({
+        mockNats: true,
+        mongoUrl: "mongodb://localhost:27017/user-service-test",
+        service: userService,
+        afterStart: (connection) => {
+            mongoDb = connection.db;
         }
-    });
-
-    afterAll(async (done) => {
-        await mongoDb.dropDatabase(testDb)
-        done();
     });
 
     it("should return updated user when updating user", async done => {
@@ -44,9 +33,15 @@ describe("fruster user service update user", () => {
         const createdUserResponse = await testUtils.createUser(user);
         const newFirstName = "Roland";
         const newLastName = "Svensson";
-        const updateResponse = await bus.request(constants.endpoints.service.UPDATE_USER, {
-            data: { id: createdUserResponse.data.id, firstName: newFirstName, lastName: newLastName }
-        }, 1000);
+        const updateResponse = await bus.request({
+            subject: constants.endpoints.service.UPDATE_USER,
+            skipOptionsRequest: true,
+            timeout: 1000,
+            message: {
+                reqId: uuid.v4(),
+                data: { id: createdUserResponse.data.id, firstName: newFirstName, lastName: newLastName }
+            }
+        });
 
         expect(updateResponse.data.firstName).toBe(newFirstName);
         expect(updateResponse.data.lastName).toBe(newLastName);
@@ -61,9 +56,15 @@ describe("fruster user service update user", () => {
 
     it("should return error when user can't be updated", async done => {
         try {
-            await bus.request(constants.endpoints.service.UPDATE_USER, {
-                data: { id: "ID_", email: "hello" }
-            }, 1000);
+            await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: { id: "ID_", email: "hello" }
+                }
+            });
 
             done.fail();
         } catch (err) {
@@ -77,9 +78,15 @@ describe("fruster user service update user", () => {
         const createdUserResponse = await testUtils.createUser(user);
 
         try {
-            await bus.request(constants.endpoints.service.UPDATE_USER, {
-                data: { id: createdUserResponse.data.id, password: "new-password" }
-            }, 1000);
+            await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: { id: createdUserResponse.data.id, password: "new-password" }
+                }
+            });
 
             done.fail();
         } catch (err) {
@@ -94,9 +101,15 @@ describe("fruster user service update user", () => {
         const createdUserResponse = await testUtils.createUser(user);
 
         try {
-            await bus.request(constants.endpoints.service.UPDATE_USER, {
-                data: { id: createdUserResponse.data.id, email: "hello" }
-            }, 1000);
+            await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: { id: createdUserResponse.data.id, email: "hello" }
+                }
+            });
 
             done.fail();
         } catch (err) {
@@ -116,9 +129,15 @@ describe("fruster user service update user", () => {
         await testUtils.createUser(user);
 
         try {
-            await bus.request(constants.endpoints.service.UPDATE_USER, {
-                data: { id: id, email: email }
-            }, 1000);
+            await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: { id: id, email: email }
+                }
+            });
 
             done.fail();
         } catch (err) {
@@ -135,9 +154,15 @@ describe("fruster user service update user", () => {
         const id = createdUserResponse.data.id;
         user.email = email;
 
-        const updateResponse = await bus.request(constants.endpoints.service.UPDATE_USER, {
-            data: { id: id, email: email, firstName: "greg" }
-        }, 1000);
+        const updateResponse = await bus.request({
+            subject: constants.endpoints.service.UPDATE_USER,
+            timeout: 1000,
+            skipOptionsRequest: true,
+            message: {
+                reqId: uuid.v4(),
+                data: { id: id, email: email, firstName: "greg" }
+            }
+        });
 
         expect(updateResponse.status).toBe(200);
         done();
@@ -151,9 +176,15 @@ describe("fruster user service update user", () => {
         const id = createdUserResponse.data.id;
         user.email = email;
 
-        const updateResponse = await bus.request(constants.endpoints.service.UPDATE_USER, {
-            data: { id: id, email: email, firstName: user.firstName, lastName: user.lastName }
-        }, 1000);
+        const updateResponse = await bus.request({
+            subject: constants.endpoints.service.UPDATE_USER,
+            timeout: 1000,
+            skipOptionsRequest: true,
+            message: {
+                reqId: uuid.v4(),
+                data: { id: id, email: email, firstName: user.firstName, lastName: user.lastName }
+            }
+        });
 
         expect(updateResponse.status).toBe(200);
         done();
@@ -170,14 +201,20 @@ describe("fruster user service update user", () => {
         id = createdUserResponse.data.id;
         user.email = email;
 
-        const updateResponse = await bus.request(constants.endpoints.service.UPDATE_USER, {
-            data: {
-                id: id,
-                email: email,
-                firstName: user.firstName,
-                lastName: user.lastName
+        const updateResponse = await bus.request({
+            subject: constants.endpoints.service.UPDATE_USER,
+            timeout: 1000,
+            skipOptionsRequest: true,
+            message: {
+                reqId: uuid.v4(),
+                data: {
+                    id: id,
+                    email: email,
+                    firstName: user.firstName,
+                    lastName: user.lastName
+                }
             }
-        }, 1000);
+        });
 
         const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
 

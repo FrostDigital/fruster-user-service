@@ -5,13 +5,13 @@ const UserRepo = require("../lib/repos/UserRepo");
 const constants = require("../lib/constants");
 
 describe("GetUserByIdHandler", () => {
-	
+
 	testUtils.startBeforeEach({
 		mockNats: true,
 		service: userService,
 		bus: bus,
 		mongoUrl: "mongodb://localhost:27017/fruster-user-service-test",
-		afterStart: (connection) => {			
+		afterStart: (connection) => {
 			return insertTestUsers(connection.db);
 		}
 	});
@@ -29,12 +29,16 @@ describe("GetUserByIdHandler", () => {
 			}
 		};
 
-		bus.request(constants.endpoints.http.admin.GET_USER, req)
+		bus.request({
+			subject: constants.endpoints.http.admin.GET_USER,
+			skipOptionsRequest: true,
+			message: req
+		})
 			.then(res => {
 				done.fail();
 			})
 			.catch(err => {
-				expect(err.status).toBe(404);				
+				expect(err.status).toBe(404);
 				done();
 			});
 	});
@@ -51,13 +55,17 @@ describe("GetUserByIdHandler", () => {
 			}
 		};
 
-		bus.request(constants.endpoints.http.admin.GET_USER, req)
+		bus.request({
+			subject: constants.endpoints.http.admin.GET_USER,
+			skipOptionsRequest: true,
+			message: req
+		})
 			.then(res => {
-				expect(res.status).toBe(200);				
-				expect(res.data.id).toBe("user1");				
-				expect(res.data.password).toBeUndefined();				
+				expect(res.status).toBe(200);
+				expect(res.data.id).toBe("user1");
+				expect(res.data.password).toBeUndefined();
 				done();
-			});			
+			});
 	});
 
 });
@@ -71,10 +79,10 @@ function insertTestUsers(db) {
 			lastName: `${username}-lastName`,
 			email: `${username}@example.com`,
 			salt: `${username}-salt`,
-			roles: [ "user" ],
+			roles: ["user"],
 			password: username
 		}
 	});
 
-	return db.collection("users").insert(users);	
+	return db.collection("users").insert(users);
 }

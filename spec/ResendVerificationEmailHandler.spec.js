@@ -12,26 +12,19 @@ const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const errors = require('../lib/errors.js');
 const constants = require('../lib/constants.js');
+const frusterTestUtils = require("fruster-test-utils");
 
-let mongoDb;
 
 describe("ResendVerificationEmailHandler", () => {
-    let server;
-    const busPort = Math.floor(Math.random() * 6000 + 2000);
-    const busAddress = "nats://localhost:" + busPort;
-    const testDb = "user-service-test";
-    const mongoUrl = "mongodb://localhost:27017/" + testDb;
 
-    beforeAll(async (done) => {
-        try {
-            server = await nsc.startServer(busPort);
-            await bus.connect(busAddress);
-            mongoDb = await mongo.connect(mongoUrl);
-            await userService.start(busAddress, mongoUrl);
-            done();
-        } catch (err) {
-            log.error(err);
-            done.fail();
+    let mongoDb;
+
+    frusterTestUtils.startBeforeEach({
+        mockNats: true,
+        mongoUrl: "mongodb://localhost:27017/user-service-test",
+        service: userService,
+        afterStart: (connection) => {
+            mongoDb = connection.db;
         }
     });
 
@@ -63,8 +56,12 @@ describe("ResendVerificationEmailHandler", () => {
 
         verificationToken = testUser.emailVerificationToken;
 
-        await bus.request(constants.endpoints.http.RESEND_VERIFICATION_EMAIL, {
-            reqId: uuid.v4(), data: {}, params: { email: createUserResponse.email }
+        await bus.request({
+            subject: constants.endpoints.http.RESEND_VERIFICATION_EMAIL,
+            skipOptionsRequest: true,
+            message: {
+                reqId: uuid.v4(), data: {}, params: { email: createUserResponse.email }
+            }
         });
     });
 
