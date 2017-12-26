@@ -9,12 +9,12 @@
     "dependencies": {
         "body-parser": "^1.17.2",
         "express": "^4.15.3",
-        "crypto-js": "^3.1.8",
+        "crypto-js": "^3.1.9-1",
         "csprng": "^0.1.1",
-        "fruster-bus": "0.2.19",
+        "fruster-bus": "0.2.20",
         "fruster-errors": "0.0.7",
-        "fruster-health": "^0.0.11",
-        "fruster-log": "^0.0.15",
+        "fruster-health": "^0.0.12",
+        "fruster-log": "^0.0.16",
         "lodash": "^4.17.2",
         "mongodb": "^2.2.31",
         "npm": "^4.6.1",
@@ -22,8 +22,8 @@
     },
     "devDependencies": {
         "fruster-test-utils": "^0.3.20",
-        "jasmine": "2.5.0",
-        "jasmine-spec-reporter": "^2.7.0",
+        "jasmine": "2.8.0",
+        "jasmine-spec-reporter": "^4.2.1",
         "nats-server-control": "0.0.1",
         "request": "^2.79.0"
     },
