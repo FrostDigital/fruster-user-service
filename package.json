@@ -17,7 +17,7 @@
         "fruster-log": "^0.0.16",
         "lodash": "^4.17.2",
         "mongodb": "^2.2.31",
-        "npm": "^5.6.0",
+        "npm": "^4.6.1",
         "uuid": "^3.1.0"
     },
     "devDependencies": {
