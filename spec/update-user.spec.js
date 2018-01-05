@@ -49,7 +49,7 @@ describe("fruster user service update user", () => {
         const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
 
         expect(testUser.emailVerified).toBe(true, "updateResponse.data.emailVerified");
-        expect(testUser.emailVerificationToken).toBeUndefined("testUser.emailVerificationToken");
+        expect(testUser.emailVerificationToken).toBeNull("testUser.emailVerificationToken");
 
         done();
     });

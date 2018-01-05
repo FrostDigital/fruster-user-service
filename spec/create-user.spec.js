@@ -12,6 +12,7 @@ const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");
 const testUtils = require("./support/test-utils.js");
 const frusterTestUtils = require("fruster-test-utils");
+const roleUtils = require("../lib/utils/role-utils");
 
 
 describe("fruster user service create user", () => {
@@ -31,6 +32,8 @@ describe("fruster user service create user", () => {
         mocks.mockMailService();
         try {
             const user = mocks.getUserObject();
+            user.roles.push("super-admin");
+
             const response = await bus.request({
                 subject: constants.endpoints.service.CREATE_USER,
                 timeout: 1000,
@@ -51,9 +54,71 @@ describe("fruster user service create user", () => {
             expect(response.data.lastName).toBe(user.lastName);
             expect(response.data.email).toBe(user.email);
 
-            user.roles.forEach(role => {
-                expect(response.data.scopes.length).toBe(_.size(utils.getRoles()[role.toLowerCase()]));
+            const roles = roleUtils.getRoles();
+            const currentRoleScopes = [];
+
+            Object.keys(roles)
+                .forEach(role => {
+                    roles[role].forEach(scope => {
+                        if (!currentRoleScopes.includes(scope))
+                            currentRoleScopes.push(scope);
+                    });
+                });
+
+            expect(response.data.scopes.length).toBe(currentRoleScopes.length, "response.data.scopes.length");
+
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
+    it("should be possible to create user with custom fields", async done => {
+        mocks.mockMailService();
+        try {
+            const user = mocks.getUserObject();
+            user.roles.push("super-admin");
+
+            /** Custom fields */
+            user.profileImage = "http://pipsum.com/435x310.jpg";
+            user.custom = "field";
+
+            const response = await bus.request({
+                subject: constants.endpoints.service.CREATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: user
+                }
             });
+
+            expect(response.status).toBe(201, "response.status");
+
+            expect(_.size(response.data)).not.toBe(0, "_.size(response.data)");
+            expect(_.size(response.error)).toBe(0, "_.size(response.error)");
+
+            expect(response.data.firstName).toBe(user.firstName, "response.data.firstName");
+            expect(response.data.middleName).toBe(user.middleName, "response.data.middleName");
+            expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
+            expect(response.data.email).toBe(user.email, "response.data.email");
+            expect(response.data.profileImage).toBe(user.profileImage, "response.data.profileImage");
+            expect(response.data.custom).toBe(user.custom, "response.data.custom");
+
+            const roles = roleUtils.getRoles();
+            const currentRoleScopes = [];
+
+            Object.keys(roles)
+                .forEach(role => {
+                    roles[role].forEach(scope => {
+                        if (!currentRoleScopes.includes(scope))
+                            currentRoleScopes.push(scope);
+                    });
+                });
+
+            expect(response.data.scopes.length).toBe(currentRoleScopes.length, "response.data.scopes.length");
 
             done();
         } catch (err) {
@@ -255,7 +320,7 @@ describe("fruster user service create user", () => {
             expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
 
             user.roles.forEach(role => {
-                expect(response.data.scopes.length).toBe(_.size(utils.getRoles()[role.toLowerCase()]));
+                expect(response.data.scopes.length).toBe(_.size(roleUtils.getRoles()[role.toLowerCase()]));
             });
 
             conf.requireEmailVerification = false;

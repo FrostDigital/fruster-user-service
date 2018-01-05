@@ -1,0 +1,21 @@
+{
+    "id": "CreateUserRequest",
+    "description": "",
+    "additionalProperties": true,
+    "properties": {
+        "email": {
+            "type": "string"
+        },
+        "firstName": {
+            "type": "string"
+        },
+        "lastName": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "email",
+        "firstName",
+        "lastName"
+    ]
+}

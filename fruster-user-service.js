@@ -7,6 +7,7 @@ const UserRepo = require("./lib/repos/UserRepo");
 
 // CREATE
 const createUser = require("./lib/create-user");
+const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
 
 // READ
 const GetUserHandler = require("./lib/GetUserHandler");
@@ -53,6 +54,7 @@ module.exports = {
 
 		//CREATE
 		createUser.init(database);
+		const createUserHandler = new CreateUserHandler(userRepo);
 
 		//READ
 		const getUserHandler = new GetUserHandler(userRepo);
@@ -82,7 +84,7 @@ module.exports = {
 		// ENDPOINTS ///////////////////////////////////////////////////////////////////////////////
 
 		//HTTP
-		bus.subscribe(constants.endpoints.http.admin.CREATE_USER, createUser.handle).permissions(["admin.*"]);
+		// bus.subscribe(constants.endpoints.http.admin.CREATE_USER, createUser.handle).permissions(["admin.*"]);
 		bus.subscribe(constants.endpoints.http.admin.GET_USERS, (req) => getUserHandler.handleHttp(req)).permissions(["admin.*"]);
 		bus.subscribe(constants.endpoints.http.admin.GET_USER, (req) => getUserByIdHandler.handleHttp(req)).permissions(["admin.*"]);
 		bus.subscribe(constants.endpoints.http.admin.UPDATE_USER, updateUserHttp.handle).permissions(["admin.*"]);
@@ -91,7 +93,17 @@ module.exports = {
 		bus.subscribe(constants.endpoints.http.RESEND_VERIFICATION_EMAIL, (req) => resendVerificationEmailHandler.handle(req));
 
 		//SERVICE
-		bus.subscribe(constants.endpoints.service.CREATE_USER, createUser.handle);
+		bus.subscribe({
+			subject: constants.endpoints.service.CREATE_USER,
+			requestSchema: "CreateUserRequest",
+			handle: (req) => createUserHandler.handle(req)
+		});
+
+		// bus.subscribe({
+		// 	subject: constants.endpoints.service.CREATE_USER,
+		// 	handle: (req) => createUser.handle(req)
+		// });
+
 		bus.subscribe(constants.endpoints.service.GET_USER, (req) => getUserHandler.handle(req));
 		bus.subscribe(constants.endpoints.service.UPDATE_USER, updateUser.handle);
 		bus.subscribe(constants.endpoints.service.DELETE_USER, deleteUser.handle);
