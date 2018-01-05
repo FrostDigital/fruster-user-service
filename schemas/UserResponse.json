@@ -1,0 +1,28 @@
+{
+    "id": "UserResponse",
+    "description": "TODO:",
+    "additionalProperties": true,
+    "properties": {
+        "id": {
+            "$ref": "User#/definitions/id"
+        },
+        "firstName": {
+            "$ref": "User#/definitions/firstName"
+        },
+        "lastName": {
+            "$ref": "User#/definitions/lastName"
+        },
+        "middleName": {
+            "$ref": "User#/definitions/middleName"
+        },
+        "email": {
+            "$ref": "User#/definitions/email"
+        },
+        "roles": {
+            "$ref": "User#/definitions/roles"
+        },
+        "scopes": {
+            "$ref": "User#/definitions/scopes"
+        }
+    }
+}

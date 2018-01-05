@@ -1,0 +1,42 @@
+{
+    "id": "User",
+    "description": "TODO:",
+    "definitions": {
+        "id": {
+            "type": "string",
+            "description": "TODO:"
+        },
+        "firstName": {
+            "type": "string",
+            "description": "TODO:"
+        },
+        "lastName": {
+            "type": "string",
+            "description": "TODO:"
+        },
+        "middleName": {
+            "type": "string",
+            "description": "TODO:"
+        },
+        "email": {
+            "type": "string",
+            "description": "TODO:"
+        },
+        "roles": {
+            "type": "array",
+            "description": "TODO:",
+            "items": {
+                "type": "string",
+                "description": "TODO:"
+            }
+        },
+        "scopes": {
+            "type": "array",
+            "description": "TODO:",
+            "items": {
+                "type": "string",
+                "description": "TODO:"
+            }
+        }
+    }
+}

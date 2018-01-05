@@ -1,0 +1,8 @@
+{
+    "id": "UserListResponse",
+    "description": "TODO:",
+    "type": "array",
+    "items": {
+        "$ref": "User"
+    }
+}

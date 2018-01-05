@@ -59,7 +59,7 @@ module.exports = {
 	     This is disabled by default for security reasons. */
 	allowGetAll: process.env.ALLOW_GET_ALL === "true",
 
-	/** Database field used to validate password (e.g. login) with  */
+	/** Database field used to validate password (e.g. login or updating password) with  */
 	usernameValidationDbField: process.env.USERNAME_VALIDATION_DB_FIELD || "email"
 };
 

@@ -23,8 +23,7 @@ const deleteUserHttp = require("./lib/http/delete-user-http");
 
 // PASSWORD
 const ValidatePasswordHandler = require("./lib/handlers/ValidatePasswordHandler");
-const validatePassword = require("./lib/validate-password");
-const updatePassword = require("./lib/update-password");
+const UpdatePasswordHandler = require("./lib/handlers/UpdatePasswordHandler");
 const setPassword = require("./lib/set-password");
 
 // ROLES
@@ -50,60 +49,61 @@ module.exports = {
 		createIndexes(db);
 		const userRepo = new UserRepo(db);
 
-		//INITS//////////////////////////////////////////////////////////////////////////////////
+		// INITS//////////////////////////////////////////////////////////////////////////////////
 
-		//CREATE
+		// CREATE
 		const createUserHandler = new CreateUserHandler(userRepo);
 		await createInitialUser(db, createUserHandler);
 
-		//READ
+		// READ
 		const getUserHandler = new GetUserHandler(userRepo);
 		const getUserByIdHandler = new GetUserByIdHandler(userRepo);
 
-		//UPDATE
+		// UPDATE
 		updateUser.init(database);
 		updateUserHttp.init(updateUser);
 
-		//DELETE
+		// DELETE
 		deleteUser.init(database);
 		deleteUserHttp.init(deleteUser);
 
-		//PASSWORD
+		// PASSWORD
 		const validatePasswordHandler = new ValidatePasswordHandler(userRepo);
-		updatePassword.init(database, validatePasswordHandler, userRepo);
+		const updatePasswordHandler = new UpdatePasswordHandler(userRepo, validatePasswordHandler);
+		// updatePassword.init(database, validatePasswordHandler, userRepo);
 		setPassword.init(database);
 
-		//ROLES
+		// ROLES
 		addRoles.init(database);
 		removeRoles.init(database);
 
-		//EMAIL VERIFICATION
+		// EMAIL VERIFICATION
 		const verifyEmailAddressHandler = new VerifyEmailAddressHandler(database, updateUser);
 		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(database);
 
 		// ENDPOINTS ///////////////////////////////////////////////////////////////////////////////
 
-		//HTTP
+		// HTTP
 		bus.subscribe({
 			subject: constants.endpoints.http.admin.CREATE_USER,
-			requestSchema: "CreateUserRequest",
-			permissions: ["admin.*"],
+			requestSchema: constants.schemas.request.CREATE_USER_REQUEST,
+			responseSchema: constants.schemas.response.USER_RESPONSE,
+			permissions: [constants.permissions.ADMIN_ANY],
 			handle: (req) => createUserHandler.handle(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.http.admin.GET_USERS,
-			permissions: ["admin.*"],
+			permissions: [constants.permissions.ADMIN_ANY],
 			handle: (req) => getUserHandler.handleHttp(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.http.admin.GET_USER,
-			permissions: ["admin.*"],
+			responseSchema: constants.schemas.response.USER_RESPONSE,
+			permissions: [constants.permissions.ADMIN_ANY],
 			handle: (req) => getUserByIdHandler.handleHttp(req)
 		});
-
-
 
 		bus.subscribe({
 			subject: constants.endpoints.http.VERIFY_EMAIL,
@@ -116,23 +116,23 @@ module.exports = {
 		});
 
 		// UNREFACTORED HTTP BELOW
-		bus.subscribe(constants.endpoints.http.admin.UPDATE_USER, updateUserHttp.handle).permissions(["admin.*"]);
-		bus.subscribe(constants.endpoints.http.admin.DELETE_USER, deleteUserHttp.handle).permissions(["admin.*"]);
+		bus.subscribe(constants.endpoints.http.admin.UPDATE_USER, updateUserHttp.handle).permissions([constants.permissions.ADMIN_ANY]);
+		bus.subscribe(constants.endpoints.http.admin.DELETE_USER, deleteUserHttp.handle).permissions([constants.permissions.ADMIN_ANY]);
 
 
-		//SERVICE
+		// SERVICE
 		bus.subscribe({
 			subject: constants.endpoints.service.CREATE_USER,
-			requestSchema: "CreateUserRequest",
+			requestSchema: constants.schemas.request.CREATE_USER_REQUEST,
+			responseSchema: constants.schemas.response.USER_RESPONSE,
 			handle: (req) => createUserHandler.handle(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.service.GET_USER,
+			responseSchema: constants.schemas.response.USER_LIST_RESPONSE,
 			handle: (req) => getUserHandler.handle(req)
 		});
-
-
 
 		bus.subscribe({
 			subject: constants.endpoints.service.VERIFY_EMAIL,
@@ -146,14 +146,20 @@ module.exports = {
 
 		bus.subscribe({
 			subject: constants.endpoints.service.VALIDATE_PASSWORD,
-			requestSchema: "ValidatePasswordRequest",
+			requestSchema: constants.schemas.request.VALIDATE_PASSWORD_REQUEST,
+			responseSchema: constants.schemas.response.USER_RESPONSE,
 			handle: (req) => validatePasswordHandler.handle(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.service.UPDATE_PASSWORD,
+			requestSchema: constants.schemas.request.UPDATE_PASSWORD_REQUEST,
+			handle: (req) => updatePasswordHandler.handle(req)
 		});
 
 		// UNREFACTORED SERVICE BELOW
 		bus.subscribe(constants.endpoints.service.UPDATE_USER, updateUser.handle);
 		bus.subscribe(constants.endpoints.service.DELETE_USER, deleteUser.handle);
-		bus.subscribe(constants.endpoints.service.UPDATE_PASSWORD, updatePassword.handle);
 		bus.subscribe(constants.endpoints.service.SET_PASSWORD, setPassword.handle);
 		bus.subscribe(constants.endpoints.service.ADD_ROLES, addRoles.handle);
 		bus.subscribe(constants.endpoints.service.REMOVE_ROLES, removeRoles.handle);
