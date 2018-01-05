@@ -6,7 +6,6 @@ const expressApp = require("./web/express-app");
 const UserRepo = require("./lib/repos/UserRepo");
 
 // CREATE
-const createUser = require("./lib/create-user");
 const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
 
 // READ
@@ -35,8 +34,8 @@ const removeRoles = require("./lib/remove-roles");
 const createInitialUser = require("./lib/create-initial-user");
 
 // EMAIL VERIFICATION
-const VerifyEmailAddressHandler = require('./lib/email-verification/VerifyEmailAddressHandler.js');
-const ResendVerificationEmailHandler = require('./lib/email-verification/ResendVerificationEmailHandler.js');
+const VerifyEmailAddressHandler = require('./lib/handlers/email-verification/VerifyEmailAddressHandler.js');
+const ResendVerificationEmailHandler = require('./lib/handlers/email-verification/ResendVerificationEmailHandler.js');
 
 
 module.exports = {
@@ -45,7 +44,7 @@ module.exports = {
 
 		await bus.connect(busAddress);
 		const db = await mongo.connect(mongoUrl);
-		await createInitialUser(db);
+
 		const database = db.collection(conf.userCollection);
 		createIndexes(db);
 		const userRepo = new UserRepo(db);
@@ -53,8 +52,8 @@ module.exports = {
 		//INITS//////////////////////////////////////////////////////////////////////////////////
 
 		//CREATE
-		createUser.init(database);
 		const createUserHandler = new CreateUserHandler(userRepo);
+		await createInitialUser(db, createUserHandler);
 
 		//READ
 		const getUserHandler = new GetUserHandler(userRepo);
@@ -84,13 +83,41 @@ module.exports = {
 		// ENDPOINTS ///////////////////////////////////////////////////////////////////////////////
 
 		//HTTP
-		// bus.subscribe(constants.endpoints.http.admin.CREATE_USER, createUser.handle).permissions(["admin.*"]);
-		bus.subscribe(constants.endpoints.http.admin.GET_USERS, (req) => getUserHandler.handleHttp(req)).permissions(["admin.*"]);
-		bus.subscribe(constants.endpoints.http.admin.GET_USER, (req) => getUserByIdHandler.handleHttp(req)).permissions(["admin.*"]);
+		bus.subscribe({
+			subject: constants.endpoints.http.admin.CREATE_USER,
+			requestSchema: "CreateUserRequest",
+			permissions: ["admin.*"],
+			handle: (req) => createUserHandler.handle(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.http.admin.GET_USERS,
+			permissions: ["admin.*"],
+			handle: (req) => getUserHandler.handleHttp(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.http.admin.GET_USER,
+			permissions: ["admin.*"],
+			handle: (req) => getUserByIdHandler.handleHttp(req)
+		});
+
+
+
+		bus.subscribe({
+			subject: constants.endpoints.http.VERIFY_EMAIL,
+			handle: (req) => verifyEmailAddressHandler.handle(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.http.RESEND_VERIFICATION_EMAIL,
+			handle: (req) => resendVerificationEmailHandler.handle(req)
+		});
+
+		// UNREFACTORED HTTP BELOW
 		bus.subscribe(constants.endpoints.http.admin.UPDATE_USER, updateUserHttp.handle).permissions(["admin.*"]);
 		bus.subscribe(constants.endpoints.http.admin.DELETE_USER, deleteUserHttp.handle).permissions(["admin.*"]);
-		bus.subscribe(constants.endpoints.http.VERIFY_EMAIL, (req) => verifyEmailAddressHandler.handle(req));
-		bus.subscribe(constants.endpoints.http.RESEND_VERIFICATION_EMAIL, (req) => resendVerificationEmailHandler.handle(req));
+
 
 		//SERVICE
 		bus.subscribe({
@@ -99,12 +126,24 @@ module.exports = {
 			handle: (req) => createUserHandler.handle(req)
 		});
 
-		// bus.subscribe({
-		// 	subject: constants.endpoints.service.CREATE_USER,
-		// 	handle: (req) => createUser.handle(req)
-		// });
+		bus.subscribe({
+			subject: constants.endpoints.service.GET_USER,
+			handle: (req) => getUserHandler.handle(req)
+		});
 
-		bus.subscribe(constants.endpoints.service.GET_USER, (req) => getUserHandler.handle(req));
+
+
+		bus.subscribe({
+			subject: constants.endpoints.service.VERIFY_EMAIL,
+			handle: (req) => verifyEmailAddressHandler.handle(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.service.RESEND_VERIFICATION_EMAIL,
+			handle: (req) => resendVerificationEmailHandler.handle(req)
+		});
+
+		// UNREFACTORED SERVICE BELOW
 		bus.subscribe(constants.endpoints.service.UPDATE_USER, updateUser.handle);
 		bus.subscribe(constants.endpoints.service.DELETE_USER, deleteUser.handle);
 		bus.subscribe(constants.endpoints.service.VALIDATE_PASSWORD, validatePassword.handle);
@@ -113,13 +152,9 @@ module.exports = {
 		bus.subscribe(constants.endpoints.service.ADD_ROLES, addRoles.handle);
 		bus.subscribe(constants.endpoints.service.REMOVE_ROLES, removeRoles.handle);
 		bus.subscribe(constants.endpoints.service.GET_SCOPES, getScopes.handle);
-		bus.subscribe(constants.endpoints.service.VERIFY_EMAIL, (req) => verifyEmailAddressHandler.handle(req));
-		bus.subscribe(constants.endpoints.service.RESEND_VERIFICATION_EMAIL, (req) => resendVerificationEmailHandler.handle(req));
 
-		if (conf.requireEmailVerification) {
+		if (conf.requireEmailVerification)
 			expressApp.start(conf.port);
-		}
-
 	},
 
 	stop: () => {

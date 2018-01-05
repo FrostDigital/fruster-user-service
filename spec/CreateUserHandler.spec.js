@@ -15,7 +15,7 @@ const frusterTestUtils = require("fruster-test-utils");
 const roleUtils = require("../lib/utils/role-utils");
 
 
-describe("fruster user service create user", () => {
+describe("CreateUserHandler", () => {
 
     let mongoDb;
 
@@ -66,7 +66,6 @@ describe("fruster user service create user", () => {
                 });
 
             expect(response.data.scopes.length).toBe(currentRoleScopes.length, "response.data.scopes.length");
-
 
             done();
         } catch (err) {
