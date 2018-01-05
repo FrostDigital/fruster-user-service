@@ -22,6 +22,7 @@ const deleteUser = require("./lib/delete-user");
 const deleteUserHttp = require("./lib/http/delete-user-http");
 
 // PASSWORD
+const ValidatePasswordHandler = require("./lib/handlers/ValidatePasswordHandler");
 const validatePassword = require("./lib/validate-password");
 const updatePassword = require("./lib/update-password");
 const setPassword = require("./lib/set-password");
@@ -68,8 +69,8 @@ module.exports = {
 		deleteUserHttp.init(deleteUser);
 
 		//PASSWORD
-		validatePassword.init(database);
-		updatePassword.init(database, validatePassword, userRepo);
+		const validatePasswordHandler = new ValidatePasswordHandler(userRepo);
+		updatePassword.init(database, validatePasswordHandler, userRepo);
 		setPassword.init(database);
 
 		//ROLES
@@ -143,10 +144,15 @@ module.exports = {
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
+		bus.subscribe({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			requestSchema: "ValidatePasswordRequest",
+			handle: (req) => validatePasswordHandler.handle(req)
+		});
+
 		// UNREFACTORED SERVICE BELOW
 		bus.subscribe(constants.endpoints.service.UPDATE_USER, updateUser.handle);
 		bus.subscribe(constants.endpoints.service.DELETE_USER, deleteUser.handle);
-		bus.subscribe(constants.endpoints.service.VALIDATE_PASSWORD, validatePassword.handle);
 		bus.subscribe(constants.endpoints.service.UPDATE_PASSWORD, updatePassword.handle);
 		bus.subscribe(constants.endpoints.service.SET_PASSWORD, setPassword.handle);
 		bus.subscribe(constants.endpoints.service.ADD_ROLES, addRoles.handle);

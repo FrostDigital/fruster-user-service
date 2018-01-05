@@ -4,7 +4,7 @@ const bus = require("fruster-bus");
 const UserRepo = require("../lib/repos/UserRepo");
 
 describe("UserRepo", () => {
-	
+
 	let userRepo;
 
 	testUtils.startBeforeEach({
@@ -12,7 +12,7 @@ describe("UserRepo", () => {
 		service: userService,
 		bus: bus,
 		mongoUrl: "mongodb://localhost:27017/fruster-user-service-test",
-		afterStart: (connection) => {			
+		afterStart: (connection) => {
 			userRepo = new UserRepo(connection.db);
 			return insertTestUsers(connection.db);
 		}
@@ -30,20 +30,20 @@ describe("UserRepo", () => {
 
 	it("should not get non existing user by id", (done) => {
 		userRepo.getById("user666").then((user) => {
-			expect(user).toBeFalsy();		
+			expect(user).toBeFalsy();
 			done();
 		});
 	});
 
 	it("should get all users", (done) => {
-		userRepo.getUsers().then((users) => {
+		userRepo.getUsersByQuery().then((users) => {
 			expect(users.length).toBe(3); // user1 + user2 + initial users = 3			
 			done();
 		});
 	});
 
 	it("should get users by query", (done) => {
-		userRepo.getUsers({email: "user1@example.com"}).then((users) => {
+		userRepo.getUsersByQuery({ email: "user1@example.com" }).then((users) => {
 			expect(users.length).toBe(1);
 			expect(users[0]._id).toBeUndefined();
 			done();
@@ -63,5 +63,5 @@ function insertTestUsers(db) {
 		}
 	});
 
-	return db.collection("users").insert(users);	
+	return db.collection("users").insert(users);
 }

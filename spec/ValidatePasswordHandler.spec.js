@@ -15,7 +15,7 @@ const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 
 
-describe("fruster user service validate password", () => {
+describe("ValidatePasswordHandler", () => {
 
     let mongoDb;
 
