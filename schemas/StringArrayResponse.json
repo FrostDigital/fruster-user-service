@@ -1,0 +1,8 @@
+{
+    "id": "StringArrayResponse",
+    "description": "TODO:",
+    "type": "array",
+    "items": {
+        "type": "string"
+    }
+}

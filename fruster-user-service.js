@@ -213,6 +213,7 @@ module.exports = {
 		bus.subscribe({
 			subject: constants.endpoints.service.GET_SCOPES_FOR_ROLES,
 			requestSchema: constants.schemas.request.GET_SCOPES_FOR_ROLES,
+			responseSchema: constants.schemas.response.STRING_ARRAY_RESPONSE,
 			// docs: TODO:
 			handle: (req) => getScopesForRolesHandler.handle(req)
 		});
@@ -226,6 +227,7 @@ module.exports = {
 
 		bus.subscribe({
 			subject: constants.endpoints.service.VERIFY_EMAIL,
+			responseSchema: constants.schemas.response.VERIFY_EMAIL_ADDRESS_RESPONSE,
 			// docs: TODO:
 			handle: (req) => verifyEmailAddressHandler.handle(req)
 		});
