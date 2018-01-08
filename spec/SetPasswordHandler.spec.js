@@ -8,7 +8,7 @@ const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 
 
-describe("Fruster - User service", () => {
+describe("SetPasswordHandler", () => {
 
 	let mongoDb;
 
