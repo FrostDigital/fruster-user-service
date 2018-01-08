@@ -11,6 +11,10 @@
             "type": "string",
             "description": "TODO:"
         },
+        "middleName": {
+            "type": "string",
+            "description": "TODO:"
+        },
         "lastName": {
             "type": "string",
             "description": "TODO:"

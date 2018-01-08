@@ -15,7 +15,7 @@ const frusterTestUtils = require("fruster-test-utils");
 
 let mongoDb;
 
-describe("fruster user service update user", () => {
+describe("UpdateUserHandler", () => {
 
     let mongoDb;
 
@@ -46,6 +46,39 @@ describe("fruster user service update user", () => {
                 message: {
                     reqId: uuid.v4(),
                     data: { id: createdUserResponse.data.id, firstName: newFirstName, lastName: newLastName }
+                }
+            });
+
+            expect(updateResponse.data.firstName).toBe(newFirstName, "updateResponse.data.firstName");
+            expect(updateResponse.data.lastName).toBe(newLastName, "updateResponse.data.lastName");
+
+            const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
+
+            expect(testUser.emailVerified).toBe(true, "updateResponse.data.emailVerified");
+            expect(testUser.emailVerificationToken).toBeUndefined("testUser.emailVerificationToken");
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
+    it("should return updated user when updating user via http", async done => {
+        try {
+            const user = mocks.getUserObject();
+            const createdUserResponse = await testUtils.createUser(user);
+            const newFirstName = "Roland";
+            const newLastName = "Svensson";
+            const updateResponse = await bus.request({
+                subject: constants.endpoints.http.admin.UPDATE_USER,
+                skipOptionsRequest: true,
+                timeout: 1000,
+                message: {
+                    user: { scopes: ["admin.*"] },
+                    reqId: uuid.v4(),
+                    data: { firstName: newFirstName, lastName: newLastName },
+                    params: { id: createdUserResponse.data.id }
                 }
             });
 
@@ -177,6 +210,7 @@ describe("fruster user service update user", () => {
             });
 
             expect(updateResponse.status).toBe(200, "updateResponse.status");
+
             done();
         } catch (err) {
             log.error(err);
@@ -204,6 +238,7 @@ describe("fruster user service update user", () => {
             });
 
             expect(updateResponse.status).toBe(200, "updateResponse.status");
+
             done();
         } catch (err) {
             log.error(err);

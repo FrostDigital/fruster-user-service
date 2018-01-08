@@ -11,9 +11,12 @@ const constants = require("../lib/constants.js");
 const testUtils = require("./support/test-utils.js");
 const frusterTestUtils = require("fruster-test-utils");
 const roleUtils = require("../lib/utils/role-utils");
+const RoleService = require("../lib/services/RoleService");
 
 
 describe("CreateUserHandler", () => {
+
+    const roleService = new RoleService();
 
     /** @type {Db} */
     let mongoDb;
@@ -58,7 +61,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
             expect(response.data.email).toBe(user.email, "response.data.email");
 
-            const roles = roleUtils.getRoles();
+            const roles = roleService.getRoles();
             const currentRoleScopes = [];
 
             Object.keys(roles)
@@ -110,7 +113,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.profileImage).toBe(user.profileImage, "response.data.profileImage");
             expect(response.data.custom).toBe(user.custom, "response.data.custom");
 
-            const roles = roleUtils.getRoles();
+            const roles = roleService.getRoles();
             const currentRoleScopes = [];
 
             Object.keys(roles)
@@ -323,7 +326,7 @@ describe("CreateUserHandler", () => {
             expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
 
             user.roles.forEach(role => {
-                expect(response.data.scopes.length).toBe(Object.keys(roleUtils.getRoles()[role.toLowerCase()]).length);
+                expect(response.data.scopes.length).toBe(Object.keys(roleService.getRoles()[role.toLowerCase()]).length);
             });
 
             conf.requireEmailVerification = false;

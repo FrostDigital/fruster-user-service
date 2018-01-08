@@ -1,7 +1,7 @@
 {
     "id": "User",
     "description": "TODO:",
-    "definitions": {
+    "properties": {
         "id": {
             "type": "string",
             "description": "TODO:"

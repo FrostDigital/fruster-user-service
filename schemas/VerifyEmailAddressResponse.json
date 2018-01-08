@@ -1,0 +1,14 @@
+{
+    "id": "VerifyEmailAddressResponse",
+    "description": "TODO:",
+    "additionalProperties": true,
+    "properties": {
+        "verifiedEmail": {
+            "type": "string",
+            "faker": "internet.email"
+        }
+    },
+    "required": [
+        "verifiedEmail"
+    ]
+}

@@ -1,6 +1,18 @@
-var conf = require("./config");
-var userService = require("./fruster-user-service");
+const config = require("./config");
+const service = require("./fruster-user-service");
+const log = require("fruster-log");
+const constants = require('./lib/constants');
 
 require("fruster-health").start();
 
-userService.start(conf.bus, conf.mongoUrl);
+(async function () {
+
+    try {
+        await service.start(config.bus, config.mongoUrl);
+        log.info(`Successfully started ${constants.SERVICE_NAME}`);
+    } catch (err) {
+        log.error(`Failed starting ${constants.SERVICE_NAME}`, err);
+        process.exit(1);
+    }
+
+}());

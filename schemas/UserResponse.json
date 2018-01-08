@@ -4,25 +4,25 @@
     "additionalProperties": true,
     "properties": {
         "id": {
-            "$ref": "User#/definitions/id"
+            "$ref": "User#/properties/id"
         },
         "firstName": {
-            "$ref": "User#/definitions/firstName"
+            "$ref": "User#/properties/firstName"
         },
         "lastName": {
-            "$ref": "User#/definitions/lastName"
+            "$ref": "User#/properties/lastName"
         },
         "middleName": {
-            "$ref": "User#/definitions/middleName"
+            "$ref": "User#/properties/middleName"
         },
         "email": {
-            "$ref": "User#/definitions/email"
+            "$ref": "User#/properties/email"
         },
         "roles": {
-            "$ref": "User#/definitions/roles"
+            "$ref": "User#/properties/roles"
         },
         "scopes": {
-            "$ref": "User#/definitions/scopes"
+            "$ref": "User#/properties/scopes"
         }
     }
 }

@@ -1,5 +1,6 @@
 const bus = require("fruster-bus");
 const mongo = require("mongodb");
+const Db = mongo.Db;
 const conf = require("./config");
 const constants = require('./lib/constants.js');
 const expressApp = require("./web/express-app");
@@ -23,8 +24,7 @@ const GetUserByIdHandler = require("./lib/handlers/GetUserByIdHandler");
 const GetScopesForRolesHandler = require("./lib/handlers/GetScopesForRolesHandler");
 
 // UPDATE
-const updateUser = require("./lib/update-user");
-const updateUserHttp = require("./lib/http/update-user-http");
+const UpdateUserHandler = require("./lib/handlers/UpdateUserHandler");
 
 // DELETE
 const DeleteUserHandler = require("./lib/handlers/DeleteUserHandler");
@@ -53,7 +53,6 @@ module.exports = {
 		await bus.connect(busAddress);
 		const db = await mongo.connect(mongoUrl);
 
-		const database = db.collection(conf.userCollection);
 		createIndexes(db);
 
 		// REPOS
@@ -68,22 +67,21 @@ module.exports = {
 		const roleService = new RoleService();
 
 		// CREATE
-		const createUserHandler = new CreateUserHandler(userRepo, passwordService);
+		const createUserHandler = new CreateUserHandler(userRepo, passwordService, roleService);
 
 		// READ
-		const getUserHandler = new GetUserHandler(userRepo);
-		const getUserByIdHandler = new GetUserByIdHandler(userRepo);
+		const getUserHandler = new GetUserHandler(userRepo, roleService);
+		const getUserByIdHandler = new GetUserByIdHandler(userRepo, roleService);
 		const getScopesForRolesHandler = new GetScopesForRolesHandler(roleService);
 
 		// UPDATE
-		updateUser.init(database);
-		updateUserHttp.init(updateUser);
+		const updateUserHandler = new UpdateUserHandler(userRepo);
 
 		// DELETE
 		const deleteUserHandler = new DeleteUserHandler(userRepo);
 
 		// PASSWORD
-		const validatePasswordHandler = new ValidatePasswordHandler(userRepo, passwordService);
+		const validatePasswordHandler = new ValidatePasswordHandler(userRepo, passwordService, roleService);
 		const updatePasswordHandler = new UpdatePasswordHandler(userRepo, passwordService);
 		const setPasswordHandler = new SetPasswordHandler(userRepo, passwordService);
 
@@ -92,8 +90,8 @@ module.exports = {
 		const removeRolesHandler = new RemoveRolesHandler(userRepo, roleService);
 
 		// EMAIL VERIFICATION
-		const verifyEmailAddressHandler = new VerifyEmailAddressHandler(database, updateUser);
-		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(database);
+		const verifyEmailAddressHandler = new VerifyEmailAddressHandler(userRepo);
+		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(userRepo);
 
 		// ENDPOINTS ///////////////////////////////////////////////////////////////////////////////
 
@@ -110,6 +108,7 @@ module.exports = {
 		bus.subscribe({
 			subject: constants.endpoints.http.admin.GET_USERS,
 			permissions: [constants.permissions.ADMIN_ANY],
+			responseSchema: constants.schemas.response.USER_LIST_RESPONSE,
 			// docs: TODO:
 			handle: (req) => getUserHandler.handleHttp(req)
 		});
@@ -123,6 +122,15 @@ module.exports = {
 		});
 
 		bus.subscribe({
+			subject: constants.endpoints.http.admin.UPDATE_USER,
+			requestSchema: constants.schemas.request.UPDATE_USER_HTTP_REQUEST,
+			responseSchema: constants.schemas.response.USER_RESPONSE,
+			permissions: [constants.permissions.ADMIN_ANY],
+			// docs: TODO:
+			handle: (req) => updateUserHandler.handleHttp(req)
+		});
+
+		bus.subscribe({
 			subject: constants.endpoints.http.admin.DELETE_USER,
 			permissions: [constants.permissions.ADMIN_ANY],
 			// docs: TODO:
@@ -131,6 +139,7 @@ module.exports = {
 
 		bus.subscribe({
 			subject: constants.endpoints.http.VERIFY_EMAIL,
+			responseSchema: constants.schemas.response.VERIFY_EMAIL_ADDRESS_RESPONSE,
 			// docs: TODO:
 			handle: (req) => verifyEmailAddressHandler.handle(req)
 		});
@@ -141,8 +150,6 @@ module.exports = {
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
-		// UNREFACTORED HTTP BELOW
-		bus.subscribe(constants.endpoints.http.admin.UPDATE_USER, updateUserHttp.handle).permissions([constants.permissions.ADMIN_ANY]);
 
 		// SERVICE
 		bus.subscribe({
@@ -161,6 +168,13 @@ module.exports = {
 		});
 
 		bus.subscribe({
+			subject: constants.endpoints.service.UPDATE_USER,
+			requestSchema: constants.schemas.request.UPDATE_USER_REQUEST,
+			responseSchema: constants.schemas.response.USER_RESPONSE,
+			handle: (req) => updateUserHandler.handle(req)
+		});
+
+		bus.subscribe({
 			subject: constants.endpoints.service.VALIDATE_PASSWORD,
 			requestSchema: constants.schemas.request.VALIDATE_PASSWORD_REQUEST,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
@@ -173,6 +187,13 @@ module.exports = {
 			requestSchema: constants.schemas.request.UPDATE_PASSWORD_REQUEST,
 			// docs: TODO:
 			handle: (req) => updatePasswordHandler.handle(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.service.DELETE_USER,
+			requestSchema: constants.schemas.request.DELETE_USER_REQUEST,
+			// docs: TODO:
+			handle: (req) => deleteUserHandler.handle(req),
 		});
 
 		bus.subscribe({
@@ -197,13 +218,6 @@ module.exports = {
 		});
 
 		bus.subscribe({
-			subject: constants.endpoints.service.DELETE_USER,
-			requestSchema: constants.schemas.request.DELETE_USER_REQUEST,
-			// docs: TODO:
-			handle: (req) => deleteUserHandler.handle(req),
-		});
-
-		bus.subscribe({
 			subject: constants.endpoints.service.SET_PASSWORD,
 			requestSchema: constants.schemas.request.SET_PASSWORD_REQUEST,
 			// docs: TODO:
@@ -222,10 +236,6 @@ module.exports = {
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
-		// UNREFACTORED SERVICE BELOW
-		bus.subscribe(constants.endpoints.service.UPDATE_USER, updateUser.handle);
-
-
 		if (conf.requireEmailVerification)
 			expressApp.start(conf.port);
 	},
@@ -238,6 +248,9 @@ module.exports = {
 
 };
 
+/**
+ * @param {Db} db 
+ */
 function createIndexes(db) {
 	db.collection(conf.userCollection)
 		.createIndex({ email: 1 }, { unique: true, partialFilterExpression: { email: { $exists: true } } });
