@@ -4,22 +4,22 @@ const conf = require("./config");
 const constants = require('./lib/constants.js');
 const expressApp = require("./web/express-app");
 
-// REPOS
+// REPOS ///
 const UserRepo = require("./lib/repos/UserRepo");
 const InitialUserRepo = require("./lib/repos/InitialUserRepo");
 
-// SERVICES
+// SERVICES ///
 const PasswordService = require("./lib/services/PasswordService");
 const RoleService = require("./lib/services/RoleService");
 
-/// HANDLERS
+/// HANDLERS ///
 
 // CREATE
 const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
 
 // READ
-const GetUserHandler = require("./lib/GetUserHandler");
-const GetUserByIdHandler = require("./lib/GetUserByIdHandler");
+const GetUserHandler = require("./lib/handlers/GetUserHandler");
+const GetUserByIdHandler = require("./lib/handlers/GetUserByIdHandler");
 const GetScopesForRolesHandler = require("./lib/handlers/GetScopesForRolesHandler");
 
 // UPDATE
