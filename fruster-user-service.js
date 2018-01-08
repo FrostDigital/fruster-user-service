@@ -27,6 +27,7 @@ const updateUser = require("./lib/update-user");
 const updateUserHttp = require("./lib/http/update-user-http");
 
 // DELETE
+const DeleteUserHandler = require("./lib/handlers/DeleteUserHandler");
 const deleteUser = require("./lib/delete-user");
 const deleteUserHttp = require("./lib/http/delete-user-http");
 
@@ -81,6 +82,7 @@ module.exports = {
 		updateUserHttp.init(updateUser);
 
 		// DELETE
+		const deleteUserHandler = new DeleteUserHandler(userRepo);
 		deleteUser.init(database);
 		deleteUserHttp.init(deleteUser);
 
@@ -136,10 +138,13 @@ module.exports = {
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
+		bus.subscribe({
+			subject: constants.endpoints.http.admin.DELETE_USER,
+			handle: (req) => deleteUserHandler.handleHttp(req)
+		}).permissions([constants.permissions.ADMIN_ANY]);
+
 		// UNREFACTORED HTTP BELOW
 		bus.subscribe(constants.endpoints.http.admin.UPDATE_USER, updateUserHttp.handle).permissions([constants.permissions.ADMIN_ANY]);
-		bus.subscribe(constants.endpoints.http.admin.DELETE_USER, deleteUserHttp.handle).permissions([constants.permissions.ADMIN_ANY]);
-
 
 		// SERVICE
 		bus.subscribe({
@@ -200,13 +205,20 @@ module.exports = {
 
 		bus.subscribe({
 			subject: constants.endpoints.service.GET_SCOPES_FOR_ROLES,
+			requestSchema: constants.schemas.request.GET_SCOPES_FOR_ROLES,
 			// docs: TODO:
 			handle: (req) => getScopesForRolesHandler.handle(req)
 		});
 
+		bus.subscribe({
+			subject: constants.endpoints.service.DELETE_USER,
+			requestSchema: constants.schemas.request.DELETE_USER_REQUEST,
+			// docs: TODO:
+			handle: (req) => deleteUserHandler.handle(req),
+		});
+
 		// UNREFACTORED SERVICE BELOW
 		bus.subscribe(constants.endpoints.service.UPDATE_USER, updateUser.handle);
-		bus.subscribe(constants.endpoints.service.DELETE_USER, deleteUser.handle);
 		bus.subscribe(constants.endpoints.service.SET_PASSWORD, setPassword.handle);
 
 

@@ -28,30 +28,40 @@ describe("fruster user service update user", () => {
         }
     });
 
-    it("should return updated user when updating user", async done => {
-        const user = mocks.getUserObject();
-        const createdUserResponse = await testUtils.createUser(user);
-        const newFirstName = "Roland";
-        const newLastName = "Svensson";
-        const updateResponse = await bus.request({
-            subject: constants.endpoints.service.UPDATE_USER,
-            skipOptionsRequest: true,
-            timeout: 1000,
-            message: {
-                reqId: uuid.v4(),
-                data: { id: createdUserResponse.data.id, firstName: newFirstName, lastName: newLastName }
-            }
-        });
-
-        expect(updateResponse.data.firstName).toBe(newFirstName);
-        expect(updateResponse.data.lastName).toBe(newLastName);
-
-        const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
-
-        expect(testUser.emailVerified).toBe(true, "updateResponse.data.emailVerified");
-        expect(testUser.emailVerificationToken).toBeUndefined("testUser.emailVerificationToken");
-
+    afterEach((done) => {
+        conf.requireEmailVerification = false;
         done();
+    });
+
+    it("should return updated user when updating user", async done => {
+        try {
+            const user = mocks.getUserObject();
+            const createdUserResponse = await testUtils.createUser(user);
+            const newFirstName = "Roland";
+            const newLastName = "Svensson";
+            const updateResponse = await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                skipOptionsRequest: true,
+                timeout: 1000,
+                message: {
+                    reqId: uuid.v4(),
+                    data: { id: createdUserResponse.data.id, firstName: newFirstName, lastName: newLastName }
+                }
+            });
+
+            expect(updateResponse.data.firstName).toBe(newFirstName, "updateResponse.data.firstName");
+            expect(updateResponse.data.lastName).toBe(newLastName, "updateResponse.data.lastName");
+
+            const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
+
+            expect(testUser.emailVerified).toBe(true, "updateResponse.data.emailVerified");
+            expect(testUser.emailVerificationToken).toBeUndefined("testUser.emailVerificationToken");
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
     });
 
     it("should return error when user can't be updated", async done => {
@@ -68,7 +78,7 @@ describe("fruster user service update user", () => {
 
             done.fail();
         } catch (err) {
-            expect(err.status).toBe(400);
+            expect(err.status).toBe(400, "err.status");
             done();
         }
     });
@@ -90,8 +100,9 @@ describe("fruster user service update user", () => {
 
             done.fail();
         } catch (err) {
-            expect(err.status).toBe(400);
-            expect(_.size(err.data)).toBe(0);
+            expect(err.status).toBe(400, err.status);
+            expect(Object.keys(err.data).length).toBe(0, "Object.keys(err.data).length");
+
             done();
         }
     });
@@ -113,7 +124,7 @@ describe("fruster user service update user", () => {
 
             done.fail();
         } catch (err) {
-            expect(err.status).toBe(400);
+            expect(err.status).toBe(400, "err.status");
             done();
         };
     });
@@ -141,89 +152,105 @@ describe("fruster user service update user", () => {
 
             done.fail();
         } catch (err) {
-            expect(err.status).toBe(400);
+            expect(err.status).toBe(400, "err.status");
             done();
         }
     });
 
     it("should be possible to send old email with update request", async done => {
-        const user = mocks.getUserObject();
-        const email = user.email;
+        try {
+            const user = mocks.getUserObject();
+            const email = user.email;
 
-        const createdUserResponse = await testUtils.createUser(user);
-        const id = createdUserResponse.data.id;
-        user.email = email;
+            const createdUserResponse = await testUtils.createUser(user);
+            const id = createdUserResponse.data.id;
+            user.email = email;
 
-        const updateResponse = await bus.request({
-            subject: constants.endpoints.service.UPDATE_USER,
-            timeout: 1000,
-            skipOptionsRequest: true,
-            message: {
-                reqId: uuid.v4(),
-                data: { id: id, email: email, firstName: "greg" }
-            }
-        });
+            const updateResponse = await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: { id: id, email: email, firstName: "greg" }
+                }
+            });
 
-        expect(updateResponse.status).toBe(200);
-        done();
+            expect(updateResponse.status).toBe(200, "updateResponse.status");
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
     });
 
     it("should not return error if no fields are updated", async done => {
-        const user = mocks.getUserObject();
-        const email = user.email;
+        try {
+            const user = mocks.getUserObject();
+            const email = user.email;
 
-        const createdUserResponse = await testUtils.createUser(user);
-        const id = createdUserResponse.data.id;
-        user.email = email;
+            const createdUserResponse = await testUtils.createUser(user);
+            const id = createdUserResponse.data.id;
+            user.email = email;
 
-        const updateResponse = await bus.request({
-            subject: constants.endpoints.service.UPDATE_USER,
-            timeout: 1000,
-            skipOptionsRequest: true,
-            message: {
-                reqId: uuid.v4(),
-                data: { id: id, email: email, firstName: user.firstName, lastName: user.lastName }
-            }
-        });
+            const updateResponse = await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: { id: id, email: email, firstName: user.firstName, lastName: user.lastName }
+                }
+            });
 
-        expect(updateResponse.status).toBe(200);
-        done();
+            expect(updateResponse.status).toBe(200, "updateResponse.status");
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
     });
 
     it("should resend verification mail when updating email if conf.requireEmailVerification is set to true", async (done) => {
-        conf.requireEmailVerification = true;
-        mocks.mockMailService();
-        const user = mocks.getUserObject();
-        const email = user.email;
-        let id;
+        try {
+            conf.requireEmailVerification = true;
+            mocks.mockMailService();
+            const user = mocks.getUserObject();
+            const email = user.email;
+            let id;
 
-        const createdUserResponse = await testUtils.createUser(user);
-        id = createdUserResponse.data.id;
-        user.email = email;
+            const createdUserResponse = await testUtils.createUser(user);
+            id = createdUserResponse.data.id;
+            user.email = email;
 
-        const updateResponse = await bus.request({
-            subject: constants.endpoints.service.UPDATE_USER,
-            timeout: 1000,
-            skipOptionsRequest: true,
-            message: {
-                reqId: uuid.v4(),
-                data: {
-                    id: id,
-                    email: email,
-                    firstName: user.firstName,
-                    lastName: user.lastName
+            const updateResponse = await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {
+                        id: id,
+                        email: email,
+                        firstName: user.firstName,
+                        lastName: user.lastName
+                    }
                 }
-            }
-        });
+            });
 
-        const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
+            const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
 
-        expect(updateResponse.status).toBe(200);
-        expect(testUser.emailVerified).toBe(false, "updateResponse.data.emailVerified");
-        expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
-        conf.requireEmailVerification = false;
+            expect(updateResponse.status).toBe(200, "updateResponse.status");
+            expect(testUser.emailVerified).toBe(false, "updateResponse.data.emailVerified");
+            expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
 
-        done();
+            conf.requireEmailVerification = false;
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
     });
 
 });

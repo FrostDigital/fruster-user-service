@@ -1,21 +1,19 @@
-const nsc = require("nats-server-control");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
-const mongo = require("mongodb");
+const Db = require("mongodb").Db;
 const uuid = require("uuid");
-const _ = require("lodash");
 
 const userService = require("../fruster-user-service");
 const utils = require("../lib/utils/utils");
-const conf = require("../config");
+const config = require("../config");
 const mocks = require("./support/mocks.js");
 const testUtils = require("fruster-test-utils");
-const errors = require("../lib/errors.js");
 const constants = require("../lib/constants.js");
 
 
 describe("VerifyEmailAddressHandler", () => {
 
+    /** @type {Db} */
     let mongoDb;
 
     testUtils.startBeforeEach({
@@ -28,18 +26,18 @@ describe("VerifyEmailAddressHandler", () => {
     });
 
     it("should remove emailVerificationToken and set emailVerified to true when verifying with emailVerificationToken", async (done) => {
-        conf.requireEmailVerification = true;
+        config.requireEmailVerification = true;
 
         const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
         bus.subscribe("mail-service.send", (req) => {
-            expect(req.data.from).toBe(conf.emailVerificationFrom, "req.data.from");
+            expect(req.data.from).toBe(config.emailVerificationFrom, "req.data.from");
             expect(req.data.to.includes(testUserData.email)).toBeTruthy("req.data.to.includes(testUserData.email)");
             return { reqId: req.reqId, status: 200 }
         });
 
         const createUserResponse = (await mocks.createUser(testUserData)).data;
-        const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: createUserResponse.id });
+        const testUser = await mongoDb.collection(config.userCollection).findOne({ id: createUserResponse.id });
         const verificationResponse = await bus.request({
             subject: constants.endpoints.http.VERIFY_EMAIL,
             skipOptionsRequest: true,
@@ -54,27 +52,27 @@ describe("VerifyEmailAddressHandler", () => {
 
         expect(verificationResponse.status).toBe(200, "verificationResponse.status");
 
-        const updatedTestUser = await mongoDb.collection(conf.userCollection).findOne({ id: createUserResponse.id });
+        const updatedTestUser = await mongoDb.collection(config.userCollection).findOne({ id: createUserResponse.id });
 
         expect(updatedTestUser.emailVerificationToken).toBeUndefined("should remove emailVerificationToken");
         expect(updatedTestUser.emailVerified).toBe(true, "should set emailVerified to true");
 
-        conf.requireEmailVerification = false;
+        config.requireEmailVerification = false;
         done();
     });
 
     it("should use sendgrid mail template if specified in config", async (done) => {
-        conf.requireEmailVerification = true;
-        conf.emailVerificationEmailTempate = "band-ola";
+        config.requireEmailVerification = true;
+        config.emailVerificationEmailTempate = "band-ola";
 
         const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
         bus.subscribe("mail-service.send", (req) => {
-            expect(req.data.from).toBe(conf.emailVerificationFrom);
+            expect(req.data.from).toBe(config.emailVerificationFrom);
             expect(req.data.to[0]).toBe(testUserData.email);
-            expect(req.data.templateId).toBe(conf.emailVerificationEmailTempate);
-            conf.requireEmailVerification = false;
-            conf.emailVerificationEmailTempate = undefined;
+            expect(req.data.templateId).toBe(config.emailVerificationEmailTempate);
+            config.requireEmailVerification = false;
+            config.emailVerificationEmailTempate = undefined;
 
             done();
         });

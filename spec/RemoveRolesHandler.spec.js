@@ -52,8 +52,8 @@ describe("RemoveRolesHandler", () => {
                 }
             });
 
-            expect(userResponse.data[0].roles.includes("admin")).toBe(false);
-            expect(userResponse.data[0].roles.length).toBe(1);
+            expect(userResponse.data[0].roles.includes("admin")).toBe(false, `userResponse.data[0].roles.includes("admin")`);
+            expect(userResponse.data[0].roles.length).toBe(1, "userResponse.data[0].roles.length");
 
             done();
         } catch (err) {
@@ -90,9 +90,9 @@ describe("RemoveRolesHandler", () => {
                 }
             });
 
-            expect(userResponse.data[0].roles.includes("admin")).toBe(false);
-            expect(userResponse.data[0].roles.includes("super-admin")).toBe(false);
-            expect(userResponse.data[0].roles.length).toBe(1);
+            expect(userResponse.data[0].roles.includes("admin")).toBe(false, `userResponse.data[0].roles.includes("admin")`);
+            expect(userResponse.data[0].roles.includes("super-admin")).toBe(false, `userResponse.data[0].roles.includes("super-admin")`);
+            expect(userResponse.data[0].roles.length).toBe(1, `userResponse.data[0].roles.length`);
 
             done();
         } catch (err) {
@@ -119,8 +119,8 @@ describe("RemoveRolesHandler", () => {
                     }
                 });
             } catch (err) {
-                expect(err.status).toBe(400);
-                expect(err.error.code).toBe("user-service.400.14");
+                expect(err.status).toBe(400, "err.status");
+                expect(err.error.code).toBe("user-service.400.14", "err.error.code");
 
                 done();
             }

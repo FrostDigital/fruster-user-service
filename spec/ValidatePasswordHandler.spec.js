@@ -1,13 +1,10 @@
-const nsc = require("nats-server-control");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
-const mongo = require("mongodb");
+const Db = require("mongodb").Db;
 const uuid = require("uuid");
-const _ = require("lodash");
 
 const userService = require('../fruster-user-service');
-const utils = require('../lib/utils/utils');
-const conf = require('../config');
+const config = require('../config');
 const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const errors = require('../lib/errors.js');
@@ -17,6 +14,7 @@ const frusterTestUtils = require("fruster-test-utils");
 
 describe("ValidatePasswordHandler", () => {
 
+    /** @type {Db} */
     let mongoDb;
 
     frusterTestUtils.startBeforeEach({
@@ -28,10 +26,16 @@ describe("ValidatePasswordHandler", () => {
         }
     });
 
+    afterEach(done => {
+        config.requireEmailVerification = false;
+        done();
+    });
+
     it("should return 200 when validating correct password", async done => {
         try {
             const user = mocks.getUserObject();
-            await mongoDb.dropDatabase(conf.userCollection);
+            //@ts-ignore
+            await mongoDb.dropDatabase(config.userCollection);
             await bus.request({
                 subject: constants.endpoints.service.CREATE_USER,
                 skipOptionsRequest: true,
@@ -52,8 +56,8 @@ describe("ValidatePasswordHandler", () => {
                 }
             });
 
-            expect(response.status).toBe(200);
-            expect(_.size(response.error)).toBe(0);
+            expect(response.status).toBe(200, "response.status");
+            expect(response.error).toBeUndefined("response.error");
 
             done();
         } catch (err) {
@@ -65,8 +69,9 @@ describe("ValidatePasswordHandler", () => {
     it("should return 200 when validating correct password without hashDate", async done => {
         try {
             const user = mocks.getOldUserObject();
-            await mongoDb.dropDatabase(conf.userCollection);
-            await mongoDb.collection(conf.userCollection).update({
+            //@ts-ignore
+            await mongoDb.dropDatabase(config.userCollection);
+            await mongoDb.collection(config.userCollection).update({
                 id: user.id
             }, user, {
                     upsert: true
@@ -79,13 +84,13 @@ describe("ValidatePasswordHandler", () => {
                     reqId: uuid.v4(),
                     data: {
                         username: user.email,
-                        password: conf.initialUserPassword
+                        password: config.initialUserPassword
                     }
                 }
             });
 
-            expect(response.status).toBe(200);
-            expect(_.size(response.error)).toBe(0);
+            expect(response.status).toBe(200, "response.status");
+            expect(response.error).toBeUndefined("response.error");
 
             done();
         } catch (err) {
@@ -98,8 +103,9 @@ describe("ValidatePasswordHandler", () => {
         try {
             const user = mocks.getOldUserObject();
             user.hashDate = new Date("1970");
-            await mongoDb.dropDatabase(conf.userCollection);
-            await mongoDb.collection(conf.userCollection).update({
+            //@ts-ignore
+            await mongoDb.dropDatabase(config.userCollection);
+            await mongoDb.collection(config.userCollection).update({
                 id: user.id
             }, user, {
                     upsert: true
@@ -112,13 +118,13 @@ describe("ValidatePasswordHandler", () => {
                     reqId: uuid.v4(),
                     data: {
                         username: user.email,
-                        password: conf.initialUserPassword
+                        password: config.initialUserPassword
                     }
                 }
             });
 
-            expect(response.status).toBe(200);
-            expect(_.size(response.error)).toBe(0);
+            expect(response.status).toBe(200, "response.status");
+            expect(response.error).toBeUndefined("response.error");
 
             done();
         } catch (err) {
@@ -153,8 +159,8 @@ describe("ValidatePasswordHandler", () => {
                 }
             });
 
-            expect(response.status).toBe(200);
-            expect(_.size(response.error)).toBe(0);
+            expect(response.status).toBe(200, "response.status");
+            expect(response.error).toBeUndefined("response.error");
 
             done();
         } catch (err) {
@@ -189,8 +195,8 @@ describe("ValidatePasswordHandler", () => {
                     }
                 });
             } catch (err) {
-                expect(err.status).toBe(401);
-                expect(_.size(err.data)).toBe(0);
+                expect(err.status).toBe(401, "err.status");
+                expect(Object.keys(err.data).length).toBe(0, "Object.keys(err.data).length");
 
                 done();
             }
@@ -203,7 +209,7 @@ describe("ValidatePasswordHandler", () => {
     it("should return 400 when user without verified email logs in with config.requireEmailVerification set to true", async done => {
         try {
             mocks.mockMailService();
-            conf.requireEmailVerification = true;
+            config.requireEmailVerification = true;
 
             const user = mocks.getUserObject();
 
@@ -230,10 +236,11 @@ describe("ValidatePasswordHandler", () => {
 
             testUtils.fail(done, response);
         } catch (err) {
-            expect(err.status).toBe(400);
-            expect(err.error.code).toBe(errors.get("EMAIL_NOT_VERIFIED").error.code);
+            expect(err.status).toBe(400, "err.status");
+            expect(err.error.code).toBe(errors.get("EMAIL_NOT_VERIFIED").error.code, "err.error.code");
 
-            conf.requireEmailVerification = false;
+            config.requireEmailVerification = false;
+
             done();
         }
     });
@@ -253,7 +260,7 @@ describe("ValidatePasswordHandler", () => {
                 }
             });
 
-            conf.requireEmailVerification = true;
+            config.requireEmailVerification = true;
 
             const response = await bus.request({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
@@ -267,10 +274,11 @@ describe("ValidatePasswordHandler", () => {
                 }
             });
 
-            expect(response.status).toBe(200);
-            expect(_.size(response.error)).toBe(0);
+            expect(response.status).toBe(200, "response.status");
+            expect(response.error).toBeUndefined("response.error");
 
-            conf.requireEmailVerification = false;
+            config.requireEmailVerification = false;
+
             done();
         } catch (err) {
             testUtils.fail(done, err);

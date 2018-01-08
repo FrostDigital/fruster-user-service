@@ -1,0 +1,14 @@
+{
+    "id": "DeleteUserRequest",
+    "description": "TODO:",
+    "additionalProperties": false,
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "TODO:"
+        }
+    },
+    "required": [
+        "id"
+    ]
+}

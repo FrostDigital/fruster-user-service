@@ -1,9 +1,7 @@
-const nsc = require("nats-server-control");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
-const mongo = require("mongodb");
+const Db = require("mongodb").Db;
 const uuid = require("uuid");
-const _ = require("lodash");
 
 const userService = require("../fruster-user-service");
 const utils = require("../lib/utils/utils");
@@ -17,6 +15,7 @@ const roleUtils = require("../lib/utils/role-utils");
 
 describe("CreateUserHandler", () => {
 
+    /** @type {Db} */
     let mongoDb;
 
     frusterTestUtils.startBeforeEach({
@@ -26,6 +25,11 @@ describe("CreateUserHandler", () => {
         afterStart: (connection) => {
             mongoDb = connection.db;
         }
+    });
+
+    afterEach((done) => {
+        conf.requireEmailVerification = false;
+        done();
     });
 
     it("should be possible to create user", async done => {
@@ -44,15 +48,15 @@ describe("CreateUserHandler", () => {
                 }
             });
 
-            expect(response.status).toBe(201);
+            expect(response.status).toBe(201, "response.status");
 
-            expect(_.size(response.data)).not.toBe(0);
-            expect(_.size(response.error)).toBe(0);
+            expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
+            expect(response.error).toBeUndefined("response.error");
 
-            expect(response.data.firstName).toBe(user.firstName);
-            expect(response.data.middleName).toBe(user.middleName);
-            expect(response.data.lastName).toBe(user.lastName);
-            expect(response.data.email).toBe(user.email);
+            expect(response.data.firstName).toBe(user.firstName, "response.data.firstName");
+            expect(response.data.middleName).toBe(user.middleName, "response.data.middleName");
+            expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
+            expect(response.data.email).toBe(user.email, "response.data.email");
 
             const roles = roleUtils.getRoles();
             const currentRoleScopes = [];
@@ -96,8 +100,8 @@ describe("CreateUserHandler", () => {
 
             expect(response.status).toBe(201, "response.status");
 
-            expect(_.size(response.data)).not.toBe(0, "_.size(response.data)");
-            expect(_.size(response.error)).toBe(0, "_.size(response.error)");
+            expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
+            expect(response.error).toBeUndefined("response.error");
 
             expect(response.data.firstName).toBe(user.firstName, "response.data.firstName");
             expect(response.data.middleName).toBe(user.middleName, "response.data.middleName");
@@ -145,12 +149,12 @@ describe("CreateUserHandler", () => {
                 }
             });
 
-            expect(response.status).toBe(201);
+            expect(response.status).toBe(201, "response.status");
 
-            expect(_.size(response.data)).not.toBe(0);
-            expect(_.size(response.error)).toBe(0);
+            expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
+            expect(response.error).toBeUndefined("response.error");
 
-            expect(response.data.roles.length).toBe(2);
+            expect(response.data.roles.length).toBe(2, "response.data.roles.length");
 
             done();
         } catch (err) {
@@ -177,10 +181,10 @@ describe("CreateUserHandler", () => {
 
             done.fail("should not be possible to create user with faulty password");
         } catch (err) {
-            expect(err.status).toBe(400);
+            expect(err.status).toBe(400, "err.statu");
 
-            expect(_.size(err.data)).toBe(0);
-            expect(_.size(err.error)).not.toBe(0);
+            expect(err.data).toBeUndefined("err.data");
+            expect(Object.keys(err.error).length).not.toBe(0, "Object.keys(err.error).length");
 
             done();
         }
@@ -203,10 +207,10 @@ describe("CreateUserHandler", () => {
 
             done.fail("should not be possible to create user with faulty email");
         } catch (err) {
-            expect(err.status).toBe(400);
+            expect(err.status).toBe(400, "err.status");
 
-            expect(_.size(err.data)).toBe(0);
-            expect(_.size(err.error)).not.toBe(0);
+            expect(err.data).toBeUndefined("err.data");
+            expect(Object.keys(err.error).length).not.toBe(0);
 
             done();
         }
@@ -248,10 +252,10 @@ describe("CreateUserHandler", () => {
                     }
                 })
                     .catch(err => {
-                        expect(err.status).toBe(400);
+                        expect(err.status).toBe(400, "err.status");
 
-                        expect(_.size(err.data)).toBe(0);
-                        expect(_.size(err.error)).not.toBe(0);
+                        expect(err.data).toBeUndefined("err.data");
+                        expect(Object.keys(err.error).length).not.toBe(0, "Object.keys(err.error).length");
 
                         resolve();
                     });
@@ -276,7 +280,7 @@ describe("CreateUserHandler", () => {
                 }
             });
 
-            expect(savedUser.data.id).toBeDefined();
+            expect(savedUser.data.id).toBeDefined("savedUser.data.id");
             conf.requirePassword = true;
 
             done();
@@ -302,10 +306,10 @@ describe("CreateUserHandler", () => {
                 }
             });
 
-            expect(response.status).toBe(201);
+            expect(response.status).toBe(201, "response.status");
 
-            expect(_.size(response.data)).not.toBe(0);
-            expect(_.size(response.error)).toBe(0);
+            expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
+            expect(response.error).toBeUndefined("response.error");
 
             expect(response.data.firstName).toBe(user.firstName, "response.data.firstName");
             expect(response.data.middleName).toBe(user.middleName, "response.data.middleName");
@@ -319,12 +323,14 @@ describe("CreateUserHandler", () => {
             expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
 
             user.roles.forEach(role => {
-                expect(response.data.scopes.length).toBe(_.size(roleUtils.getRoles()[role.toLowerCase()]));
+                expect(response.data.scopes.length).toBe(Object.keys(roleUtils.getRoles()[role.toLowerCase()]).length);
             });
 
             conf.requireEmailVerification = false;
+
             done();
         } catch (err) {
+            conf.requireEmailVerification = false;
             log.error(err);
             done.fail(err);
         }
@@ -348,10 +354,10 @@ describe("CreateUserHandler", () => {
 
             done.fail();
         } catch (err) {
-            expect(err.status).toBe(400);
+            expect(err.status).toBe(400, "err.status");
 
-            expect(_.size(err.data)).toBe(0);
-            expect(_.size(err.error)).not.toBe(0);
+            expect(err.data).toBeUndefined("err.data");
+            expect(Object.keys(err.error).length).not.toBe(0, "Object.keys(err.error).length");
 
             done();
         }

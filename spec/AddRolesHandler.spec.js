@@ -1,18 +1,13 @@
-const nsc = require("nats-server-control");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
-const mongo = require("mongodb");
-const Db = mongo.Db;
+const Db = require("mongodb").Db;
 const uuid = require("uuid");
 
 const userService = require('../fruster-user-service');
-const utils = require('../lib/utils/utils');
-const conf = require('../config');
 const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
-const errors = require("../lib/utils/errors");
 
 
 describe("AddRolesHandler", () => {
@@ -53,8 +48,8 @@ describe("AddRolesHandler", () => {
                 }
             }));
 
-            expect(userResponse.data[0].roles.includes("admin")).toBe(true);
-            expect(userResponse.data[0].roles.includes("user")).toBe(true);
+            expect(userResponse.data[0].roles.includes("admin")).toBe(true, `userResponse.data[0].roles.includes("admin")`);
+            expect(userResponse.data[0].roles.includes("user")).toBe(true, `userResponse.data[0].roles.includes("user")`);
 
             done();
         } catch (err) {
@@ -88,9 +83,9 @@ describe("AddRolesHandler", () => {
                 }
             });
 
-            expect(userResponse.data[0].roles.includes("admin")).toBe(true);
-            expect(userResponse.data[0].roles.includes("user")).toBe(true);
-            expect(userResponse.data[0].roles.includes("super-admin")).toBe(true);
+            expect(userResponse.data[0].roles.includes("admin")).toBe(true, `userResponse.data[0].roles.includes("admin")`);
+            expect(userResponse.data[0].roles.includes("user")).toBe(true, `userResponse.data[0].roles.includes("user")`);
+            expect(userResponse.data[0].roles.includes("super-admin")).toBe(true, `userResponse.data[0].roles.includes("super-admin")`);
 
             done();
         } catch (err) {
@@ -124,7 +119,8 @@ describe("AddRolesHandler", () => {
                 }
             });
 
-            expect(userResponse.data[0].roles.length).toBe(1);
+            expect(userResponse.data[0].roles.length).toBe(1, "userResponse.data[0].roles.length");
+
             done();
 
         } catch (err) {

@@ -23,7 +23,6 @@ describe("GetScopesForRolesHandler", () => {
         }
     });
 
-
     it("should return scopes for requested role", async done => {
         try {
             const roles = ["admin"];

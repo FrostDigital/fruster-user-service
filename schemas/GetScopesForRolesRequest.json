@@ -1,0 +1,9 @@
+{
+    "id": "GetScopesForRolesRequest",
+    "description": "TODO:",
+    "type": "array",
+    "items": {
+        "type": "string",
+        "description": "TODO:"
+    }
+}

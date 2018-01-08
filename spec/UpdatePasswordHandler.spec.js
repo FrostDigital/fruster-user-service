@@ -55,9 +55,9 @@ describe("UpdatePasswordHandler", () => {
             const updatedUser = await db.collection("users")
                 .findOne({ id: createdUser.data.id });
 
-            expect(updatedUser.password).not.toBe(startUser.password);
-            expect(updatedUser.salt).not.toBe(startUser.salt);
-            expect(updatedUser.hashDate).not.toBe(startUser.hashDate);
+            expect(updatedUser.password).not.toBe(startUser.password, "updatedUser.password");
+            expect(updatedUser.salt).not.toBe(startUser.salt, "updatedUser.salt");
+            expect(updatedUser.hashDate).not.toBe(startUser.hashDate, "updatedUser.hashDate");
 
             done();
         } catch (err) {
@@ -90,7 +90,7 @@ describe("UpdatePasswordHandler", () => {
 
                 done.fail();
             } catch (err) {
-                expect(err.error.code).toBe(errors.errorCodes.forbidden);
+                expect(err.error.code).toBe(errors.errorCodes.forbidden, "err.error.code");
                 done();
             };
         } catch (err) {
@@ -123,14 +123,13 @@ describe("UpdatePasswordHandler", () => {
 
                 done.fail();
             } catch (err) {
-                expect(err.error.code).toBe(errors.errorCodes.forbidden);
+                expect(err.error.code).toBe(errors.errorCodes.forbidden, "err.error.code");
                 done();
             }
         } catch (err) {
             log.error(err);
             done.fail(err);
         }
-
     });
 
 });
