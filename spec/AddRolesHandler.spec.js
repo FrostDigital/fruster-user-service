@@ -15,7 +15,7 @@ const frusterTestUtils = require("fruster-test-utils");
 const errors = require("../lib/utils/errors");
 
 
-describe("AddUsersHandler", () => {
+describe("AddRolesHandler", () => {
 
     /** @type {Db} */
     let db;

@@ -11,6 +11,7 @@ const UserRepo = require("./lib/repos/UserRepo");
 const PasswordService = require("./lib/services/PasswordService");
 const RoleService = require("./lib/services/RoleService");
 
+/// HANDLERS
 
 // CREATE
 const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
@@ -35,7 +36,7 @@ const setPassword = require("./lib/set-password");
 
 // ROLES
 const AddRolesHandler = require("./lib/handlers/AddRolesHandler");
-const removeRoles = require("./lib/remove-roles");
+const RemoveRolesHandler = require("./lib/handlers/RemoveRolesHandler");
 
 // INITIAL USER
 const createInitialUser = require("./lib/create-initial-user");
@@ -54,6 +55,8 @@ module.exports = {
 
 		const database = db.collection(conf.userCollection);
 		createIndexes(db);
+
+		// REPOS
 		const userRepo = new UserRepo(db);
 
 		// SERVICES
@@ -79,12 +82,11 @@ module.exports = {
 		// PASSWORD
 		const validatePasswordHandler = new ValidatePasswordHandler(userRepo, passwordService);
 		const updatePasswordHandler = new UpdatePasswordHandler(userRepo, passwordService);
-		// updatePassword.init(database, validatePasswordHandler, userRepo);
 		setPassword.init(database);
 
 		// ROLES
 		const addRolesHandler = new AddRolesHandler(userRepo, roleService);
-		removeRoles.init(database);
+		const removeRolesHandler = new RemoveRolesHandler(userRepo, roleService);
 
 		// EMAIL VERIFICATION
 		const verifyEmailAddressHandler = new VerifyEmailAddressHandler(database, updateUser);
@@ -168,8 +170,14 @@ module.exports = {
 
 		bus.subscribe({
 			subject: constants.endpoints.service.ADD_ROLES,
-			requestSchema: "AddRolesRequest",
+			requestSchema: constants.schemas.request.ADD_AND_REMOVE_ROLES_REQUEST,
 			handle: (req) => addRolesHandler.handle(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.service.REMOVE_ROLES,
+			requestSchema: constants.schemas.request.ADD_AND_REMOVE_ROLES_REQUEST,
+			handle: (req) => removeRolesHandler.handle(req)
 		});
 
 		// UNREFACTORED SERVICE BELOW
@@ -177,7 +185,6 @@ module.exports = {
 		bus.subscribe(constants.endpoints.service.DELETE_USER, deleteUser.handle);
 		bus.subscribe(constants.endpoints.service.SET_PASSWORD, setPassword.handle);
 
-		bus.subscribe(constants.endpoints.service.REMOVE_ROLES, removeRoles.handle);
 		bus.subscribe(constants.endpoints.service.GET_SCOPES, getScopes.handle);
 
 		if (conf.requireEmailVerification)

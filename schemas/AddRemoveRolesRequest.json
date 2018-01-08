@@ -1,6 +1,7 @@
 {
-    "id": "AddRolesRequest",
+    "id": "AddRemoveRolesRequest",
     "description": "TODO:",
+    "additionalProperties": false,
     "properties": {
         "id": {
             "type": "string",
@@ -8,10 +9,14 @@
         },
         "roles": {
             "type": "array",
-            "description": "TODO:"
+            "description": "TODO:",
+            "items": {
+                "type": "string"
+            }
         }
     },
     "required": [
-        "id"
+        "id",
+        "roles"
     ]
 }
