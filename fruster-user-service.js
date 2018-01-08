@@ -3,7 +3,14 @@ const mongo = require("mongodb");
 const conf = require("./config");
 const constants = require('./lib/constants.js');
 const expressApp = require("./web/express-app");
+
+// REPOS
 const UserRepo = require("./lib/repos/UserRepo");
+
+// SERVICES
+const PasswordService = require("./lib/services/PasswordService");
+const RoleService = require("./lib/services/RoleService");
+
 
 // CREATE
 const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
@@ -27,7 +34,7 @@ const UpdatePasswordHandler = require("./lib/handlers/UpdatePasswordHandler");
 const setPassword = require("./lib/set-password");
 
 // ROLES
-const addRoles = require("./lib/add-roles");
+const AddRolesHandler = require("./lib/handlers/AddRolesHandler");
 const removeRoles = require("./lib/remove-roles");
 
 // INITIAL USER
@@ -49,10 +56,12 @@ module.exports = {
 		createIndexes(db);
 		const userRepo = new UserRepo(db);
 
-		// INITS//////////////////////////////////////////////////////////////////////////////////
+		// SERVICES
+		const passwordService = new PasswordService(userRepo);
+		const roleService = new RoleService();
 
 		// CREATE
-		const createUserHandler = new CreateUserHandler(userRepo);
+		const createUserHandler = new CreateUserHandler(userRepo, passwordService);
 		await createInitialUser(db, createUserHandler);
 
 		// READ
@@ -68,13 +77,13 @@ module.exports = {
 		deleteUserHttp.init(deleteUser);
 
 		// PASSWORD
-		const validatePasswordHandler = new ValidatePasswordHandler(userRepo);
-		const updatePasswordHandler = new UpdatePasswordHandler(userRepo, validatePasswordHandler);
+		const validatePasswordHandler = new ValidatePasswordHandler(userRepo, passwordService);
+		const updatePasswordHandler = new UpdatePasswordHandler(userRepo, passwordService);
 		// updatePassword.init(database, validatePasswordHandler, userRepo);
 		setPassword.init(database);
 
 		// ROLES
-		addRoles.init(database);
+		const addRolesHandler = new AddRolesHandler(userRepo, roleService);
 		removeRoles.init(database);
 
 		// EMAIL VERIFICATION
@@ -157,11 +166,17 @@ module.exports = {
 			handle: (req) => updatePasswordHandler.handle(req)
 		});
 
+		bus.subscribe({
+			subject: constants.endpoints.service.ADD_ROLES,
+			requestSchema: "AddRolesRequest",
+			handle: (req) => addRolesHandler.handle(req)
+		});
+
 		// UNREFACTORED SERVICE BELOW
 		bus.subscribe(constants.endpoints.service.UPDATE_USER, updateUser.handle);
 		bus.subscribe(constants.endpoints.service.DELETE_USER, deleteUser.handle);
 		bus.subscribe(constants.endpoints.service.SET_PASSWORD, setPassword.handle);
-		bus.subscribe(constants.endpoints.service.ADD_ROLES, addRoles.handle);
+
 		bus.subscribe(constants.endpoints.service.REMOVE_ROLES, removeRoles.handle);
 		bus.subscribe(constants.endpoints.service.GET_SCOPES, getScopes.handle);
 

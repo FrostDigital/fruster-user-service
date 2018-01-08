@@ -1,0 +1,17 @@
+{
+    "id": "AddRolesRequest",
+    "description": "TODO:",
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "TODO:"
+        },
+        "roles": {
+            "type": "array",
+            "description": "TODO:"
+        }
+    },
+    "required": [
+        "id"
+    ]
+}
