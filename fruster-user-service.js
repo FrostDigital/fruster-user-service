@@ -19,7 +19,7 @@ const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
 // READ
 const GetUserHandler = require("./lib/GetUserHandler");
 const GetUserByIdHandler = require("./lib/GetUserByIdHandler");
-const GetScopesHandler = require("./lib/handlers/GetScopesHandler");
+const GetScopesForRolesHandler = require("./lib/handlers/GetScopesForRolesHandler");
 
 // UPDATE
 const updateUser = require("./lib/update-user");
@@ -70,7 +70,7 @@ module.exports = {
 		// READ
 		const getUserHandler = new GetUserHandler(userRepo);
 		const getUserByIdHandler = new GetUserByIdHandler(userRepo);
-		const getScopesHandler = new GetScopesHandler(roleService);
+		const getScopesForRolesHandler = new GetScopesForRolesHandler(roleService);
 
 		// UPDATE
 		updateUser.init(database);
@@ -195,9 +195,9 @@ module.exports = {
 		});
 
 		bus.subscribe({
-			subject: constants.endpoints.service.GET_SCOPES,
+			subject: constants.endpoints.service.GET_SCOPES_FOR_ROLES,
 			// docs: TODO:
-			handle: (req) => getScopesHandler.handle(req)
+			handle: (req) => getScopesForRolesHandler.handle(req)
 		});
 
 		// UNREFACTORED SERVICE BELOW

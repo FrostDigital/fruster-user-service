@@ -9,7 +9,7 @@ const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 
 
-describe("GetScopesHandler", () => {
+describe("GetScopesForRolesHandler", () => {
 
     /** @type {Db} */
     let db;
@@ -28,7 +28,7 @@ describe("GetScopesHandler", () => {
         try {
             const roles = ["admin"];
             const scopesResponse = await bus.request({
-                subject: constants.endpoints.service.GET_SCOPES,
+                subject: constants.endpoints.service.GET_SCOPES_FOR_ROLES,
                 skipOptionsRequest: true,
                 message: {
                     reqId: uuid.v4(),
@@ -49,7 +49,7 @@ describe("GetScopesHandler", () => {
         try {
             const roles = ["ram"];
             const scopesResponse = await bus.request({
-                subject: constants.endpoints.service.GET_SCOPES,
+                subject: constants.endpoints.service.GET_SCOPES_FOR_ROLES,
                 skipOptionsRequest: true,
                 message: {
                     reqId: uuid.v4(),
