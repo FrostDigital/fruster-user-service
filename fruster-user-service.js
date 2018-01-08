@@ -6,6 +6,7 @@ const expressApp = require("./web/express-app");
 
 // REPOS
 const UserRepo = require("./lib/repos/UserRepo");
+const InitialUserRepo = require("./lib/repos/InitialUserRepo");
 
 // SERVICES
 const PasswordService = require("./lib/services/PasswordService");
@@ -39,7 +40,7 @@ const AddRolesHandler = require("./lib/handlers/AddRolesHandler");
 const RemoveRolesHandler = require("./lib/handlers/RemoveRolesHandler");
 
 // INITIAL USER
-const createInitialUser = require("./lib/create-initial-user");
+const CreateInitialUserHandler = require("./lib/handlers/CreateInitialUserHandler");
 
 // EMAIL VERIFICATION
 const VerifyEmailAddressHandler = require('./lib/handlers/email-verification/VerifyEmailAddressHandler.js');
@@ -58,6 +59,10 @@ module.exports = {
 
 		// REPOS
 		const userRepo = new UserRepo(db);
+		const initialUserRepo = new InitialUserRepo(db);
+
+		const createInitialUserHandler = new CreateInitialUserHandler(userRepo, initialUserRepo);
+		await createInitialUserHandler.handle();
 
 		// SERVICES
 		const passwordService = new PasswordService(userRepo);
@@ -65,7 +70,6 @@ module.exports = {
 
 		// CREATE
 		const createUserHandler = new CreateUserHandler(userRepo, passwordService);
-		await createInitialUser(db, createUserHandler);
 
 		// READ
 		const getUserHandler = new GetUserHandler(userRepo);
