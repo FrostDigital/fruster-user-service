@@ -80,6 +80,53 @@ describe("CreateUserHandler", () => {
         }
     });
 
+    it("should be possible to create user via http", async done => {
+        mocks.mockMailService();
+        try {
+            const user = mocks.getUserObject();
+            user.roles.push("super-admin");
+
+            const response = await bus.request({
+                subject: constants.endpoints.http.admin.CREATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    user: { scopes: ["admin.*"] },
+                    reqId: uuid.v4(),
+                    data: user
+                }
+            });
+
+            expect(response.status).toBe(201, "response.status");
+
+            expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
+            expect(response.error).toBeUndefined("response.error");
+
+            expect(response.data.firstName).toBe(user.firstName, "response.data.firstName");
+            expect(response.data.middleName).toBe(user.middleName, "response.data.middleName");
+            expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
+            expect(response.data.email).toBe(user.email, "response.data.email");
+
+            const roles = roleService.getRoles();
+            const currentRoleScopes = [];
+
+            Object.keys(roles)
+                .forEach(role => {
+                    roles[role].forEach(scope => {
+                        if (!currentRoleScopes.includes(scope))
+                            currentRoleScopes.push(scope);
+                    });
+                });
+
+            expect(response.data.scopes.length).toBe(currentRoleScopes.length, "response.data.scopes.length");
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
     it("should be possible to create user with custom fields", async done => {
         mocks.mockMailService();
         try {

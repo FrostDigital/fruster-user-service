@@ -1,8 +1,8 @@
-var Jasmine = require('jasmine');
-var SpecReporter = require('jasmine-spec-reporter').SpecReporter;
-var noop = function () { };
+const Jasmine = require('jasmine');
+const SpecReporter = require('jasmine-spec-reporter').SpecReporter;
+const noop = function () { };
 
-var jrunner = new Jasmine({});
+const jrunner = new Jasmine({});
 jrunner.configureDefaultReporter({
     print: noop,
     showingColors: true

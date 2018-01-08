@@ -33,7 +33,8 @@
     },
     "nyc": {
         "exclude": [
-            "web"
+            "web",
+            "spec"
         ]
     }
 }
