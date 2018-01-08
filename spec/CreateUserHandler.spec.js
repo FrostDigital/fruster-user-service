@@ -10,7 +10,6 @@ const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");
 const testUtils = require("./support/test-utils.js");
 const frusterTestUtils = require("fruster-test-utils");
-const roleUtils = require("../lib/utils/role-utils");
 const RoleService = require("../lib/services/RoleService");
 
 
