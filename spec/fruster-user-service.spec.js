@@ -27,24 +27,6 @@ describe("Fruster - User service", () => {
 		}
 	});
 
-	// get scopes
-	it("should return scopes for requested role", done => {
-		const roles = ["admin"];
-		return bus.request({
-			subject: constants.endpoints.service.GET_SCOPES,
-			skipOptionsRequest: true,
-			message: {
-				reqId: uuid.v4(),
-				data: roles
-			}
-		})
-			.then(resp => {
-				expect(resp.data[0]).toBe("profile.get");
-				done();
-			});
-	});
-
-
 	it("should return 200 when user is successfully removed", done => {
 		const user = mocks.getUserObject();
 

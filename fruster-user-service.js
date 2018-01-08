@@ -19,7 +19,7 @@ const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
 // READ
 const GetUserHandler = require("./lib/GetUserHandler");
 const GetUserByIdHandler = require("./lib/GetUserByIdHandler");
-const getScopes = require("./lib/get-scopes");
+const GetScopesHandler = require("./lib/handlers/GetScopesHandler");
 
 // UPDATE
 const updateUser = require("./lib/update-user");
@@ -70,6 +70,7 @@ module.exports = {
 		// READ
 		const getUserHandler = new GetUserHandler(userRepo);
 		const getUserByIdHandler = new GetUserByIdHandler(userRepo);
+		const getScopesHandler = new GetScopesHandler(roleService);
 
 		// UPDATE
 		updateUser.init(database);
@@ -100,12 +101,14 @@ module.exports = {
 			requestSchema: constants.schemas.request.CREATE_USER_REQUEST,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
 			permissions: [constants.permissions.ADMIN_ANY],
+			// docs: TODO:
 			handle: (req) => createUserHandler.handle(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.http.admin.GET_USERS,
 			permissions: [constants.permissions.ADMIN_ANY],
+			// docs: TODO:
 			handle: (req) => getUserHandler.handleHttp(req)
 		});
 
@@ -113,16 +116,19 @@ module.exports = {
 			subject: constants.endpoints.http.admin.GET_USER,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
 			permissions: [constants.permissions.ADMIN_ANY],
+			// docs: TODO:
 			handle: (req) => getUserByIdHandler.handleHttp(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.http.VERIFY_EMAIL,
+			// docs: TODO:
 			handle: (req) => verifyEmailAddressHandler.handle(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.http.RESEND_VERIFICATION_EMAIL,
+			// docs: TODO:
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
@@ -136,22 +142,26 @@ module.exports = {
 			subject: constants.endpoints.service.CREATE_USER,
 			requestSchema: constants.schemas.request.CREATE_USER_REQUEST,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
+			// docs: TODO:
 			handle: (req) => createUserHandler.handle(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.service.GET_USER,
 			responseSchema: constants.schemas.response.USER_LIST_RESPONSE,
+			// docs: TODO:
 			handle: (req) => getUserHandler.handle(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.service.VERIFY_EMAIL,
+			// docs: TODO:
 			handle: (req) => verifyEmailAddressHandler.handle(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.service.RESEND_VERIFICATION_EMAIL,
+			// docs: TODO:
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
@@ -159,25 +169,35 @@ module.exports = {
 			subject: constants.endpoints.service.VALIDATE_PASSWORD,
 			requestSchema: constants.schemas.request.VALIDATE_PASSWORD_REQUEST,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
+			// docs: TODO:
 			handle: (req) => validatePasswordHandler.handle(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.service.UPDATE_PASSWORD,
 			requestSchema: constants.schemas.request.UPDATE_PASSWORD_REQUEST,
+			// docs: TODO:
 			handle: (req) => updatePasswordHandler.handle(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.service.ADD_ROLES,
 			requestSchema: constants.schemas.request.ADD_AND_REMOVE_ROLES_REQUEST,
+			// docs: TODO:
 			handle: (req) => addRolesHandler.handle(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.service.REMOVE_ROLES,
 			requestSchema: constants.schemas.request.ADD_AND_REMOVE_ROLES_REQUEST,
+			// docs: TODO:
 			handle: (req) => removeRolesHandler.handle(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.service.GET_SCOPES,
+			// docs: TODO:
+			handle: (req) => getScopesHandler.handle(req)
 		});
 
 		// UNREFACTORED SERVICE BELOW
@@ -185,7 +205,6 @@ module.exports = {
 		bus.subscribe(constants.endpoints.service.DELETE_USER, deleteUser.handle);
 		bus.subscribe(constants.endpoints.service.SET_PASSWORD, setPassword.handle);
 
-		bus.subscribe(constants.endpoints.service.GET_SCOPES, getScopes.handle);
 
 		if (conf.requireEmailVerification)
 			expressApp.start(conf.port);
