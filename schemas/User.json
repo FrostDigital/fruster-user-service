@@ -1,41 +1,41 @@
 {
     "id": "User",
-    "description": "TODO:",
+    "description": "A fruster user. Without any custom fields:",
     "properties": {
         "id": {
             "type": "string",
-            "description": "TODO:"
+            "description": "Id of the user:"
         },
         "firstName": {
             "type": "string",
-            "description": "TODO:"
+            "description": "The first name of the user."
         },
         "lastName": {
             "type": "string",
-            "description": "TODO:"
+            "description": "The last name of the user"
         },
         "middleName": {
             "type": "string",
-            "description": "TODO:"
+            "description": "the middle name of the user."
         },
         "email": {
             "type": "string",
-            "description": "TODO:"
+            "description": "the email of the user."
         },
         "roles": {
             "type": "array",
-            "description": "TODO:",
+            "description": "",
             "items": {
                 "type": "string",
-                "description": "TODO:"
+                "description": "the roles of the user."
             }
         },
         "scopes": {
             "type": "array",
-            "description": "TODO:",
+            "description": "",
             "items": {
                 "type": "string",
-                "description": "TODO:"
+                "description": "the scopes of the roles of the user."
             }
         }
     }

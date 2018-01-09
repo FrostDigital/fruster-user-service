@@ -123,7 +123,7 @@ describe("UpdatePasswordHandler", () => {
 
                 done.fail();
             } catch (err) {
-                expect(err.error.code).toBe(errors.errorCodes.forbidden, "err.error.code");
+                expect(err.error.code).toBe(errors.errorCodes.invalidUsernameOrPassword, "err.error.code");
                 done();
             }
         } catch (err) {

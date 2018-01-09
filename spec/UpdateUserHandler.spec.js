@@ -134,7 +134,7 @@ describe("UpdateUserHandler", () => {
             done.fail();
         } catch (err) {
             expect(err.status).toBe(400, err.status);
-            expect(Object.keys(err.data).length).toBe(0, "Object.keys(err.data).length");
+            expect(err.data).toBeUndefined("err.data");
 
             done();
         }

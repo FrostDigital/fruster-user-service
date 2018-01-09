@@ -231,6 +231,7 @@ module.exports = {
 
 		bus.subscribe({
 			subject: constants.endpoints.service.VERIFY_EMAIL,
+			requestSchema: constants.schemas.request.VERIFY_EMAIL_ADDRESS_SERVICE_REQUEST,
 			responseSchema: constants.schemas.response.VERIFY_EMAIL_ADDRESS_RESPONSE,
 			docs: docs.service.VERIFY_EMAIL,
 			handle: (req) => verifyEmailAddressHandler.handle(req)
@@ -238,6 +239,7 @@ module.exports = {
 
 		bus.subscribe({
 			subject: constants.endpoints.service.RESEND_VERIFICATION_EMAIL,
+			requestSchema: constants.schemas.request.RESEND_VERIFICATION_EMAIL_REQUEST,
 			docs: docs.service.RESEND_VERIFICATION_EMAIL,
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});

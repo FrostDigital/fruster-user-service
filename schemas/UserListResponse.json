@@ -1,6 +1,6 @@
 {
     "id": "UserListResponse",
-    "description": "TODO:",
+    "description": "Response with an array of users.",
     "type": "array",
     "items": {
         "$ref": "User"

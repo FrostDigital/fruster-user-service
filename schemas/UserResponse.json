@@ -1,6 +1,6 @@
 {
     "id": "UserResponse",
-    "description": "TODO:",
+    "description": "Single user response.",
     "additionalProperties": true,
     "properties": {
         "id": {

@@ -1,6 +1,6 @@
 {
     "id": "StringArrayResponse",
-    "description": "TODO:",
+    "description": "Response with array array of strings.",
     "type": "array",
     "items": {
         "type": "string"

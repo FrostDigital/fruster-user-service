@@ -1,23 +1,23 @@
 {
     "id": "CreateUserRequest",
-    "description": "TODO:",
+    "description": "Request for creating a fruster user. Can include any number of custom fields.",
     "additionalProperties": true,
     "properties": {
         "email": {
             "type": "string",
-            "description": "TODO:"
+            "description": "The email of the user:"
         },
         "firstName": {
             "type": "string",
-            "description": "TODO:"
+            "description": "The first name of the user:"
         },
         "middleName": {
             "type": "string",
-            "description": "TODO:"
+            "description": "The middle name of the user :"
         },
         "lastName": {
             "type": "string",
-            "description": "TODO:"
+            "description": "The last name of the user.:"
         }
     },
     "required": [

@@ -1,6 +1,6 @@
 {
     "id": "UpdateUserRequest",
-    "description": "TODO:",
+    "description": "Request for updating a user via service call.",
     "additionalProperties": true,
     "properties": {
         "id": {

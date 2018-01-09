@@ -1,6 +1,6 @@
 {
     "id": "UpdateUserHttpRequest",
-    "description": "TODO:",
+    "description": "Request for updating a user via http.",
     "additionalProperties": true,
     "properties": {
         "firstName": {

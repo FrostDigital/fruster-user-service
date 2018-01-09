@@ -1,11 +1,11 @@
 {
     "id": "DeleteUserRequest",
-    "description": "TODO:",
+    "description": "Request for deleting a user.",
     "additionalProperties": false,
     "properties": {
         "id": {
             "type": "string",
-            "description": "TODO:"
+            "description": "The id of the user to delete.:"
         }
     },
     "required": [
