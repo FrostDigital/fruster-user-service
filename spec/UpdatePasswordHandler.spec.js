@@ -12,7 +12,7 @@ const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
-const errors = require("../lib/utils/errors");
+const deprecatedErrors = require("../lib/deprecatedErrors");
 
 
 describe("UpdatePasswordHandler", () => {
@@ -90,7 +90,7 @@ describe("UpdatePasswordHandler", () => {
 
                 done.fail();
             } catch (err) {
-                expect(err.error.code).toBe(errors.errorCodes.forbidden, "err.error.code");
+                expect(err.error.code).toBe(deprecatedErrors.errorCodes.forbidden, "err.error.code");
                 done();
             };
         } catch (err) {
@@ -123,7 +123,7 @@ describe("UpdatePasswordHandler", () => {
 
                 done.fail();
             } catch (err) {
-                expect(err.error.code).toBe(errors.errorCodes.invalidUsernameOrPassword, "err.error.code");
+                expect(err.error.code).toBe(deprecatedErrors.errorCodes.invalidUsernameOrPassword, "err.error.code");
                 done();
             }
         } catch (err) {
