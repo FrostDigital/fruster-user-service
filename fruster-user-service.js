@@ -104,14 +104,16 @@ module.exports = {
 			requestSchema: constants.schemas.request.CREATE_USER_REQUEST,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
 			permissions: [constants.permissions.ADMIN_ANY],
+			mustBeLoggedIn: true,
 			docs: docs.http.admin.CREATE_USER,
 			handle: (req) => createUserHandler.handle(req)
 		});
 
 		bus.subscribe({
 			subject: constants.endpoints.http.admin.GET_USERS,
-			permissions: [constants.permissions.ADMIN_ANY],
 			responseSchema: constants.schemas.response.USER_LIST_RESPONSE,
+			permissions: [constants.permissions.ADMIN_ANY],
+			mustBeLoggedIn: true,
 			docs: docs.http.admin.GET_USERS,
 			handle: (req) => getUserHandler.handleHttp(req)
 		});
@@ -120,6 +122,7 @@ module.exports = {
 			subject: constants.endpoints.http.admin.GET_USER,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
 			permissions: [constants.permissions.ADMIN_ANY],
+			mustBeLoggedIn: true,
 			docs: docs.http.admin.GET_USER,
 			handle: (req) => getUserByIdHandler.handleHttp(req)
 		});
@@ -129,6 +132,7 @@ module.exports = {
 			requestSchema: constants.schemas.request.UPDATE_USER_HTTP_REQUEST,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
 			permissions: [constants.permissions.ADMIN_ANY],
+			mustBeLoggedIn: true,
 			docs: docs.http.admin.UPDATE_USER,
 			handle: (req) => updateUserHandler.handleHttp(req)
 		});
@@ -136,6 +140,7 @@ module.exports = {
 		bus.subscribe({
 			subject: constants.endpoints.http.admin.DELETE_USER,
 			permissions: [constants.permissions.ADMIN_ANY],
+			mustBeLoggedIn: true,
 			docs: docs.http.admin.DELETE_USER,
 			handle: (req) => deleteUserHandler.handleHttp(req)
 		});
