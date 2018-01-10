@@ -60,7 +60,10 @@ module.exports = {
 	allowGetAll: process.env.ALLOW_GET_ALL === "true",
 
 	/** Database field used to validate password (e.g. login or updating password) with  */
-	usernameValidationDbField: process.env.USERNAME_VALIDATION_DB_FIELD || "email"
+	usernameValidationDbField: process.env.USERNAME_VALIDATION_DB_FIELD || "email",
+
+	/** Which hashing algoritm to use for hashing passwords, supports whatever cryptojs supports */
+	hashingAlgoritm: process.env.HASHING_ALGORITM || "sha512"
 };
 
 function parseArray(str) {
