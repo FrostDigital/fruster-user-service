@@ -15,7 +15,6 @@
         "fruster-errors": "0.0.7",
         "fruster-health": "^0.0.12",
         "fruster-log": "^0.0.16",
-        "lodash": "^4.17.2",
         "mongodb": "^2.2.31",
         "npm": "^4.6.1",
         "uuid": "^3.1.0"
@@ -33,6 +32,7 @@
     },
     "nyc": {
         "exclude": [
+            "lib/deprecatedErrors.js",
             "web",
             "spec"
         ]

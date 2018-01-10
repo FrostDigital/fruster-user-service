@@ -205,7 +205,7 @@ describe("GetUserHandler", () => {
  * @param {Db} db 
  */
 function insertTestUsers(db) {
-	let users = ["user1", "user2"].map((username) => {
+	const users = ["user1", "user2"].map((username) => {
 		return {
 			id: username,
 			firstName: `${username}-firstName`,

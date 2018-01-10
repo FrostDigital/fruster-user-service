@@ -50,7 +50,9 @@ describe("UserRepo", () => {
 
 	it("should get all users", async done => {
 		try {
-			const users = await userRepo.getUsersByQuery();
+			let users;
+			[users] = await userRepo.getUsersByQuery();
+
 			expect(users.length).toBe(3); // user1 + user2 + initial users = 3			
 			done();
 		} catch (err) {
@@ -61,7 +63,8 @@ describe("UserRepo", () => {
 
 	it("should get users by query", async done => {
 		try {
-			const users = await userRepo.getUsersByQuery({ email: "user1@example.com" })
+			let users;
+			[users] = await userRepo.getUsersByQuery({ email: "user1@example.com" });
 			expect(users.length).toBe(1);
 			expect(users[0]._id).toBeUndefined();
 			done();

@@ -1,7 +1,7 @@
 {
     "id": "VerifyEmailAddressResponse",
     "description": "Response from verifying email address.",
-    "additionalProperties": true,
+    "additionalProperties": false,
     "properties": {
         "verifiedEmail": {
             "type": "string",

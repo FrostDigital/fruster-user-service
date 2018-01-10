@@ -19,7 +19,8 @@ const RoleService = require("./lib/services/RoleService");
 const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
 
 // READ
-const GetUserHandler = require("./lib/handlers/GetUserHandler");
+/** DEPRECATED */ const GetUserHandler = require("./lib/handlers/GetUserHandler");
+const GetUsersByQueryHandler = require("./lib/handlers/GetUsersByQueryHandler");
 const GetUserByIdHandler = require("./lib/handlers/GetUserByIdHandler");
 const GetScopesForRolesHandler = require("./lib/handlers/GetScopesForRolesHandler");
 
@@ -73,7 +74,8 @@ module.exports = {
 		const createUserHandler = new CreateUserHandler(userRepo, passwordService, roleService);
 
 		// READ
-		const getUserHandler = new GetUserHandler(userRepo, roleService);
+		/** DEPRECATED */ const getUserHandler = new GetUserHandler(userRepo, roleService);
+		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleService);
 		const getUserByIdHandler = new GetUserByIdHandler(userRepo, roleService);
 		const getScopesForRolesHandler = new GetScopesForRolesHandler(roleService);
 
@@ -168,11 +170,22 @@ module.exports = {
 			handle: (req) => createUserHandler.handle(req)
 		});
 
+		/** DEPRECATED */
 		bus.subscribe({
+			// @ts-ignore
+			deprecated: true,
 			subject: constants.endpoints.service.GET_USER,
 			responseSchema: constants.schemas.response.USER_LIST_RESPONSE,
 			docs: docs.service.GET_USER,
 			handle: (req) => getUserHandler.handle(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
+			requestSchema: constants.schemas.request.GET_USERS_BY_QUERY,
+			responseSchema: constants.schemas.response.GET_USERS_BY_QUERY_RESPONSE,
+			docs: docs.service.GET_USERS_BY_QUERY,
+			handle: (req) => getUsersByQueryHandler.handle(req)
 		});
 
 		bus.subscribe({
