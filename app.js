@@ -1,7 +1,7 @@
 const config = require("./config");
 const service = require("./fruster-user-service");
 const log = require("fruster-log");
-const constants = require('./lib/constants');
+const constants = require("./lib/constants");
 
 require("fruster-health").start();
 

@@ -1,5 +1,5 @@
-const Jasmine = require('jasmine');
-const SpecReporter = require('jasmine-spec-reporter').SpecReporter;
+const Jasmine = require("jasmine");
+const SpecReporter = require("jasmine-spec-reporter").SpecReporter;
 const noop = function () { };
 
 const jrunner = new Jasmine({});

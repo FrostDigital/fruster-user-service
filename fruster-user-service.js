@@ -2,7 +2,7 @@ const bus = require("fruster-bus");
 const mongo = require("mongodb");
 const Db = mongo.Db;
 const conf = require("./config");
-const constants = require('./lib/constants.js');
+const constants = require("./lib/constants.js");
 const expressApp = require("./web/express-app");
 
 // REPOS ///
@@ -43,8 +43,8 @@ const RemoveRolesHandler = require("./lib/handlers/RemoveRolesHandler");
 const CreateInitialUserHandler = require("./lib/handlers/CreateInitialUserHandler");
 
 // EMAIL VERIFICATION
-const VerifyEmailAddressHandler = require('./lib/handlers/email-verification/VerifyEmailAddressHandler.js');
-const ResendVerificationEmailHandler = require('./lib/handlers/email-verification/ResendVerificationEmailHandler.js');
+const VerifyEmailAddressHandler = require("./lib/handlers/email-verification/VerifyEmailAddressHandler.js");
+const ResendVerificationEmailHandler = require("./lib/handlers/email-verification/ResendVerificationEmailHandler.js");
 
 const docs = require("./lib/docs");
 
