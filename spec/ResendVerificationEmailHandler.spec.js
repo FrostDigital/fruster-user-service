@@ -1,22 +1,18 @@
-const nsc = require("nats-server-control");
 const bus = require("fruster-bus");
-const log = require("fruster-log");
-const mongo = require("mongodb");
+const Db = require("mongodb").Db;
 const uuid = require("uuid");
-const _ = require("lodash");
 
 const userService = require('../fruster-user-service');
-const utils = require('../lib/utils/utils');
 const conf = require('../config');
 const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
-const errors = require('../lib/errors.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 
 
 describe("ResendVerificationEmailHandler", () => {
 
+    /** @type {Db} */
     let mongoDb;
 
     frusterTestUtils.startBeforeEach({
@@ -28,6 +24,11 @@ describe("ResendVerificationEmailHandler", () => {
         }
     });
 
+    afterEach((done) => {
+        conf.requireEmailVerification = false;
+        done();
+    });
+
     it("should resend email", async (done) => {
         conf.requireEmailVerification = true;
 
@@ -35,20 +36,23 @@ describe("ResendVerificationEmailHandler", () => {
         let verificationToken;
         let initialUserCreated = false;
 
-        bus.subscribe("mail-service.send", (req) => {
-            if (initialUserCreated) {
-                expect(req.data.message.includes(verificationToken)).toBe(false, "should generate new verification token");
-                expect(req.data.from).toBe(conf.emailVerificationFrom, "req.data.from");
-                expect(req.data.to[0]).toBe(testUserData.email, "req.data.to[0]");
+        bus.subscribe({
+            subject: "mail-service.send",
+            handle: (req) => {
+                if (initialUserCreated) {
+                    expect(req.data.message.includes(verificationToken)).toBe(false, "req.data.message.includes(verificationToken)");
+                    expect(req.data.from).toBe(conf.emailVerificationFrom, "req.data.from");
+                    expect(req.data.to[0]).toBe(testUserData.email, "req.data.to[0]");
 
-                done();
-            } else {
-                initialUserCreated = true;
+                    done();
+                } else {
+                    initialUserCreated = true;
+                }
+
+                conf.requireEmailVerification = false;
+
+                return { reqId: req.reqId, status: 200 };
             }
-
-            conf.requireEmailVerification = false;
-
-            return { reqId: req.reqId, status: 200 };
         });
 
         const createUserResponse = (await mocks.createUser(testUserData)).data;

@@ -1,0 +1,42 @@
+{
+    "id": "User",
+    "description": "A fruster user. Without any custom fields:",
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "Id of the user:"
+        },
+        "firstName": {
+            "type": "string",
+            "description": "The first name of the user."
+        },
+        "lastName": {
+            "type": "string",
+            "description": "The last name of the user"
+        },
+        "middleName": {
+            "type": "string",
+            "description": "the middle name of the user."
+        },
+        "email": {
+            "type": "string",
+            "description": "the email of the user."
+        },
+        "roles": {
+            "type": "array",
+            "description": "",
+            "items": {
+                "type": "string",
+                "description": "the roles of the user."
+            }
+        },
+        "scopes": {
+            "type": "array",
+            "description": "",
+            "items": {
+                "type": "string",
+                "description": "the scopes of the roles of the user."
+            }
+        }
+    }
+}

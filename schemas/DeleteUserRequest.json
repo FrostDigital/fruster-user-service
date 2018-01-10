@@ -1,0 +1,14 @@
+{
+    "id": "DeleteUserRequest",
+    "description": "Request for deleting a user.",
+    "additionalProperties": false,
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "The id of the user to delete.:"
+        }
+    },
+    "required": [
+        "id"
+    ]
+}

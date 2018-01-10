@@ -1,0 +1,22 @@
+{
+    "id": "GetUsersByQueryRequest",
+    "description": "Request getting users by query.",
+    "additionalProperties": true,
+    "properties": {
+        "query": {
+            "$ref": "GenericAttrs#/definitions/query"
+        },
+        "filter": {
+            "$ref": "GenericAttrs#/definitions/filter"
+        },
+        "start": {
+            "$ref": "GenericAttrs#/definitions/start"
+        },
+        "limit": {
+            "$ref": "GenericAttrs#/definitions/limit"
+        }
+    },
+    "required": [
+        "query"
+    ]
+}

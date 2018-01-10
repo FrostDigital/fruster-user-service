@@ -1,0 +1,15 @@
+{
+    "id": "GetUsersByQueryResponse",
+    "description": "Response from get users by query",
+    "additionalProperties": false,
+    "properties": {
+        "totalCount": {
+            "type": "number",
+            "description": "The total count of results in the databse found with provided query",
+            "minimum": 0
+        },
+        "users": {
+            "$ref": "UserListResponse"
+        }
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "id": "VerifyEmailAddressServiceRequest",
+    "description": "Request to verify email address via service call",
+    "additionalProperties": false,
+    "properties": {
+        "tokenId": {
+            "type": "string",
+            "description": "The email verification token to verify with."
+        }
+    }
+}

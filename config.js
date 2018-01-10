@@ -57,12 +57,15 @@ module.exports = {
 
 	/** If user service accepts queries for ALL users
 	     This is disabled by default for security reasons. */
-	allowGetAll: process.env.ALLOW_GET_ALL === "true"
+	allowGetAll: process.env.ALLOW_GET_ALL === "true",
+
+	/** Database field used to validate password (e.g. login or updating password) with  */
+	usernameValidationDbField: process.env.USERNAME_VALIDATION_DB_FIELD || "email"
 };
 
 function parseArray(str) {
 	if (str) {
-		return str.split(',');
+		return str.split(",");
 	}
 
 	return null;

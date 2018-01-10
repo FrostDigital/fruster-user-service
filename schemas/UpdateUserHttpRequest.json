@@ -1,0 +1,19 @@
+{
+    "id": "UpdateUserHttpRequest",
+    "description": "Request for updating a user via http.",
+    "additionalProperties": true,
+    "properties": {
+        "firstName": {
+            "$ref": "User#/properties/firstName"
+        },
+        "lastName": {
+            "$ref": "User#/properties/lastName"
+        },
+        "middleName": {
+            "$ref": "User#/properties/middleName"
+        },
+        "email": {
+            "$ref": "User#/properties/email"
+        }
+    }
+}
