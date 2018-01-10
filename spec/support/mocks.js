@@ -1,6 +1,6 @@
 const uuid = require("uuid");
 const bus = require("fruster-bus");
-const constants = require('../../lib/constants.js');
+const constants = require("../../lib/constants.js");
 
 module.exports = {
 

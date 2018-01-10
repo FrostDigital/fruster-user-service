@@ -65,7 +65,7 @@ module.exports = {
 
 function parseArray(str) {
 	if (str) {
-		return str.split(',');
+		return str.split(",");
 	}
 
 	return null;

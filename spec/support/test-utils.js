@@ -1,8 +1,8 @@
 const util = require("util");
-const jasmine_runner = require('./jasmine-runner.js');
+const jasmine_runner = require("./jasmine-runner.js");
 const log = require("fruster-log");
 const bus = require("fruster-bus");
-const constants = require('../../lib/constants.js');
+const constants = require("../../lib/constants.js");
 const uuid = require("uuid");
 
 module.exports = {
