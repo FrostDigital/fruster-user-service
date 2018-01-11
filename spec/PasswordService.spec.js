@@ -17,7 +17,7 @@ describe("PasswordService", () => {
     it("should be able to hash password using sha512 and validate the password", async done => {
         const password = " hello";
         const id = "user-id";
-        const passwordService = new PasswordService(null);
+        const passwordService = new PasswordService();
         const salt = passwordService._generateSalt();
         const hashDate = new Date();
         const pepper = passwordService._generatePepper(id, password, hashDate);
@@ -34,7 +34,7 @@ describe("PasswordService", () => {
 
         const password = " hello";
         const id = "user-id";
-        const passwordService = new PasswordService(null);
+        const passwordService = new PasswordService();
         const salt = passwordService._generateSalt();
         const hashDate = new Date();
         const pepper = passwordService._generatePepper(id, password, hashDate);
@@ -51,7 +51,7 @@ describe("PasswordService", () => {
 
         const password = " hello";
         const id = "user-id";
-        const passwordService = new PasswordService(null);
+        const passwordService = new PasswordService();
         const salt = passwordService._generateSalt();
         const hashDate = new Date();
         const pepper = passwordService._generatePepper(id, password, hashDate);
@@ -69,7 +69,7 @@ describe("PasswordService", () => {
 
         const password = " hello";
         const id = "user-id";
-        const passwordService = new PasswordService(null);
+        const passwordService = new PasswordService();
         const salt = passwordService._generateSalt();
         const hashDate = new Date();
         const pepper = passwordService._generatePepper(id, password, hashDate);
