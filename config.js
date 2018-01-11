@@ -62,7 +62,8 @@ module.exports = {
 	/** Database field used to validate password (e.g. login or updating password) with  */
 	usernameValidationDbField: process.env.USERNAME_VALIDATION_DB_FIELD || "email",
 
-	/** Which hashing algoritm to use for hashing passwords, supports whatever cryptojs supports */
+	/** Which hashing algoritm to use for hashing passwords, supports whatever cryptojs supports. 
+	 * NOTE: changing this will make it impossible to login with any accounts created with another hashing teqnique prior. */
 	hashingAlgoritm: process.env.HASHING_ALGORITM || "sha512"
 };
 
