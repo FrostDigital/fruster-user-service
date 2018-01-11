@@ -62,11 +62,16 @@ module.exports = {
 	/** Database field used to validate password (e.g. login or updating password) with  */
 	usernameValidationDbField: process.env.USERNAME_VALIDATION_DB_FIELD || "email",
 
+	/** Which hashing algorithm to use for hashing passwords, supports whatever cryptojs supports. 
+ * NOTE: changing this will make it impossible to login with any accounts created with another hashing teqnique prior. */
+	hashingAlgorithm: process.env.HASHING_ALGORITHM || "sha512",
+
 	/** TODO:  */
 	useDbRolesAndScopes: process.env.USE_DB_ROLES_AND_SCOPES === "true",
 
 	/** TODO:  */
 	optOutOfRoleAdminWeb: process.env.OPT_OUT_OF_ROLE_ADMIN_WEB === "true"
+
 };
 
 function parseArray(str) {
