@@ -11,6 +11,7 @@ const constants = require("../lib/constants.js");
 const testUtils = require("./support/test-utils.js");
 const frusterTestUtils = require("fruster-test-utils");
 const RoleService = require("../lib/services/RoleService");
+const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
 
 
 describe("CreateUserHandler", () => {
@@ -60,7 +61,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
             expect(response.data.email).toBe(user.email, "response.data.email");
 
-            const roles = roleService.getRoles();
+            const roles = await roleService.getRoles();
             const currentRoleScopes = [];
 
             Object.keys(roles)
@@ -107,7 +108,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
             expect(response.data.email).toBe(user.email, "response.data.email");
 
-            const roles = roleService.getRoles();
+            const roles = await roleService.getRoles();
             const currentRoleScopes = [];
 
             Object.keys(roles)
@@ -159,7 +160,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.profileImage).toBe(user.profileImage, "response.data.profileImage");
             expect(response.data.custom).toBe(user.custom, "response.data.custom");
 
-            const roles = roleService.getRoles();
+            const roles = await roleService.getRoles();
             const currentRoleScopes = [];
 
             Object.keys(roles)
@@ -371,8 +372,10 @@ describe("CreateUserHandler", () => {
             expect(userFromDatabase.emailVerified).toBe(false, "userFromDatabase.emailVerified");
             expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
 
+            const roles = await roleService.getRoles();
+
             user.roles.forEach(role => {
-                expect(response.data.scopes.length).toBe(Object.keys(roleService.getRoles()[role.toLowerCase()]).length);
+                expect(response.data.scopes.length).toBe(Object.keys(roles[role.toLowerCase()]).length);
             });
 
             conf.requireEmailVerification = false;

@@ -60,7 +60,13 @@ module.exports = {
 	allowGetAll: process.env.ALLOW_GET_ALL === "true",
 
 	/** Database field used to validate password (e.g. login or updating password) with  */
-	usernameValidationDbField: process.env.USERNAME_VALIDATION_DB_FIELD || "email"
+	usernameValidationDbField: process.env.USERNAME_VALIDATION_DB_FIELD || "email",
+
+	/** TODO:  */
+	useDbRolesAndScopes: process.env.USE_DB_ROLES_AND_SCOPES === "true",
+
+	/** TODO:  */
+	optOutOfRoleAdminWeb: process.env.OPT_OUT_OF_ROLE_ADMIN_WEB === "true"
 };
 
 function parseArray(str) {

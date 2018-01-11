@@ -1,13 +1,15 @@
 const bus = require("fruster-bus");
 const mongo = require("mongodb");
 const Db = mongo.Db;
-const conf = require("./config");
+const config = require("./config");
 const constants = require("./lib/constants.js");
 const expressApp = require("./web/express-app");
 
 // REPOS ///
 const UserRepo = require("./lib/repos/UserRepo");
 const InitialUserRepo = require("./lib/repos/InitialUserRepo");
+const RoleScopesDbRepo = require("./lib/repos/RoleScopesDbRepo");
+const RoleScopesConfigRepo = require("./lib/repos/RoleScopesConfigRepo");
 
 // SERVICES ///
 const PasswordService = require("./lib/services/PasswordService");
@@ -61,10 +63,12 @@ module.exports = {
 		// REPOS
 		const userRepo = new UserRepo(db);
 		const initialUserRepo = new InitialUserRepo(db);
+		const roleScopesDbRepo = new RoleScopesDbRepo(db);
+		const roleScopesConfigRepo = new RoleScopesConfigRepo();
 
 		// SERVICES
 		const passwordService = new PasswordService(userRepo);
-		const roleService = new RoleService();
+		const roleService = new RoleService(config.useDbRolesAndScopes ? roleScopesDbRepo : roleScopesConfigRepo);
 
 		// INITIALS
 		const createInitialUserHandler = new CreateInitialUserHandler(userRepo, initialUserRepo);
@@ -262,12 +266,12 @@ module.exports = {
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
-		if (conf.requireEmailVerification)
-			expressApp.start(conf.port);
+		if (config.requireEmailVerification)
+			expressApp.start(config.port);
 	},
 
 	stop: () => {
-		if (conf.requireEmailVerification) {
+		if (config.requireEmailVerification) {
 			expressApp.stop();
 		}
 	}
@@ -278,13 +282,13 @@ module.exports = {
  * @param {Db} db 
  */
 function createIndexes(db) {
-	db.collection(conf.userCollection)
+	db.collection(config.userCollection)
 		.createIndex({ email: 1 }, { unique: true, partialFilterExpression: { email: { $exists: true } } });
 
-	conf.uniqueIndexes.forEach(index => {
+	config.uniqueIndexes.forEach(index => {
 		const indexObj = {};
 		indexObj[index] = 1;
-		db.collection(conf.userCollection)
+		db.collection(config.userCollection)
 			.createIndex(indexObj, { unique: true });
 	});
 
