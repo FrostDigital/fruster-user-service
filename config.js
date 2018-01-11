@@ -67,7 +67,8 @@ module.exports = {
 	hashingAlgorithm: process.env.HASHING_ALGORITHM || "sha512",
 
 	/** TODO:  */
-	useDbRolesAndScopes: process.env.USE_DB_ROLES_AND_SCOPES === "true",
+	// useDbRolesAndScopes: process.env.USE_DB_ROLES_AND_SCOPES === "true",
+	useDbRolesAndScopes: true,
 
 	/** TODO:  */
 	optOutOfRoleAdminWeb: process.env.OPT_OUT_OF_ROLE_ADMIN_WEB === "true"

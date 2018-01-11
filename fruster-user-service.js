@@ -31,7 +31,7 @@ module.exports = {
 
 		// SERVICES
 		const PasswordService = require("./lib/services/PasswordService");
-		const passwordService = new PasswordService(userRepo);
+		const passwordService = new PasswordService();
 
 		const RoleService = require("./lib/services/RoleService");
 		const roleService = new RoleService(config.useDbRolesAndScopes ? roleScopesDbRepo : roleScopesConfigRepo);
@@ -117,30 +117,42 @@ module.exports = {
 			bus.subscribe({
 				subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
 				permissions: [constants.permissions.ADD_SYSTEM_ROLE],
+				requestSchema: constants.schemas.request.ADD_SYSTEM_ROLE_REQUEST,
+				responseSchema: constants.schemas.response.ROLE_MODEL,
+				docs: docs.http.admin.ADD_SYSTEM_ROLE,
 				handle: (req) => addSystemRoleHandler.handle(req)
 			});
 
 			bus.subscribe({
 				subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES,
 				permissions: [constants.permissions.ADD_SYSTEM_ROLE_SCOPES],
+				requestSchema: constants.schemas.request.ADD_SYSTEM_ROLE_SCOPES_REQUEST,
+				responseSchema: constants.schemas.response.ROLE_MODEL,
+				docs: docs.http.admin.ADD_SYSTEM_ROLE_SCOPES,
 				handle: (req) => addSystemRoleScopesHandler.handle(req)
 			});
 
 			bus.subscribe({
 				subject: constants.endpoints.http.admin.GET_SYSTEM_ROLES,
 				permissions: [constants.permissions.GET_SYSTEM_ROLES],
+				responseSchema: constants.schemas.response.ROLE_MODEL_LIST_RESPONSE,
+				docs: docs.http.admin.GET_SYSTEM_ROLES,
 				handle: (req) => getSystemRolesHandler.handle(req)
 			});
 
 			bus.subscribe({
 				subject: constants.endpoints.http.admin.REMOVE_SYSTEM_ROLE,
 				permissions: [constants.permissions.REMOVE_SYSTEM_ROLE],
+				docs: docs.http.admin.REMOVE_SYSTEM_ROLE,
 				handle: (req) => removeSystemRoleHandler.handle(req)
 			});
 
 			bus.subscribe({
 				subject: constants.endpoints.http.admin.REMOVE_SYSTEM_ROLE_SCOPES,
 				permissions: [constants.permissions.REMOVE_SYSTEM_ROLE_SCOPES],
+				requestSchema: constants.schemas.request.REMOVE_SYSTEM_ROLE_SCOPES,
+				responseSchema: constants.schemas.response.ROLE_MODEL,
+				docs: docs.http.admin.REMOVE_SYSTEM_ROLE_SCOPES,
 				handle: (req) => removeSystemRoleScopesHandler.handle(req)
 			});
 

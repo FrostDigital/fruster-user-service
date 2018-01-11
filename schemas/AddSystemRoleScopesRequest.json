@@ -1,0 +1,19 @@
+{
+    "id": "AddSystemRoleScopesRequest",
+    "description": "Request for adding scopes to a system role.",
+    "additionalProperties": false,
+    "properties": {
+        "scopes": {
+            "type": "array",
+            "description": "Scopes to add to the role.",
+            "items": {
+                "type": "string",
+                "description": "The scopes",
+                "faker": "lorem.word"
+            }
+        }
+    },
+    "required": [
+        "scopes"
+    ]
+}

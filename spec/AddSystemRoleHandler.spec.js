@@ -57,33 +57,6 @@ describe("AddSystemRoleHandler", () => {
         }
     });
 
-    it("should be possible to add role wtih one scope", async done => {
-        try {
-            const role = "padmin";
-            const scopes = "set-fire";
-
-            await bus.request({
-                subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: "reqId",
-                    user: { scopes: ["system.add-role"] },
-                    data: { role, scopes }
-                }
-            });
-
-            const roles = await db.collection(constants.collections.ROLE_SCOPES).find({ role }).toArray();
-
-            expect(roles[0].role).toBe(role, "roles[0].role");
-            expect(roles[0].scopes[0]).toBe(scopes, "roles[0].scopes");
-
-            done();
-        } catch (err) {
-            log.error(err);
-            done.fail(err);
-        }
-    });
-
     it("should be possible to add role wtih multiple scopes", async done => {
         try {
             const role = "padmin";

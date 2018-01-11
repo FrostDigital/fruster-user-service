@@ -1,0 +1,19 @@
+{
+    "id": "RemoveSystemRoleScopesRequest",
+    "description": "Request for removing scopes from a system role.",
+    "additionalProperties": false,
+    "properties": {
+        "scopes": {
+            "type": "array",
+            "description": "Scopes to remove from the role.",
+            "items": {
+                "type": "string",
+                "description": "The scopes",
+                "faker": "lorem.word"
+            }
+        }
+    },
+    "required": [
+        "scopes"
+    ]
+}

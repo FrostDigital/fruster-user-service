@@ -1,0 +1,9 @@
+{
+    "id": "RoleModelListResponse",
+    "description": "Response with an array of roles.",
+    "additionalProperties": false,
+    "type": "array",
+    "items": {
+        "$ref": "RoleModel"
+    }
+}
