@@ -7,13 +7,10 @@
             "type": "string",
             "description": "The email of the user:"
         },
-<<<<<<< HEAD
         "password": {
             "type": "string",
             "description": "the password of the user. Is required only if `config.requirePassword` is set to true."
         },
-=======
->>>>>>> c357a5fae565cec474036b2db81e24d148fba47f
         "firstName": {
             "type": "string",
             "description": "The first name of the user:"
