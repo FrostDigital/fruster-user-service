@@ -36,7 +36,7 @@ describe("AddSystemRoleHandler", () => {
             const role = "padmin";
 
             await bus.request({
-                subject: constants.endpoints.service.ADD_SYSTEM_ROLE,
+                subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
                 skipOptionsRequest: true,
                 message: {
                     reqId: "reqId",
@@ -44,8 +44,6 @@ describe("AddSystemRoleHandler", () => {
                     data: { role }
                 }
             });
-
-            const a = function () { console.log("hello"); };
 
             const roles = await db.collection(constants.collections.ROLE_SCOPES).find({ role }).toArray();
 
@@ -65,7 +63,7 @@ describe("AddSystemRoleHandler", () => {
             const scopes = "set-fire";
 
             await bus.request({
-                subject: constants.endpoints.service.ADD_SYSTEM_ROLE,
+                subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
                 skipOptionsRequest: true,
                 message: {
                     reqId: "reqId",
@@ -92,7 +90,7 @@ describe("AddSystemRoleHandler", () => {
             const scopes = ["1", "2"];
 
             await bus.request({
-                subject: constants.endpoints.service.ADD_SYSTEM_ROLE,
+                subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
                 skipOptionsRequest: true,
                 message: {
                     reqId: "reqId",
@@ -130,7 +128,7 @@ describe("AddSystemRoleHandler", () => {
 
             async function addRole() {
                 await bus.request({
-                    subject: constants.endpoints.service.ADD_SYSTEM_ROLE,
+                    subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
                     skipOptionsRequest: true,
                     message: {
                         reqId: "reqId",
@@ -155,7 +153,7 @@ describe("AddSystemRoleHandler", () => {
             for (let i = 0; i < 10; i++) {
                 try {
                     await bus.request({
-                        subject: constants.endpoints.service.ADD_SYSTEM_ROLE,
+                        subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
                         skipOptionsRequest: true,
                         message: {
                             reqId: "reqId",

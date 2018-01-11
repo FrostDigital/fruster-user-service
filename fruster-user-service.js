@@ -90,24 +90,61 @@ module.exports = {
 		const ResendVerificationEmailHandler = require("./lib/handlers/email-verification/ResendVerificationEmailHandler.js");
 		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(userRepo);
 
-		// ROLES & SCOPES
+		// ENDPOINTS ///////////////////////////////////////////////////////////////////////////////
+
+		const docs = require("./lib/docs");
+
+		// ROLES & SCOPES, if configured
 		if (config.useDbRolesAndScopes) {
 			await roleScopesDbRepo.prepareRoles();
 
-			const AddSystemRoleHandler = require("./lib/handlers/roles/AddSystemRoleHandler");
+			// SYSTEM ROLES
+			const AddSystemRoleHandler = require("./lib/handlers/system/AddSystemRoleHandler");
 			const addSystemRoleHandler = new AddSystemRoleHandler(roleScopesDbRepo);
 
+			const AddSystemRoleScopesHandler = require("./lib/handlers/system/AddSystemRoleScopesHandler");
+			const addSystemRoleScopesHandler = new AddSystemRoleScopesHandler(roleScopesDbRepo);
+
+			const GetSystemRolesHandler = require("./lib/handlers/system/GetSystemRolesHandler");
+			const getSystemRolesHandler = new GetSystemRolesHandler(roleScopesDbRepo);
+
+			const RemoveSystemRoleHandler = require("./lib/handlers/system/RemoveSystemRoleHandler");
+			const removeSystemRoleHandler = new RemoveSystemRoleHandler(roleScopesDbRepo);
+
+			const RemoveSystemRoleScopesHandler = require("./lib/handlers/system/RemoveSystemRoleScopesHandler");
+			const removeSystemRoleScopesHandler = new RemoveSystemRoleScopesHandler(roleScopesDbRepo);
+
 			bus.subscribe({
-				subject: constants.endpoints.service.ADD_SYSTEM_ROLE,
+				subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
 				permissions: [constants.permissions.ADD_SYSTEM_ROLE],
 				handle: (req) => addSystemRoleHandler.handle(req)
 			});
 
+			bus.subscribe({
+				subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES,
+				permissions: [constants.permissions.ADD_SYSTEM_ROLE_SCOPES],
+				handle: (req) => addSystemRoleScopesHandler.handle(req)
+			});
+
+			bus.subscribe({
+				subject: constants.endpoints.http.admin.GET_SYSTEM_ROLES,
+				permissions: [constants.permissions.GET_SYSTEM_ROLES],
+				handle: (req) => getSystemRolesHandler.handle(req)
+			});
+
+			bus.subscribe({
+				subject: constants.endpoints.http.admin.REMOVE_SYSTEM_ROLE,
+				permissions: [constants.permissions.REMOVE_SYSTEM_ROLE],
+				handle: (req) => removeSystemRoleHandler.handle(req)
+			});
+
+			bus.subscribe({
+				subject: constants.endpoints.http.admin.REMOVE_SYSTEM_ROLE_SCOPES,
+				permissions: [constants.permissions.REMOVE_SYSTEM_ROLE_SCOPES],
+				handle: (req) => removeSystemRoleScopesHandler.handle(req)
+			});
+
 		}
-
-		// ENDPOINTS ///////////////////////////////////////////////////////////////////////////////
-
-		const docs = require("./lib/docs");
 
 		// HTTP
 		bus.subscribe({

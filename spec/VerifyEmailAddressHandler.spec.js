@@ -2,6 +2,7 @@ const bus = require("fruster-bus");
 const log = require("fruster-log");
 const Db = require("mongodb").Db;
 const uuid = require("uuid");
+const errors = require("../lib/errors");
 
 const userService = require("../fruster-user-service");
 const utils = require("../lib/utils/utils");
@@ -16,14 +17,27 @@ describe("VerifyEmailAddressHandler", () => {
 
     /** @type {Db} */
     let db;
+    let defaultRequireEmailVerification;
 
     frusterTestUtils
         .startBeforeEach(specConstants
             .testUtilsOptions((connection) => { db = connection.db; }));
 
-    it("should remove emailVerificationToken and set emailVerified to true when verifying with emailVerificationToken", async (done) => {
+    beforeAll(() => {
+        defaultRequireEmailVerification = config.requireEmailVerification;
         config.requireEmailVerification = true;
+    });
 
+    afterAll(() => {
+        config.requireEmailVerification = defaultRequireEmailVerification;
+        config.emailVerificationEmailTempate = undefined;
+    });
+
+    afterEach(() => {
+        userService.stop();
+    });
+
+    it("should remove emailVerificationToken and set emailVerified to true when verifying with emailVerificationToken", async (done) => {
         const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
         bus.subscribe("mail-service.send", (req) => {
@@ -53,12 +67,31 @@ describe("VerifyEmailAddressHandler", () => {
         expect(updatedTestUser.emailVerificationToken).toBeUndefined("should remove emailVerificationToken");
         expect(updatedTestUser.emailVerified).toBe(true, "should set emailVerified to true");
 
-        config.requireEmailVerification = false;
         done();
     });
 
+    it("should not be able to verify email with faulty token", async (done) => {
+        try {
+            const verificationResponse = await bus.request({
+                subject: constants.endpoints.http.VERIFY_EMAIL,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {},
+                    params: {
+                        tokenId: "ram.jam"
+                    }
+                }
+            });
+
+            done.fail();
+        } catch (err) {
+            expect(err.error.code).toBe(errors.get("INVALID_TOKEN").error.code);
+            done();
+        }
+    });
+
     it("should use sendgrid mail template if specified in config", async (done) => {
-        config.requireEmailVerification = true;
         config.emailVerificationEmailTempate = "band-ola";
 
         const testUserData = mocks.getUserWithUnverifiedEmailObject();
@@ -67,8 +100,6 @@ describe("VerifyEmailAddressHandler", () => {
             expect(req.data.from).toBe(config.emailVerificationFrom);
             expect(req.data.to[0]).toBe(testUserData.email);
             expect(req.data.templateId).toBe(config.emailVerificationEmailTempate);
-            config.requireEmailVerification = false;
-            config.emailVerificationEmailTempate = undefined;
 
             done();
         });
