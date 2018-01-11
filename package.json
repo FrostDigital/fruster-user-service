@@ -33,6 +33,7 @@
     "nyc": {
         "exclude": [
             "lib/deprecatedErrors.js",
+            "lib/repos/AbstractRoleScopesRepo.js",
             "web",
             "spec"
         ]

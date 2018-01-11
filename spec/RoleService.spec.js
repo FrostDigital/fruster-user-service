@@ -5,37 +5,52 @@ const RoleService = require("../lib/services/RoleService");
 const constants = require("../lib/constants");
 const config = require("../config");
 const RoleModel = require("../lib/models/RoleModel");
+const specConstants = require("./support/spec-constants");
+const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
 
 
 describe("RoleService", () => {
 
+    const defaults = {
+        /** @type {String} */
+        roles: undefined,
+        /** @type {Boolean} */
+        useDbRolesAndScopes: undefined
+    };
+
     /** @type {Db} */
     let db;
-    /** @type {String} */
-    let rolesDefaultValue;
 
-    frusterTestUtils.startBeforeEach({
-        mockNats: true,
-        mongoUrl: "mongodb://localhost:27017/user-service-test",
-        afterStart: (connection) => {
-            db = connection.db;
-        }
+    frusterTestUtils
+        .startBeforeEach(specConstants
+            .testUtilsOptions((connection) => { db = connection.db; }));
+
+    beforeAll(() => {
+        defaults.roles = config.roles;
+        defaults.useDbRolesAndScopes = config.useDbRolesAndScopes;
     });
 
-    beforeAll(() => { rolesDefaultValue = config.roles; });
+    afterEach(() => {
+        config.roles = defaults.roles;
+        config.useDbRolesAndScopes = defaults.useDbRolesAndScopes;
+    });
 
-    afterEach(() => { config.roles = rolesDefaultValue; });
-
-    afterAll(() => { config.roles = rolesDefaultValue; });
+    afterAll(() => {
+        config.roles = defaults.roles;
+        config.useDbRolesAndScopes = defaults.useDbRolesAndScopes;
+    });
 
     it("should be able to get roles from config", async done => {
         config.roles = "admin:user.hello;user:admin.hello";
 
-        const roleService = new RoleService();
+        const roleScopesConfigRepo = new RoleScopesConfigRepo();
+        await roleScopesConfigRepo.prepareRoles();
+
+        const roleService = new RoleService(roleScopesConfigRepo);
         const roles = await roleService.getRoles();
 
-        expect(roles.admin[0]).toBe("user.hello", roles.admin[0]);
-        expect(roles.user[0]).toBe("admin.hello", roles.user[0]);
+        expect(roles.admin[0]).toBe("user.hello", "roles.admin[0]");
+        expect(roles.user[0]).toBe("admin.hello", "roles.user[0]");
 
         done();
     });
@@ -51,8 +66,25 @@ describe("RoleService", () => {
         const roles = await roleService.getRoles();
 
         expect(config.roles).not.toBe("admin:user.hello;user:admin.hello", config.roles);
-        expect(roles.admin[0]).toBe("user.hello", roles.admin[0]);
-        expect(roles.user[0]).toBe("admin.hello", roles.user[0]);
+        expect(roles.admin[0]).toBe("user.hello", "roles.admin[0]");
+        expect(roles.user[0]).toBe("admin.hello", "roles.user[0]");
+
+        done();
+    });
+
+    it("should save roles from config to database if database is empty", async done => {
+        config.useDbRolesAndScopes = true;
+
+        const roleScopesDbRepo = new RoleScopesDbRepo(db);
+        await roleScopesDbRepo.prepareRoles();
+
+        const roleService = new RoleService(roleScopesDbRepo);
+        const roles = await roleService.getRoles();
+
+        expect(roles["super-admin"][0]).toBe("*", "roles[\"super-admin\"][0]");
+        expect(roles.admin[0]).toBe("profile.get", "roles.admin[0]");
+        expect(roles.admin[1]).toBe("user.*", "roles.admin[1]");
+        expect(roles.user[0]).toBe("profile.get", "roles.user[0]");
 
         done();
     });

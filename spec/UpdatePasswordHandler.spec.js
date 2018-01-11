@@ -13,6 +13,7 @@ const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const deprecatedErrors = require("../lib/deprecatedErrors");
+const specConstants = require("./support/spec-constants");
 
 
 describe("UpdatePasswordHandler", () => {
@@ -20,14 +21,9 @@ describe("UpdatePasswordHandler", () => {
     /** @type {Db} */
     let db;
 
-    frusterTestUtils.startBeforeEach({
-        mockNats: true,
-        mongoUrl: "mongodb://localhost:27017/user-service-test",
-        service: userService,
-        afterStart: (connection) => {
-            db = connection.db;
-        }
-    });
+    frusterTestUtils
+        .startBeforeEach(specConstants
+            .testUtilsOptions((connection) => { db = connection.db; }));
 
     it("should be possible to update password", async done => {
         try {

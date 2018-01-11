@@ -8,9 +8,8 @@ const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
 
 describe("UserModel", () => {
 
-    afterEach(done => {
+    afterEach(() => {
         config.lowerCaseName = false;
-        done();
     });
 
     it("should lowercase names if `config.lowerCaseName` is true", () => {

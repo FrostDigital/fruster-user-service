@@ -7,23 +7,19 @@ const userService = require("../fruster-user-service");
 const utils = require("../lib/utils/utils");
 const config = require("../config");
 const mocks = require("./support/mocks.js");
-const testUtils = require("fruster-test-utils");
+const frusterTestUtils = require("fruster-test-utils");
 const constants = require("../lib/constants.js");
+const specConstants = require("./support/spec-constants");
 
 
 describe("VerifyEmailAddressHandler", () => {
 
     /** @type {Db} */
-    let mongoDb;
+    let db;
 
-    testUtils.startBeforeEach({
-        mockNats: true,
-        mongoUrl: "mongodb://localhost:27017/user-service-test",
-        service: userService,
-        afterStart: (connection) => {
-            mongoDb = connection.db;
-        }
-    });
+    frusterTestUtils
+        .startBeforeEach(specConstants
+            .testUtilsOptions((connection) => { db = connection.db; }));
 
     it("should remove emailVerificationToken and set emailVerified to true when verifying with emailVerificationToken", async (done) => {
         config.requireEmailVerification = true;
@@ -37,7 +33,7 @@ describe("VerifyEmailAddressHandler", () => {
         });
 
         const createUserResponse = (await mocks.createUser(testUserData)).data;
-        const testUser = await mongoDb.collection(config.userCollection).findOne({ id: createUserResponse.id });
+        const testUser = await db.collection(config.userCollection).findOne({ id: createUserResponse.id });
         const verificationResponse = await bus.request({
             subject: constants.endpoints.http.VERIFY_EMAIL,
             skipOptionsRequest: true,
@@ -52,7 +48,7 @@ describe("VerifyEmailAddressHandler", () => {
 
         expect(verificationResponse.status).toBe(200, "verificationResponse.status");
 
-        const updatedTestUser = await mongoDb.collection(config.userCollection).findOne({ id: createUserResponse.id });
+        const updatedTestUser = await db.collection(config.userCollection).findOne({ id: createUserResponse.id });
 
         expect(updatedTestUser.emailVerificationToken).toBeUndefined("should remove emailVerificationToken");
         expect(updatedTestUser.emailVerified).toBe(true, "should set emailVerified to true");

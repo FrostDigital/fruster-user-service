@@ -1,25 +1,23 @@
-const testUtils = require("fruster-test-utils");
+const frusterTestUtils = require("fruster-test-utils");
 const userService = require("../fruster-user-service");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
 const UserRepo = require("../lib/repos/UserRepo");
 const Db = require("mongodb").Db;
+const specConstants = require("./support/spec-constants");
+
 
 describe("UserRepo", () => {
 
 	/**@type {UserRepo} */
 	let userRepo;
 
-	testUtils.startBeforeEach({
-		mockNats: true,
-		service: userService,
-		bus: bus,
-		mongoUrl: "mongodb://localhost:27017/fruster-user-service-test",
-		afterStart: (connection) => {
-			userRepo = new UserRepo(connection.db);
-			return insertTestUsers(connection.db);
-		}
-	});
+	frusterTestUtils
+		.startBeforeEach(specConstants
+			.testUtilsOptions((connection) => {
+				userRepo = new UserRepo(connection.db);
+				return insertTestUsers(connection.db);
+			}));
 
 	it("should get user by id", async done => {
 		try {

@@ -1,23 +1,18 @@
-const testUtils = require("fruster-test-utils");
+const frusterTestUtils = require("fruster-test-utils");
 const userService = require("../fruster-user-service");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
 const constants = require("../lib/constants");
 const uuid = require("uuid");
 const Db = require("mongodb").Db;
+const specConstants = require("./support/spec-constants");
 
 
 describe("GetUserHandler", () => {
 
-	testUtils.startBeforeEach({
-		mockNats: true,
-		service: userService,
-		bus: bus,
-		mongoUrl: "mongodb://localhost:27017/fruster-user-service-test",
-		afterStart: (connection) => {
-			return insertTestUsers(connection.db);
-		}
-	});
+	frusterTestUtils
+		.startBeforeEach(specConstants
+			.testUtilsOptions((connection) => { return insertTestUsers(connection.db); }));
 
 	it("should fail to get ALL users when passing in empty object as query", async done => {
 		try {

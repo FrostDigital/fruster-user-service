@@ -8,21 +8,17 @@ const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
+const specConstants = require("./support/spec-constants");
 
 
 describe("ResendVerificationEmailHandler", () => {
 
     /** @type {Db} */
-    let mongoDb;
+    let db;
 
-    frusterTestUtils.startBeforeEach({
-        mockNats: true,
-        mongoUrl: "mongodb://localhost:27017/user-service-test",
-        service: userService,
-        afterStart: (connection) => {
-            mongoDb = connection.db;
-        }
-    });
+    frusterTestUtils
+        .startBeforeEach(specConstants
+            .testUtilsOptions((connection) => { db = connection.db; }));
 
     afterEach((done) => {
         conf.requireEmailVerification = false;
@@ -56,7 +52,7 @@ describe("ResendVerificationEmailHandler", () => {
         });
 
         const createUserResponse = (await mocks.createUser(testUserData)).data;
-        const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: createUserResponse.id });
+        const testUser = await db.collection(conf.userCollection).findOne({ id: createUserResponse.id });
 
         verificationToken = testUser.emailVerificationToken;
 
