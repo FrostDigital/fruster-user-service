@@ -38,36 +38,41 @@ describe("VerifyEmailAddressHandler", () => {
     });
 
     it("should remove emailVerificationToken and set emailVerified to true when verifying with emailVerificationToken", async (done) => {
-        const testUserData = mocks.getUserWithUnverifiedEmailObject();
+        try {
+            const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
-        bus.subscribe("mail-service.send", (req) => {
-            expect(req.data.from).toBe(config.emailVerificationFrom, "req.data.from");
-            expect(req.data.to.includes(testUserData.email)).toBeTruthy("req.data.to.includes(testUserData.email)");
-            return { reqId: req.reqId, status: 200 }
-        });
+            bus.subscribe("mail-service.send", (req) => {
+                expect(req.data.from).toBe(config.emailVerificationFrom, "req.data.from");
+                expect(req.data.to.includes(testUserData.email)).toBeTruthy("req.data.to.includes(testUserData.email)");
+                return { reqId: req.reqId, status: 200 }
+            });
 
-        const createUserResponse = (await mocks.createUser(testUserData)).data;
-        const testUser = await db.collection(config.userCollection).findOne({ id: createUserResponse.id });
-        const verificationResponse = await bus.request({
-            subject: constants.endpoints.http.VERIFY_EMAIL,
-            skipOptionsRequest: true,
-            message: {
-                reqId: uuid.v4(),
-                data: {},
-                params: {
-                    tokenId: testUser.emailVerificationToken
+            const createUserResponse = (await mocks.createUser(testUserData)).data;
+            const testUser = await db.collection(config.userCollection).findOne({ id: createUserResponse.id });
+            const verificationResponse = await bus.request({
+                subject: constants.endpoints.http.VERIFY_EMAIL,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {},
+                    params: {
+                        tokenId: testUser.emailVerificationToken
+                    }
                 }
-            }
-        });
+            });
 
-        expect(verificationResponse.status).toBe(200, "verificationResponse.status");
+            expect(verificationResponse.status).toBe(200, "verificationResponse.status");
 
-        const updatedTestUser = await db.collection(config.userCollection).findOne({ id: createUserResponse.id });
+            const updatedTestUser = await db.collection(config.userCollection).findOne({ id: createUserResponse.id });
 
-        expect(updatedTestUser.emailVerificationToken).toBeUndefined("should remove emailVerificationToken");
-        expect(updatedTestUser.emailVerified).toBe(true, "should set emailVerified to true");
+            expect(updatedTestUser.emailVerificationToken).toBeUndefined("should remove emailVerificationToken");
+            expect(updatedTestUser.emailVerified).toBe(true, "should set emailVerified to true");
 
-        done();
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail();
+        }
     });
 
     it("should not be able to verify email with faulty token", async (done) => {
@@ -92,19 +97,24 @@ describe("VerifyEmailAddressHandler", () => {
     });
 
     it("should use sendgrid mail template if specified in config", async (done) => {
-        config.emailVerificationEmailTempate = "band-ola";
+        try {
+            config.emailVerificationEmailTempate = "band-ola";
 
-        const testUserData = mocks.getUserWithUnverifiedEmailObject();
+            const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
-        bus.subscribe("mail-service.send", (req) => {
-            expect(req.data.from).toBe(config.emailVerificationFrom);
-            expect(req.data.to[0]).toBe(testUserData.email);
-            expect(req.data.templateId).toBe(config.emailVerificationEmailTempate);
+            bus.subscribe("mail-service.send", (req) => {
+                expect(req.data.from).toBe(config.emailVerificationFrom);
+                expect(req.data.to[0]).toBe(testUserData.email);
+                expect(req.data.templateId).toBe(config.emailVerificationEmailTempate);
 
-            done();
-        });
+                done();
+            });
 
-        await mocks.createUser(testUserData);
+            await mocks.createUser(testUserData);
+        } catch (err) {
+            log.error(err);
+            done.fail();
+        }
     });
 
 });
