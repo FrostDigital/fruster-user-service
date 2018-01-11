@@ -63,7 +63,7 @@ module.exports = {
 		const initialUserRepo = new InitialUserRepo(db);
 
 		// SERVICES
-		const passwordService = new PasswordService(userRepo);
+		const passwordService = new PasswordService();
 		const roleService = new RoleService();
 
 		// INITIALS
