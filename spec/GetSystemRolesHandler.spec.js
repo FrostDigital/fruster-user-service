@@ -75,4 +75,40 @@ describe("GetSystemRolesHandler", () => {
         }
     });
 
+    it("should be possible to get all roles with config format", async done => {
+        try {
+            const role = "padmin";
+
+            for (let i = 0; i < 3; i++) {
+                await bus.request({
+                    subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
+                    skipOptionsRequest: true,
+                    message: {
+                        reqId: "reqId",
+                        user: { scopes: ["system.add-role"] },
+                        data: { role: role + i, scopes: [i.toString()] }
+                    }
+                });
+            }
+
+            const rolesResponse = await bus.request({
+                subject: constants.endpoints.http.admin.GET_SYSTEM_ROLES,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: "reqId",
+                    user: { scopes: ["system.get-roles"] },
+                    query: { format: "config" },
+                    data: {}
+                }
+            });
+
+            expect(rolesResponse.data).toBe("super-admin:*;admin:profile.get,user.*;user:profile.get;padmin0:0;padmin1:1;padmin2:2;");
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
 });
