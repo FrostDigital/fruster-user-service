@@ -320,12 +320,12 @@ module.exports = {
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
-		if (config.requireEmailVerification)
+		if (config.requireEmailVerification || config.useDbRolesAndScopes)
 			expressApp.start(config.port);
 	},
 
 	stop: () => {
-		if (config.requireEmailVerification) {
+		if (config.requireEmailVerification || config.useDbRolesAndScopes) {
 			expressApp.stop();
 		}
 	}

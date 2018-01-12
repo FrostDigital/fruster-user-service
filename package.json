@@ -17,7 +17,9 @@
         "fruster-log": "^0.0.16",
         "mongodb": "^2.2.31",
         "npm": "^4.6.1",
-        "uuid": "^3.1.0"
+        "uuid": "^3.1.0",
+        "cookie-parser": "1.4.3",
+        "request": "^2.81.0"
     },
     "devDependencies": {
         "fruster-test-utils": "^0.3.20",

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Role administration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        input {
+            display: block;
+        }
+
+        .clickable {
+            cursor: pointer;
+        }
+
+        .inline {
+            display: inline;
+        }
+
+        .panel {
+            cursor: pointer;
+            font-size: 15px;
+            opacity: 0;
+        }
+
+        .panel span {
+            margin-left: 10px;
+        }
+
+        .role-header:hover .panel,
+        li:hover .panel,
+        h2:hover .panel {
+            opacity: 1;
+        }
+
+        #roles div {
+            margin-left: 30px;
+        }
+    </style>
+
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/styles/googlecode.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <script src="https://code.jquery.com/jquery-3.1.0.js" integrity="sha256-slogkvB1K3VOkzAI8QITxV3VzpOnkeNVsKvtkYLMjfk=" crossorigin="anonymous"></script>
+
+    <script>
+        String.prototype.replaceAll = function (search, replacement) {
+            var target = this;
+            return target.split(search).join(replacement);
+        };
+
+        let apiClientService;
+        const baseUrl = "http://localhost:3000";
+
+        $(() => {
+            apiClientService = new ApiClientService();
+
+            if (window.isLoggedIn) {
+                userLoggedIn();
+            } else {
+                userNotLoggedIn();
+            }
+        });
+
+        async function userLoggedIn() {
+            console.log("userLoggedIn");
+
+            $("#login").hide();
+            $("#logout-btn-container").show();
+            $("#roles").show();
+
+            try {
+                const roles = await apiClientService.get("admin/system/role");
+
+                roles.data.forEach(roleObj => {
+                    let roleHtml = `
+                    <div>
+                        <h3 class="role-header">{{role}}
+                            <span class="panel">
+                                <span role="{{role}}" class="add-scope"><span title="Add scope" class="text-success  clickable glyphicon glyphicon-plus"></span> Add scope(s)</span>
+                                <span role="{{role}}" class="remove-role"><span title="Remove role" class="clickable text-danger glyphicon glyphicon-remove"></span> Remove role</span>
+                            </span>
+                        </h3>
+                    </div>`;
+                    const scopesList = $(`<ul></ul>`);
+
+                    roleObj.scopes.forEach(scope => {
+                        const listItem = $(`
+                        <li role="${roleObj.role}" scope="${scope}">
+                            ${scope} 
+                            <span class="panel">
+                                <span class="clickable text-danger glyphicon glyphicon-remove"></span> Remove scope
+                            </span>
+                        </i>
+                        `);
+
+                        listItem.click(removeScope);
+                        scopesList.append(listItem);
+                    });
+
+                    roleHtml = roleHtml.replaceAll("{{role}}", roleObj.role);
+                    roleHtml = $(roleHtml);
+                    roleHtml.append(scopesList);
+                    $("#roles").append($(roleHtml));
+                });
+
+                $("#add-system-role").click(addRole);
+                $(".add-scope").click(addScope);
+                $(".remove-role").click(removeRole);
+                $("#logout-btn").click(logout);
+
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        async function userNotLoggedIn() {
+            console.log("userNotLoggedIn");
+            $("#submit-login").click(login);
+        }
+
+        async function login() {
+            try {
+
+                //TODO: Make sure this works: 
+                await apiClientService.post("auth/cookie", {
+                    username: $("#username").val(),
+                    password: $("#password").val()
+                });
+
+                // await apiClientService.post("test");
+
+                location.reload();
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        async function logout() {
+            try {
+                await apiClientService.get("/auth/logout");
+                location.reload();
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        async function addRole() {
+            const roleName = prompt("Please enter a role to be created");
+
+            if (roleName)
+                try {
+                    await apiClientService.post("admin/system/role", { role: roleName });
+                    location.reload();
+                } catch (err) {
+                    console.log(err);
+                }
+        }
+
+        async function removeRole(e) {
+            const roleToRemove = e.currentTarget.attributes["role"].nodeValue;
+            const confirmed = confirm(`Do you want to remove the role ${roleToRemove}?`);
+
+            if (confirmed)
+                try {
+                    await apiClientService.delete("admin/system/role", { role: roleToRemove });
+                    location.reload();
+                } catch (err) {
+                    console.log(err);
+                }
+        }
+
+        async function addScope(e) {
+            const roleToCreateScopeFor = e.currentTarget.attributes["role"].nodeValue;
+            let scopeNames = prompt(`Please enter a scope  to be created for ${roleToCreateScopeFor}. Can be csv.`);
+            scopeNames = scopeNames.split(",");
+
+            if (scopeNames)
+                try {
+                    await apiClientService.post(`admin/system/role/${roleToCreateScopeFor}/scope`, { scopes: scopeNames });
+                    location.reload();
+                } catch (err) {
+                    console.log(err);
+                }
+        }
+
+        async function removeScope(e) {
+            const scopeToRemove = e.currentTarget.attributes["scope"].nodeValue;
+            const roleToRemoveFrom = e.currentTarget.attributes["role"].nodeValue;
+            const confirmed = confirm(`Do you want to remove the scope ${scopeToRemove} from the role ${roleToRemoveFrom}?`);
+
+            if (confirmed)
+                try {
+                    await apiClientService.delete(`admin/system/role/${roleToRemoveFrom}/scope`, { scopes: [scopeToRemove] });
+                    location.reload();
+                } catch (err) {
+                    console.log(err);
+                }
+        }
+
+        class ApiClientService {
+            constructor(root) {
+                this.apiRoot = root || "/api/";
+            }
+
+            post(path, body) {
+                return this._request("POST", path, body);
+            }
+
+            get(path) {
+                return this._request("GET", path);
+            }
+
+            delete(path, body) {
+                return this._request("DELETE", path, body);
+            }
+
+            _request(method, path, body) {
+                return new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    const url = `${this.apiRoot}${path}`;
+                    const JSONBody = JSON.stringify(body);
+
+                    const onLoad = function (response) {
+                        if (xhr.status === 200) {
+                            resolve(JSON.parse(xhr.response));
+                        } else {
+                            console.log("request error");
+
+                            let errorJson;
+                            if (response.currentTarget && response.currentTarget.response) {
+                                errorJson = JSON.parse(response.currentTarget.response);
+                            }
+
+                            reject(errorJson || xhr.statusText);
+                        }
+                    }
+                    const onError = function () {
+                        console.log("request error");
+                        reject(xhr.statusText);
+                    }
+
+                    xhr.onload = onLoad;
+                    xhr.onerror = onError;
+
+                    xhr.open(method, url);
+                    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                    xhr.send(JSONBody);
+                });
+            }
+        }
+    </script>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Role administration</h1>
+            </div>
+            <div class="col-md-6" style="text-align: right; margin-top: 25px;">
+                <div id="logout-btn-container" hidden>
+                    <button id="logout-btn" type="button" class="btn btn-default">Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="clearfix"></div>
+
+        <div id="login">
+            <div class="input-group">
+                <label for="username">Username:</label>
+                <input id="username" type="text" />
+            </div>
+            <div class="input-group">
+                <label for="password">Password:</label>
+                <input id="password" type="password" />
+            </div>
+            <button id="submit-login">Login</button>
+        </div>
+
+        <div hidden id="roles">
+            <h2>System roles
+                <span class="panel">
+                    <span id="add-system-role">
+                        <span class="text-success clickable glyphicon glyphicon-plus"></span> Add role</span>
+                </span>
+            </h2>
+        </div>
+    </div>
+
+</body>
+
+</html>

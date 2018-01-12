@@ -4,6 +4,9 @@ const path = require("path");
 const log = require("fruster-log");
 const http = require("http");
 const routes = require("./routes");
+const cookieParser = require("cookie-parser");
+const apiProxy = require("./middleware/api-proxy");
+
 
 let server;
 
@@ -19,8 +22,13 @@ function createExpressApp() {
         extended: false
     }));
 
+    // Enable cookie parsing
+    app.use(cookieParser());
+
     // Set static site directory where javascript, (s)css, etc will reside
     app.use(express.static(path.join(__dirname, "static")));
+
+    app.use("/api", apiProxy());
 
     // Delegate to actual routing to pages/endpoints
     routes(app);
