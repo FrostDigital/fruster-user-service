@@ -72,6 +72,7 @@ module.exports = {
     },
 
     stop: () => {
-        server.close();
+        if (server)
+            server.close();
     }
 };

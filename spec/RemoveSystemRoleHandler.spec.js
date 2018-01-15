@@ -54,7 +54,7 @@ describe("RemoveSystemRoleHandler", () => {
                 message: {
                     reqId: "reqId",
                     user: { scopes: ["system.remove-role"] },
-                    params: { role }
+                    data: { role }
                 }
             });
 

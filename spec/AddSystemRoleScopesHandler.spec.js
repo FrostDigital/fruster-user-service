@@ -52,8 +52,7 @@ describe("AddSystemRoleScopesHandler", () => {
                 message: {
                     reqId: "reqId",
                     user: { scopes: ["system.add-role-scopes"] },
-                    params: { role },
-                    data: { scopes: newScopes }
+                    data: { scopes: newScopes, role }
                 }
             });
 
@@ -93,8 +92,7 @@ describe("AddSystemRoleScopesHandler", () => {
                     message: {
                         reqId: "reqId",
                         user: { scopes: ["system.add-role-scopes"] },
-                        params: { role },
-                        data: { scopes: newScopes }
+                        data: { scopes: newScopes, role }
                     }
                 });
             }

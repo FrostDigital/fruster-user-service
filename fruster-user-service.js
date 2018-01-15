@@ -321,7 +321,7 @@ module.exports = {
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
-		if (config.requireEmailVerification || config.useDbRolesAndScopes)
+		if (!busAddress.includes("mock") && (config.requireEmailVerification || config.useDbRolesAndScopes))
 			expressApp.start(config.port);
 	},
 

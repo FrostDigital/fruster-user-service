@@ -52,8 +52,7 @@ describe("RemoveSystemRoleScopesHandler", () => {
                 message: {
                     reqId: "reqId",
                     user: { scopes: ["system.add-role-scopes"] },
-                    params: { role },
-                    data: { scopes: newScopes }
+                    data: { scopes: newScopes, role }
                 }
             });
 
@@ -63,8 +62,7 @@ describe("RemoveSystemRoleScopesHandler", () => {
                 message: {
                     reqId: "reqId",
                     user: { scopes: ["system.remove-role-scopes"] },
-                    params: { role },
-                    data: { scopes: [newScopes[0], newScopes[1]] }
+                    data: { scopes: [newScopes[0], newScopes[1]], role }
                 }
             });
 
