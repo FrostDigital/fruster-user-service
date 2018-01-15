@@ -114,6 +114,7 @@ module.exports = {
 			const RemoveSystemRoleScopesHandler = require("./lib/handlers/system/RemoveSystemRoleScopesHandler");
 			const removeSystemRoleScopesHandler = new RemoveSystemRoleScopesHandler(roleScopesDbRepo);
 
+
 			bus.subscribe({
 				subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
 				permissions: [constants.permissions.ADD_SYSTEM_ROLE],

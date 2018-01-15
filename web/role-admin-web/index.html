@@ -21,7 +21,19 @@
         }
 
         button {
-            height: 50px;
+            height: 40px;
+        }
+
+        li {
+            width: 100%;
+        }
+
+        li:nth-child(even) {
+            background-color: rgb(247, 247, 247);
+        }
+
+        li:nth-child(odd) {
+            background-color: rgb(255, 255, 255);
         }
 
         .clickable {
@@ -35,20 +47,22 @@
         .panel {
             cursor: pointer;
             font-size: 15px;
-            opacity: 0;
+            /* opacity: 0; */
         }
 
         .panel span {
             margin-left: 10px;
+            float: right
         }
 
         .role-header:hover .panel,
         li:hover .panel,
         h2:hover .panel {
-            opacity: 1;
+            /* opacity: 1; */
         }
 
-        #roles div {
+        #roles div,
+        #scopes-in-use {
             margin-left: 30px;
         }
     </style>
@@ -85,6 +99,8 @@
             $("#logout-btn-container").show();
             $("#roles").show();
 
+            $("#copy-as-config-btn").click(copyAsConfig);
+
             try {
                 const roles = await apiClientService.get("admin/system/role");
 
@@ -119,15 +135,21 @@
             }
         }
 
+        async function copyAsConfig() {
+            const roles = await apiClientService.get("admin/system/role?format=config");
+            alert(roles.data);
+        }
+
         function addRoleHtml(role, scopes) {
             let roleHtml = `
                     <div id="{{role}}">
-                        <h3 class="role-header">{{role}}
+                        <h3 class="role-header">{{role}} role
                             <span class="panel">
-                                <span role="{{role}}" class="add-scope"><span title="Add scope" class="text-success  clickable glyphicon glyphicon-plus"></span>Add scope(s)</span>
+                                <span role="{{role}}" class="add-scope"><span title="Add scope(s)" class="text-success  clickable glyphicon glyphicon-plus"></span>Add scope(s)</span>
                                 <span role="{{role}}" class="remove-role"><span title="Remove role" class="clickable text-danger glyphicon glyphicon-remove"></span>Remove role</span>
                             </span>
                         </h3>
+                        has scopes:
                     </div>`;
             const scopesList = $(`<ul></ul>`);
 
@@ -143,8 +165,8 @@
             const listItem = $(`
                     <li id="${(encodeURI(role) + "-" + encodeURI(scope)).replaceAll(".", "DOT").replaceAll("*", "STAR")}" role="${role}" scope="${scope}">
                         ${scope} 
-                        <span class="panel">
-                            <span class="clickable text-danger glyphicon glyphicon-remove"></span>Remove scope
+                        <span title="Remove scope" class="panel">
+                            <span class="clickable text-danger glyphicon glyphicon-remove"></span>
                         </span>
                     </i>
                     `);
@@ -168,11 +190,10 @@
             $("#roles #roles-list").empty();
             $("#roles #roles-list").append(sortedRoleList);
 
-            $(`#roles #roles-list .add-scope`).each((i, a) => {
-                $(a).click((e) => addScope(e));
-            });
-            $(`#roles #roles-list .remove-role`).each((i, a) => {
-                $(a).click((e) => removeRole(e));
+            setRoleClickEvents();
+
+            sortedRoleList.each((i, elem) => {
+                setScopeClickEvents($(elem).attr("id"));
             });
         }
 
@@ -190,6 +211,19 @@
             $(`#roles #roles-list #${role} ul`).empty();
             $(`#roles #roles-list #${role} ul`).append(sortedRoleList);
 
+            setScopeClickEvents(role);
+        }
+
+        function setRoleClickEvents() {
+            $(`#roles #roles-list .add-scope`).each((i, a) => {
+                $(a).click((e) => addScope(e));
+            });
+            $(`#roles #roles-list .remove-role`).each((i, a) => {
+                $(a).click((e) => removeRole(e));
+            });
+        }
+
+        function setScopeClickEvents(role) {
             $(`#roles #roles-list #${role} ul li`).each((i, a) => {
                 $(a).click((e) => removeScope(e));
             })
@@ -322,7 +356,13 @@
                             let errorJson;
                             if (response.currentTarget && response.currentTarget.response) {
                                 errorJson = JSON.parse(response.currentTarget.response);
+
+                                if (errorJson.status === 403 && userLoggedIn) {
+                                    logout();
+                                    return;
+                                }
                             }
+
                             $("#error-message").replaceWith(`${errorJson.status} ${xhr.statusText}:<br/> ${errorJson.error.code} - ${errorJson.error.title} - ${errorJson.error.detail}`);
                             $("#error-box").show();
 
@@ -360,11 +400,12 @@
 
         <div class="row">
             <div class="col-md-6">
-                <h1>Role administration</h1>
+                <h1>Fruster role administration</h1>
             </div>
             <div class="col-md-6" style="text-align: right; margin-top: 25px;">
                 <div id="logout-btn-container" hidden>
-                    <button id="logout-btn" type="button" class="btn btn-danger">Logout</button>
+                    <button id="copy-as-config-btn" type="button" class="btn btn-default btn-sm">To config string</button>
+                    <button id="logout-btn" type="button" class="btn btn-default">Logout</button>
                 </div>
             </div>
         </div>
@@ -384,11 +425,11 @@
                 <button id="submit-login" type="submit" class="btn btn-default">Login</button>
             </form>
         </div>
-
         <div hidden id="roles">
+            <b>Note:</b> Role names and scopes should not have any special characters nor spaces.
             <h2>System roles
                 <span class="panel">
-                    <span id="add-system-role">
+                    <span title="Add role" id="add-system-role">
                         <span class="text-success clickable glyphicon glyphicon-plus"></span>Add role
                     </span>
                 </span>
