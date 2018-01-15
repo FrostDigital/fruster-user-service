@@ -3,6 +3,11 @@
     "description": "Request for adding scopes to a system role.",
     "additionalProperties": false,
     "properties": {
+        "role": {
+            "type": "string",
+            "description": "The role name to add the scope(s) to.",
+            "faker": "name.jobType"
+        },
         "scopes": {
             "type": "array",
             "description": "Scopes to add to the role.",
@@ -14,6 +19,7 @@
         }
     },
     "required": [
-        "scopes"
+        "scopes",
+        "role"
     ]
 }

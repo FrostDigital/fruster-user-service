@@ -57,6 +57,8 @@
         $(() => {
             apiClientService = new ApiClientService();
 
+            $("#close-error-btn").click(() => { $("#error-box").hide() });
+
             if (window.isLoggedIn) {
                 userLoggedIn();
             } else {
@@ -74,36 +76,27 @@
             try {
                 const roles = await apiClientService.get("admin/system/role");
 
+                roles.data = roles.data.sort((a, b) => {
+                    if (a.role.toLowerCase() > b.role.toLowerCase()) {
+                        return 1;
+                    } else if (a.role.toLowerCase() < b.role.toLowerCase()) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                });
+
                 roles.data.forEach(roleObj => {
-                    let roleHtml = `
-                    <div>
-                        <h3 class="role-header">{{role}}
-                            <span class="panel">
-                                <span role="{{role}}" class="add-scope"><span title="Add scope" class="text-success  clickable glyphicon glyphicon-plus"></span> Add scope(s)</span>
-                                <span role="{{role}}" class="remove-role"><span title="Remove role" class="clickable text-danger glyphicon glyphicon-remove"></span> Remove role</span>
-                            </span>
-                        </h3>
-                    </div>`;
-                    const scopesList = $(`<ul></ul>`);
-
-                    roleObj.scopes.forEach(scope => {
-                        const listItem = $(`
-                        <li role="${roleObj.role}" scope="${scope}">
-                            ${scope} 
-                            <span class="panel">
-                                <span class="clickable text-danger glyphicon glyphicon-remove"></span> Remove scope
-                            </span>
-                        </i>
-                        `);
-
-                        listItem.click(removeScope);
-                        scopesList.append(listItem);
+                    roleObj.scopes = roleObj.scopes.sort((a, b) => {
+                        if (a.toLowerCase() > b.toLowerCase()) {
+                            return 1;
+                        } else if (a.toLowerCase() < b.toLowerCase()) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
                     });
-
-                    roleHtml = roleHtml.replaceAll("{{role}}", roleObj.role);
-                    roleHtml = $(roleHtml);
-                    roleHtml.append(scopesList);
-                    $("#roles").append($(roleHtml));
+                    addRoleHtml(roleObj.role, roleObj.scopes);
                 });
 
                 $("#add-system-role").click(addRole);
@@ -116,6 +109,82 @@
             }
         }
 
+        function addRoleHtml(role, scopes) {
+            let roleHtml = `
+                    <div id="{{role}}">
+                        <h3 class="role-header">{{role}}
+                            <span class="panel">
+                                <span role="{{role}}" class="add-scope">Add scope(s)<span title="Add scope" class="text-success  clickable glyphicon glyphicon-plus"></span></span>
+                                <span role="{{role}}" class="remove-role">Remove role <span title="Remove role" class="clickable text-danger glyphicon glyphicon-remove"></span></span>
+                            </span>
+                        </h3>
+                    </div>`;
+            const scopesList = $(`<ul></ul>`);
+
+            scopes.forEach(scope => scopesList.append(addScopeHtml(scope, role)));
+
+            roleHtml = roleHtml.replaceAll("{{role}}", role);
+            roleHtml = $(roleHtml);
+            roleHtml.append(scopesList);
+            $("#roles #roles-list").append($(roleHtml));
+        }
+
+        function addScopeHtml(scope, role) {
+            const listItem = $(`
+                    <li id="${(encodeURI(role) + "-" + encodeURI(scope)).replaceAll(".", "DOT").replaceAll("*", "STAR")}" role="${role}" scope="${scope}">
+                        ${scope} 
+                        <span class="panel">
+                            <span class="clickable text-danger glyphicon glyphicon-remove"></span> Remove scope
+                        </span>
+                    </i>
+                    `);
+
+            listItem.click(removeScope);
+
+            return listItem;
+        }
+
+        function sortRolesHtml() {
+            const sortedRoleList = $("#roles #roles-list")
+                .children()
+                .sort((a, b) => {
+                    if ($(a).attr("id").toLowerCase() > $(b).attr("id").toLowerCase())
+                        return 1;
+                    else if ($(a).attr("id").toLowerCase() < $(b).attr("id").toLowerCase())
+                        return -1
+                    else
+                        return 0;
+                });
+            $("#roles #roles-list").empty();
+            $("#roles #roles-list").append(sortedRoleList);
+
+            $(`#roles #roles-list .add-scope`).each((i, a) => {
+                $(a).click((e) => addScope(e));
+            });
+            $(`#roles #roles-list .remove-role`).each((i, a) => {
+                $(a).click((e) => removeRole(e));
+            });
+        }
+
+        function sortScopesHtml(role) {
+            const sortedRoleList = $(`#roles #roles-list #${role} ul li`)
+                .sort((a, b) => {
+                    if ($(a).attr("id").toLowerCase() > $(b).attr("id").toLowerCase())
+                        return 1;
+                    else if ($(a).attr("id").toLowerCase() < $(b).attr("id").toLowerCase())
+                        return -1
+                    else
+                        return 0;
+                });
+
+            $(`#roles #roles-list #${role} ul`).empty();
+            $(`#roles #roles-list #${role} ul`).append(sortedRoleList);
+
+            $(`#roles #roles-list #${role} ul li`).each((i, a) => {
+                $(a).click((e) => removeScope(e));
+            })
+        }
+
         async function userNotLoggedIn() {
             console.log("userNotLoggedIn");
             $("#submit-login").click(login);
@@ -123,14 +192,10 @@
 
         async function login() {
             try {
-
-                //TODO: Make sure this works: 
                 await apiClientService.post("auth/cookie", {
                     username: $("#username").val(),
                     password: $("#password").val()
                 });
-
-                // await apiClientService.post("test");
 
                 location.reload();
             } catch (err) {
@@ -153,7 +218,8 @@
             if (roleName)
                 try {
                     await apiClientService.post("admin/system/role", { role: roleName });
-                    location.reload();
+                    addRoleHtml(roleName, []);
+                    sortRolesHtml();
                 } catch (err) {
                     console.log(err);
                 }
@@ -165,8 +231,8 @@
 
             if (confirmed)
                 try {
-                    await apiClientService.delete("admin/system/role", { role: roleToRemove });
-                    location.reload();
+                    await apiClientService.delete(`admin/system/role`, { role: roleToRemove });
+                    $(`#${roleToRemove}`).remove();
                 } catch (err) {
                     console.log(err);
                 }
@@ -175,12 +241,21 @@
         async function addScope(e) {
             const roleToCreateScopeFor = e.currentTarget.attributes["role"].nodeValue;
             let scopeNames = prompt(`Please enter a scope  to be created for ${roleToCreateScopeFor}. Can be csv.`);
-            scopeNames = scopeNames.split(",");
+
+            if (scopeNames)
+                scopeNames = scopeNames.split(",");
 
             if (scopeNames)
                 try {
-                    await apiClientService.post(`admin/system/role/${roleToCreateScopeFor}/scope`, { scopes: scopeNames });
-                    location.reload();
+                    const response = await apiClientService.post(`admin/system/role/scope`, { scopes: scopeNames, role: roleToCreateScopeFor });
+                    const scopeList = $(`#roles #roles-list #${roleToCreateScopeFor} ul`);
+                    const scopesToAddToList = response.data.scopes.filter(a => scopeNames.includes(a));
+
+                    scopesToAddToList.forEach(scope => {
+                        scopeList.append(addScopeHtml(scope, roleToCreateScopeFor));
+                    });
+
+                    sortScopesHtml(roleToCreateScopeFor);
                 } catch (err) {
                     console.log(err);
                 }
@@ -193,8 +268,8 @@
 
             if (confirmed)
                 try {
-                    await apiClientService.delete(`admin/system/role/${roleToRemoveFrom}/scope`, { scopes: [scopeToRemove] });
-                    location.reload();
+                    await apiClientService.delete(`admin/system/role/scope`, { scopes: [scopeToRemove], role: roleToRemoveFrom });
+                    $(`#${(encodeURI(roleToRemoveFrom) + "-" + encodeURI(scopeToRemove)).replaceAll(".", "DOT").replaceAll("*", "STAR")}`).remove();
                 } catch (err) {
                     console.log(err);
                 }
@@ -233,12 +308,15 @@
                             if (response.currentTarget && response.currentTarget.response) {
                                 errorJson = JSON.parse(response.currentTarget.response);
                             }
+                            $("#error-message").replaceWith(`${errorJson.status} ${xhr.statusText}:<br/> ${errorJson.error.code} - ${errorJson.error.title} - ${errorJson.error.detail}`);
+                            $("#error-box").show();
 
                             reject(errorJson || xhr.statusText);
                         }
                     }
                     const onError = function () {
                         console.log("request error");
+
                         reject(xhr.statusText);
                     }
 
@@ -257,13 +335,21 @@
 
 <body>
     <div class="container">
+
+        <div id="error-box" class="alert alert-danger" hidden>
+            <span style="float: right" id="close-error-btn" class="clickable text-danger glyphicon glyphicon-remove"></span>
+            <strong data-reactid="7">Something went wrong:</strong>
+
+            <span id="error-message"></span>
+        </div>
+
         <div class="row">
             <div class="col-md-6">
                 <h1>Role administration</h1>
             </div>
             <div class="col-md-6" style="text-align: right; margin-top: 25px;">
                 <div id="logout-btn-container" hidden>
-                    <button id="logout-btn" type="button" class="btn btn-default">Logout</button>
+                    <button id="logout-btn" type="button" class="btn btn-danger">Logout</button>
                 </div>
             </div>
         </div>
@@ -285,10 +371,14 @@
         <div hidden id="roles">
             <h2>System roles
                 <span class="panel">
-                    <span id="add-system-role">
-                        <span class="text-success clickable glyphicon glyphicon-plus"></span> Add role</span>
+                    <span id="add-system-role"> Add role
+                        <span class="text-success clickable glyphicon glyphicon-plus"></span>
+                    </span>
                 </span>
             </h2>
+            <span id="roles-list">
+                <!-- Role list will show up here -->
+            </span>
         </div>
     </div>
 

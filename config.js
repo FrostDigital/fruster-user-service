@@ -68,13 +68,14 @@ module.exports = {
 
 	/** Whether or not to use database for roles and scopes. This makes it possible to dynamically add new system roles and scopes.  */
 
-	useDbRolesAndScopes: process.env.USE_DB_ROLES_AND_SCOPES === "true",
+	// useDbRolesAndScopes: process.env.USE_DB_ROLES_AND_SCOPES === "true",
+	useDbRolesAndScopes: true,
 
 	/** Whether or not to opt out of the admin web for handling roles and scopes.  */
 	optOutOfRoleAdminWeb: process.env.OPT_OUT_OF_ROLE_ADMIN_WEB === "true",
 
-	//TODO: FIX THIS!
-	apiRoot: "http://localhost:3000"
+	// Base URL to API (the api gateway)
+	apiRoot: process.env.API_ROOT || "http://localhost:3000"
 
 };
 

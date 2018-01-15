@@ -20,18 +20,3 @@ module.exports.get = async (req, res) => {
         }
     });
 };
-
-module.exports.post = async (req, res) => {
-    try {
-        const response = await bus.request(constants.endpoints.service.RESEND_VERIFICATION_EMAIL, {
-            reqId: uuid.v4(),
-            data: {
-                email: req.body.email
-            }
-        });
-
-        res.json(response);
-    } catch (err) {
-        res.status(err.status).json(err);
-    }
-};

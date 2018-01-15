@@ -13,8 +13,7 @@ let server;
 function createExpressApp() {
     let app = express();
 
-    // Set default view engine even though markojs is used
-    app.set("view engine", "pug");
+    app.use("/api", apiProxy());
 
     // Configure body parser
     app.use(bodyParser.json());
@@ -27,8 +26,6 @@ function createExpressApp() {
 
     // Set static site directory where javascript, (s)css, etc will reside
     app.use(express.static(path.join(__dirname, "static")));
-
-    app.use("/api", apiProxy());
 
     // Delegate to actual routing to pages/endpoints
     routes(app);
