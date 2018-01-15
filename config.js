@@ -67,9 +67,7 @@ module.exports = {
 	hashingAlgorithm: process.env.HASHING_ALGORITHM || "sha512",
 
 	/** Whether or not to use database for roles and scopes. This makes it possible to dynamically add new system roles and scopes.  */
-
-	// useDbRolesAndScopes: process.env.USE_DB_ROLES_AND_SCOPES === "true",
-	useDbRolesAndScopes: true,
+	useDbRolesAndScopes: process.env.USE_DB_ROLES_AND_SCOPES === "true",
 
 	/** Whether or not to opt out of the admin web for handling roles and scopes.  */
 	optOutOfRoleAdminWeb: process.env.OPT_OUT_OF_ROLE_ADMIN_WEB === "true",
