@@ -4,12 +4,24 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Role administration</title>
+    <title>Fruster role administration</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <style>
         input {
             display: block;
+            width: 100%;
+            padding: 5px;
+            height: 30px;
+        }
+
+        .input-group {
+            width: 250px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            height: 50px;
         }
 
         .clickable {
@@ -55,6 +67,7 @@
         const baseUrl = "http://localhost:3000";
 
         $(() => {
+            $("#login-form").submit(() => { return false; });
             apiClientService = new ApiClientService();
 
             $("#close-error-btn").click(() => { $("#error-box").hide() });
@@ -69,7 +82,6 @@
         async function userLoggedIn() {
             console.log("userLoggedIn");
 
-            $("#login").hide();
             $("#logout-btn-container").show();
             $("#roles").show();
 
@@ -77,24 +89,22 @@
                 const roles = await apiClientService.get("admin/system/role");
 
                 roles.data = roles.data.sort((a, b) => {
-                    if (a.role.toLowerCase() > b.role.toLowerCase()) {
+                    if (a.role.toLowerCase() > b.role.toLowerCase())
                         return 1;
-                    } else if (a.role.toLowerCase() < b.role.toLowerCase()) {
+                    else if (a.role.toLowerCase() < b.role.toLowerCase())
                         return -1;
-                    } else {
+                    else
                         return 0;
-                    }
                 });
 
                 roles.data.forEach(roleObj => {
                     roleObj.scopes = roleObj.scopes.sort((a, b) => {
-                        if (a.toLowerCase() > b.toLowerCase()) {
+                        if (a.toLowerCase() > b.toLowerCase())
                             return 1;
-                        } else if (a.toLowerCase() < b.toLowerCase()) {
+                        else if (a.toLowerCase() < b.toLowerCase())
                             return -1;
-                        } else {
+                        else
                             return 0;
-                        }
                     });
                     addRoleHtml(roleObj.role, roleObj.scopes);
                 });
@@ -114,8 +124,8 @@
                     <div id="{{role}}">
                         <h3 class="role-header">{{role}}
                             <span class="panel">
-                                <span role="{{role}}" class="add-scope">Add scope(s)<span title="Add scope" class="text-success  clickable glyphicon glyphicon-plus"></span></span>
-                                <span role="{{role}}" class="remove-role">Remove role <span title="Remove role" class="clickable text-danger glyphicon glyphicon-remove"></span></span>
+                                <span role="{{role}}" class="add-scope"><span title="Add scope" class="text-success  clickable glyphicon glyphicon-plus"></span>Add scope(s)</span>
+                                <span role="{{role}}" class="remove-role"><span title="Remove role" class="clickable text-danger glyphicon glyphicon-remove"></span>Remove role</span>
                             </span>
                         </h3>
                     </div>`;
@@ -134,7 +144,7 @@
                     <li id="${(encodeURI(role) + "-" + encodeURI(scope)).replaceAll(".", "DOT").replaceAll("*", "STAR")}" role="${role}" scope="${scope}">
                         ${scope} 
                         <span class="panel">
-                            <span class="clickable text-danger glyphicon glyphicon-remove"></span> Remove scope
+                            <span class="clickable text-danger glyphicon glyphicon-remove"></span>Remove scope
                         </span>
                     </i>
                     `);
@@ -187,7 +197,12 @@
 
         async function userNotLoggedIn() {
             console.log("userNotLoggedIn");
+            $("#login").show();
             $("#submit-login").click(login);
+
+            $("#login-form").onsubmit = function () {
+                login();
+            };
         }
 
         async function login() {
@@ -302,7 +317,7 @@
                         if (xhr.status === 200) {
                             resolve(JSON.parse(xhr.response));
                         } else {
-                            console.log("request error");
+                            console.error("request error");
 
                             let errorJson;
                             if (response.currentTarget && response.currentTarget.response) {
@@ -315,7 +330,7 @@
                         }
                     }
                     const onError = function () {
-                        console.log("request error");
+                        console.error("request error");
 
                         reject(xhr.statusText);
                     }
@@ -356,23 +371,25 @@
 
         <div class="clearfix"></div>
 
-        <div id="login">
-            <div class="input-group">
-                <label for="username">Username:</label>
-                <input id="username" type="text" />
-            </div>
-            <div class="input-group">
-                <label for="password">Password:</label>
-                <input id="password" type="password" />
-            </div>
-            <button id="submit-login">Login</button>
+        <div id="login" hidden>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="username">Username:</label>
+                    <input id="username" type="text" />
+                </div>
+                <div class="input-group">
+                    <label for="password">Password:</label>
+                    <input id="password" type="password" />
+                </div>
+                <button id="submit-login" type="submit" class="btn btn-default">Login</button>
+            </form>
         </div>
 
         <div hidden id="roles">
             <h2>System roles
                 <span class="panel">
-                    <span id="add-system-role"> Add role
-                        <span class="text-success clickable glyphicon glyphicon-plus"></span>
+                    <span id="add-system-role">
+                        <span class="text-success clickable glyphicon glyphicon-plus"></span>Add role
                     </span>
                 </span>
             </h2>

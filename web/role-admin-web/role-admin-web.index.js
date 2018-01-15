@@ -16,6 +16,7 @@ module.exports.get = async (req, res) => {
             if (req.headers.cookie) {
                 data += "<script>window.isLoggedIn = true;</script>";
             }
+
             res.end(data);
         }
     });
