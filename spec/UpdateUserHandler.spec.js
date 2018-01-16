@@ -12,21 +12,16 @@ const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
+const specConstants = require("./support/spec-constants");
 
-let mongoDb;
 
 describe("UpdateUserHandler", () => {
 
-    let mongoDb;
+    let db;
 
-    frusterTestUtils.startBeforeEach({
-        mockNats: true,
-        mongoUrl: "mongodb://localhost:27017/user-service-test",
-        service: userService,
-        afterStart: (connection) => {
-            mongoDb = connection.db;
-        }
-    });
+    frusterTestUtils
+        .startBeforeEach(specConstants
+            .testUtilsOptions((connection) => { db = connection.db; }));
 
     afterEach((done) => {
         conf.requireEmailVerification = false;
@@ -52,7 +47,7 @@ describe("UpdateUserHandler", () => {
             expect(updateResponse.data.firstName).toBe(newFirstName, "updateResponse.data.firstName");
             expect(updateResponse.data.lastName).toBe(newLastName, "updateResponse.data.lastName");
 
-            const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
+            const testUser = await db.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
 
             expect(testUser.emailVerified).toBe(true, "updateResponse.data.emailVerified");
             expect(testUser.emailVerificationToken).toBeUndefined("testUser.emailVerificationToken");
@@ -85,7 +80,7 @@ describe("UpdateUserHandler", () => {
             expect(updateResponse.data.firstName).toBe(newFirstName, "updateResponse.data.firstName");
             expect(updateResponse.data.lastName).toBe(newLastName, "updateResponse.data.lastName");
 
-            const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
+            const testUser = await db.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
 
             expect(testUser.emailVerified).toBe(true, "updateResponse.data.emailVerified");
             expect(testUser.emailVerificationToken).toBeUndefined("testUser.emailVerificationToken");
@@ -273,7 +268,7 @@ describe("UpdateUserHandler", () => {
                 }
             });
 
-            const testUser = await mongoDb.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
+            const testUser = await db.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
 
             expect(updateResponse.status).toBe(200, "updateResponse.status");
             expect(testUser.emailVerified).toBe(false, "updateResponse.data.emailVerified");

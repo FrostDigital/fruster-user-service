@@ -63,8 +63,18 @@ module.exports = {
 	usernameValidationDbField: process.env.USERNAME_VALIDATION_DB_FIELD || "email",
 
 	/** Which hashing algorithm to use for hashing passwords, supports whatever cryptojs supports. 
-	 * NOTE: changing this will make it impossible to login with any accounts created with another hashing teqnique prior. */
-	hashingAlgorithm: process.env.HASHING_ALGORITHM || "sha512"
+ * NOTE: changing this will make it impossible to login with any accounts created with another hashing teqnique prior. */
+	hashingAlgorithm: process.env.HASHING_ALGORITHM || "sha512",
+
+	/** Whether or not to use database for roles and scopes. This makes it possible to dynamically add new system roles and scopes.  */
+	useDbRolesAndScopes: process.env.USE_DB_ROLES_AND_SCOPES === "true",
+
+	/** Whether or not to opt out of the admin web for handling roles and scopes.  */
+	optOutOfRoleAdminWeb: process.env.OPT_OUT_OF_ROLE_ADMIN_WEB === "true",
+
+	// Base URL to API (the api gateway)
+	apiRoot: process.env.API_ROOT || "http://localhost:3000"
+
 };
 
 function parseArray(str) {

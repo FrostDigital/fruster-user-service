@@ -3,37 +3,51 @@ const RoleService = require("../lib/services/RoleService");
 const config = require("../config");
 const mocks = require("./support/mocks");
 const utils = require("../lib/utils/utils");
-
+const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
+const log = require("fruster-log");
 
 describe("UserModel", () => {
 
-    afterEach(done => {
+    afterEach(() => {
         config.lowerCaseName = false;
-        done();
     });
 
-    it("should lowercase names if `config.lowerCaseName` is true", () => {
-        config.lowerCaseName = true;
+    it("should lowercase names if `config.lowerCaseName` is true", done => {
+        try {
+            config.lowerCaseName = true;
 
-        const mockUser = mocks.getUserObject();
-        const user = new UserModel(mockUser);
+            const mockUser = mocks.getUserObject();
+            const user = new UserModel(mockUser);
 
-        expect(user.firstName).toBe(mockUser.firstName.toLowerCase(), "user.firstName");
-        expect(user.middleName).toBe(mockUser.middleName.toLowerCase(), "user.middleName");
-        expect(user.lastName).toBe(mockUser.lastName.toLowerCase(), "user.lastName");
+            expect(user.firstName).toBe(mockUser.firstName.toLowerCase(), "user.firstName");
+            expect(user.middleName).toBe(mockUser.middleName.toLowerCase(), "user.middleName");
+            expect(user.lastName).toBe(mockUser.lastName.toLowerCase(), "user.lastName");
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail();
+        }
     });
 
-    it("should convert names to title case for view model if if `config.lowerCaseName` is true", () => {
-        const roleService = new RoleService();
+    it("should convert names to title case for view model if if `config.lowerCaseName` is true", async done => {
+        try {
+            const roleService = new RoleService();
 
-        config.lowerCaseName = true;
+            config.lowerCaseName = true;
 
-        const mockUser = mocks.getUserObject();
-        const user = new UserModel(mockUser).toViewModel(roleService);
+            const mockUser = mocks.getUserObject();
+            const user = await new UserModel(mockUser).toViewModel(roleService);
 
-        expect(user.firstName).toBe(utils.toTitleCase(mockUser.firstName), "user.firstName");
-        expect(user.middleName).toBe(utils.toTitleCase(mockUser.middleName), "user.middleName");
-        expect(user.lastName).toBe(utils.toTitleCase(mockUser.lastName), "user.lastName");
+            expect(user.firstName).toBe(utils.toTitleCase(mockUser.firstName), "user.firstName");
+            expect(user.middleName).toBe(utils.toTitleCase(mockUser.middleName), "user.middleName");
+            expect(user.lastName).toBe(utils.toTitleCase(mockUser.lastName), "user.lastName");
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail();
+        }
     });
 
 });
