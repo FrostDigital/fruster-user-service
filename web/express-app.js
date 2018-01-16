@@ -4,20 +4,25 @@ const path = require("path");
 const log = require("fruster-log");
 const http = require("http");
 const routes = require("./routes");
+const cookieParser = require("cookie-parser");
+const apiProxy = require("./middleware/api-proxy");
+
 
 let server;
 
 function createExpressApp() {
     let app = express();
 
-    // Set default view engine even though markojs is used
-    app.set("view engine", "pug");
+    app.use("/api", apiProxy());
 
     // Configure body parser
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({
         extended: false
     }));
+
+    // Enable cookie parsing
+    app.use(cookieParser());
 
     // Set static site directory where javascript, (s)css, etc will reside
     app.use(express.static(path.join(__dirname, "static")));
@@ -67,6 +72,7 @@ module.exports = {
     },
 
     stop: () => {
-        server.close();
+        if (server)
+            server.close();
     }
 };

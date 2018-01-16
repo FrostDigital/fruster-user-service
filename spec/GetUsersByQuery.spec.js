@@ -1,23 +1,18 @@
-const testUtils = require("fruster-test-utils");
+const frusterTestUtils = require("fruster-test-utils");
 const userService = require("../fruster-user-service");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
 const constants = require("../lib/constants");
 const uuid = require("uuid");
 const Db = require("mongodb").Db;
+const specConstants = require("./support/spec-constants");
 
 
 describe("GetUsersByQueryHandler", () => {
 
-    testUtils.startBeforeEach({
-        mockNats: true,
-        service: userService,
-        bus: bus,
-        mongoUrl: "mongodb://localhost:27017/fruster-user-service-test",
-        afterStart: (connection) => {
-            return insertTestUsers(connection.db, 10);
-        }
-    });
+    frusterTestUtils
+        .startBeforeEach(specConstants
+            .testUtilsOptions((connection) => { return insertTestUsers(connection.db, 10); }));
 
     it("should be able to get users by a simple query", async done => {
         try {

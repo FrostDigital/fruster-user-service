@@ -10,21 +10,17 @@ const testUtils = require('./support/test-utils.js');
 const errors = require('../lib/errors.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
+const specConstants = require("./support/spec-constants");
 
 
 describe("ValidatePasswordHandler", () => {
 
     /** @type {Db} */
-    let mongoDb;
+    let db;
 
-    frusterTestUtils.startBeforeEach({
-        mockNats: true,
-        mongoUrl: "mongodb://localhost:27017/user-service-test",
-        service: userService,
-        afterStart: (connection) => {
-            mongoDb = connection.db;
-        }
-    });
+    frusterTestUtils
+        .startBeforeEach(specConstants
+            .testUtilsOptions((connection) => { db = connection.db; }));
 
     afterEach(done => {
         config.requireEmailVerification = false;
@@ -35,7 +31,7 @@ describe("ValidatePasswordHandler", () => {
         try {
             const user = mocks.getUserObject();
             //@ts-ignore
-            await mongoDb.dropDatabase(config.userCollection);
+            await db.dropDatabase(config.userCollection);
             await bus.request({
                 subject: constants.endpoints.service.CREATE_USER,
                 skipOptionsRequest: true,
@@ -70,8 +66,8 @@ describe("ValidatePasswordHandler", () => {
         try {
             const user = mocks.getOldUserObject();
             //@ts-ignore
-            await mongoDb.dropDatabase(config.userCollection);
-            await mongoDb.collection(config.userCollection).update({
+            await db.dropDatabase(config.userCollection);
+            await db.collection(config.userCollection).update({
                 id: user.id
             }, user, {
                     upsert: true
@@ -104,8 +100,8 @@ describe("ValidatePasswordHandler", () => {
             const user = mocks.getOldUserObject();
             user.hashDate = new Date("1970");
             //@ts-ignore
-            await mongoDb.dropDatabase(config.userCollection);
-            await mongoDb.collection(config.userCollection).update({
+            await db.dropDatabase(config.userCollection);
+            await db.collection(config.userCollection).update({
                 id: user.id
             }, user, {
                     upsert: true

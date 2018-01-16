@@ -8,6 +8,7 @@ const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
+const specConstants = require("./support/spec-constants");
 
 
 describe("AddRolesHandler", () => {
@@ -15,14 +16,9 @@ describe("AddRolesHandler", () => {
     /** @type {Db} */
     let db;
 
-    frusterTestUtils.startBeforeEach({
-        mockNats: true,
-        mongoUrl: "mongodb://localhost:27017/user-service-test",
-        service: userService,
-        afterStart: (connection) => {
-            db = connection.db;
-        }
-    });
+    frusterTestUtils
+        .startBeforeEach(specConstants
+            .testUtilsOptions((connection) => { db = connection.db; }));
 
     it("should be possible to add a role to a user", async done => {
         try {

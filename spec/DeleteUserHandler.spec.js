@@ -9,6 +9,7 @@ const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const mocks = require("./support/mocks");
+const specConstants = require("./support/spec-constants");
 
 
 describe("DeleteUserHandler", () => {
@@ -16,14 +17,9 @@ describe("DeleteUserHandler", () => {
     /** @type {Db} */
     let db;
 
-    frusterTestUtils.startBeforeEach({
-        mockNats: true,
-        mongoUrl: "mongodb://localhost:27017/user-service-test",
-        service: userService,
-        afterStart: (connection) => {
-            db = connection.db;
-        }
-    });
+    frusterTestUtils
+        .startBeforeEach(specConstants
+            .testUtilsOptions((connection) => { db = connection.db; }));
 
     it("should return 200 when user is successfully removed", async done => {
         try {
