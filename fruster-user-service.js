@@ -8,7 +8,7 @@ const expressApp = require("./web/express-app");
 
 module.exports = {
 
-	start: async (busAddress, mongoUrl) => {
+	start: async(busAddress, mongoUrl) => {
 
 		await bus.connect(busAddress);
 		const db = await mongo.connect(mongoUrl);
@@ -46,8 +46,10 @@ module.exports = {
 		const createUserHandler = new CreateUserHandler(userRepo, passwordService, roleService);
 
 		// READ
-		/** DEPRECATED */ const GetUserHandler = require("./lib/handlers/GetUserHandler");
-		/** DEPRECATED */ const getUserHandler = new GetUserHandler(userRepo, roleService);
+		/** DEPRECATED */
+		const GetUserHandler = require("./lib/handlers/GetUserHandler");
+		/** DEPRECATED */
+		const getUserHandler = new GetUserHandler(userRepo, roleService);
 
 		const GetUsersByQueryHandler = require("./lib/handlers/GetUsersByQueryHandler");
 		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleService);
@@ -219,6 +221,14 @@ module.exports = {
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
+		bus.subscribe({
+			subject: constants.endpoints.http.UPDATE_PASSWORD,
+			requestSchema: constants.schemas.request.UPDATE_PASSWORD_HTTP_REQUEST,
+			mustBeLoggedIn: true,
+			docs: docs.http.UPDATE_PASSWORD,
+			handle: (req) => updatePasswordHandler.handleHttp(req)
+		});
+
 
 		// SERVICE
 		bus.subscribe({
@@ -338,13 +348,24 @@ module.exports = {
  */
 function createIndexes(db) {
 	db.collection(config.userCollection)
-		.createIndex({ email: 1 }, { unique: true, partialFilterExpression: { email: { $exists: true } } });
+		.createIndex({
+			email: 1
+		}, {
+			unique: true,
+			partialFilterExpression: {
+				email: {
+					$exists: true
+				}
+			}
+		});
 
 	config.uniqueIndexes.forEach(index => {
 		const indexObj = {};
 		indexObj[index] = 1;
 		db.collection(config.userCollection)
-			.createIndex(indexObj, { unique: true });
+			.createIndex(indexObj, {
+				unique: true
+			});
 	});
 
 	return db;

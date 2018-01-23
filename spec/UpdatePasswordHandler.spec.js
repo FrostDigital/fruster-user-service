@@ -23,7 +23,9 @@ describe("UpdatePasswordHandler", () => {
 
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => { db = connection.db; }));
+            .testUtilsOptions((connection) => {
+                db = connection.db;
+            }));
 
     it("should be possible to update password", async done => {
         try {
@@ -35,7 +37,9 @@ describe("UpdatePasswordHandler", () => {
                 id: createdUser.data.id
             };
             const startUser = await db.collection("users")
-                .findOne({ id: createdUser.data.id });
+                .findOne({
+                    id: createdUser.data.id
+                });
 
             await bus.request({
                 subject: constants.endpoints.service.UPDATE_PASSWORD,
@@ -49,7 +53,49 @@ describe("UpdatePasswordHandler", () => {
             });
 
             const updatedUser = await db.collection("users")
-                .findOne({ id: createdUser.data.id });
+                .findOne({
+                    id: createdUser.data.id
+                });
+
+            expect(updatedUser.password).not.toBe(startUser.password, "updatedUser.password");
+            expect(updatedUser.salt).not.toBe(startUser.salt, "updatedUser.salt");
+            expect(updatedUser.hashDate).not.toBe(startUser.hashDate, "updatedUser.hashDate");
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
+    it("should be possible to update password via http", async done => {
+        try {
+            const user = mocks.getUserObject();
+            const createdUser = await testUtils.createUser(user);
+            const updatePassword = {
+                newPassword: "Localhost:8081",
+                oldPassword: user.password
+            };
+            const startUser = await db.collection("users")
+                .findOne({
+                    id: createdUser.data.id
+                });
+
+            await bus.request({
+                subject: constants.endpoints.http.UPDATE_PASSWORD,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    user: createdUser.data,
+                    data: updatePassword
+                },
+                timeout: 1000
+            });
+
+            const updatedUser = await db.collection("users")
+                .findOne({
+                    id: createdUser.data.id
+                });
 
             expect(updatedUser.password).not.toBe(startUser.password, "updatedUser.password");
             expect(updatedUser.salt).not.toBe(startUser.salt, "updatedUser.salt");
