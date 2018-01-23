@@ -8,18 +8,18 @@
     },
     "dependencies": {
         "body-parser": "^1.17.2",
-        "express": "^4.15.3",
+        "cookie-parser": "^1.4.3",
         "crypto-js": "^3.1.9-1",
         "csprng": "^0.1.1",
-        "fruster-bus": "0.2.22",
+        "express": "^4.15.3",
+        "fruster-bus": "^0.2.22",
         "fruster-errors": "0.0.7",
-        "fruster-health": "^0.0.12",
-        "fruster-log": "^0.0.16",
-        "mongodb": "^2.2.31",
+        "fruster-health": "0.0.12",
+        "fruster-log": "0.0.16",
+        "mongodb": "^2.2.34",
         "npm": "^4.6.1",
-        "uuid": "^3.1.0",
-        "cookie-parser": "1.4.3",
-        "request": "^2.81.0"
+        "request": "^2.81.0",
+        "uuid": "^3.2.1"
     },
     "devDependencies": {
         "fruster-test-utils": "^0.3.20",
