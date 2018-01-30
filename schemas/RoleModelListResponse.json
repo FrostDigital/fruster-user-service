@@ -1,7 +1,9 @@
 {
     "id": "RoleModelListResponse",
     "description": "Response with an array of roles.",
-    "anyOf": [{
+    "additionalProperties": false,
+    "anyOf": [
+        {
             "type": "array",
             "items": {
                 "$ref": "RoleModel"
@@ -11,5 +13,4 @@
             "type": "string"
         }
     ]
-
 }
