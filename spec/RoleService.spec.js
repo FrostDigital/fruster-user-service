@@ -84,7 +84,6 @@ describe("RoleService", () => {
         }
     });
 
-    // TODO: This is not working randomly 
     it("should save roles from config to database if database is empty", async done => {
         try {
             config.useDbRolesAndScopes = true;
