@@ -15,7 +15,7 @@
             "description": "The last name of the user"
         },
         "middleName": {
-            "type": "string",
+            "type": ["string", "null"],
             "description": "the middle name of the user."
         },
         "email": {
