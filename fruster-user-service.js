@@ -8,7 +8,7 @@ const expressApp = require("./web/express-app");
 
 module.exports = {
 
-	start: async(busAddress, mongoUrl) => {
+	start: async (busAddress, mongoUrl) => {
 
 		await bus.connect(busAddress);
 		const db = await mongo.connect(mongoUrl);
@@ -38,7 +38,7 @@ module.exports = {
 
 		// HANDLERS
 		const CreateInitialUserHandler = require("./lib/handlers/CreateInitialUserHandler");
-		const createInitialUserHandler = new CreateInitialUserHandler(userRepo, initialUserRepo);
+		const createInitialUserHandler = new CreateInitialUserHandler(userRepo, initialUserRepo, passwordService);
 		await createInitialUserHandler.handle();
 
 		// CREATE

@@ -18,9 +18,9 @@ module.exports = {
 
 	uniqueIndexes: parseArray(process.env.UNIQUE_INDEXES) || [],
 
-	initialUserEmail: "admin@frost.se",
+	initialUserEmail: process.env.INITIAL_USER_EMAIL || "admin@frost.se",
 
-	initialUserPassword: "FrusterR0ckS",
+	initialUserPassword: process.env.INITIAL_USER_PASSWORD || "FrusterR0ckS",
 
 	initialUserRole: process.env.INITIAL_USER_ROLE || "super-admin",
 
