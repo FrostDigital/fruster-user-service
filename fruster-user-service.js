@@ -241,8 +241,7 @@ module.exports = {
 
 		/** DEPRECATED */
 		bus.subscribe({
-			// @ts-ignore
-			deprecated: true,
+			deprecated: docs.deprecated.GET_USER,
 			subject: constants.endpoints.service.GET_USER,
 			responseSchema: constants.schemas.response.USER_LIST_RESPONSE,
 			docs: docs.service.GET_USER,
