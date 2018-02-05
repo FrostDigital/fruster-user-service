@@ -47,6 +47,7 @@
         .panel {
             cursor: pointer;
             font-size: 15px;
+            border-top-right-radius: 0 !important;
             /* opacity: 0; */
         }
 
@@ -55,15 +56,74 @@
             float: right
         }
 
-        .role-header:hover .panel,
-        li:hover .panel,
-        h2:hover .panel {
-            /* opacity: 1; */
-        }
-
         #roles div,
         #scopes-in-use {
             margin-left: 30px;
+        }
+
+        #config-string {
+            text-align: left;
+            margin-top: -1px;
+            cursor: inherit;
+        }
+
+        .panel-body {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        #config-btn-text.closed::before {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            margin-left: 0px;
+            vertical-align: middle;
+            border-top: 4px dashed;
+            border-top: 4px solid\9;
+            border-right: 4px solid transparent;
+            border-left: 4px solid transparent;
+            content: " ";
+        }
+
+        #config-btn-text.opened::before {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            margin-left: 0px;
+            vertical-align: middle;
+            border-right: 4px solid transparent;
+            border-left: 4px solid transparent;
+            content: " ";
+            border-top: 0;
+            border-bottom: 4px dashed;
+            border-bottom: 4px solid\9;
+        }
+
+        .btn.opened {
+            padding-top: 4px;
+            border-bottom: none;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .btn.config-menu-opened {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .btn {
+            border-color: #ddd !important;
+        }
+
+        .btn.opened:hover,
+        .btn.opened:focus,
+        .btn.opened:active {
+            border-color: #ddd !important;
+        }
+
+        .btn.opened:focus,
+        .btn.opened:active {
+            background-color: white;
         }
     </style>
 
@@ -99,7 +159,7 @@
             $("#logout-btn-container").show();
             $("#roles").show();
 
-            $("#copy-as-config-btn").click(copyAsConfig);
+            $("#config-btn").click(asConfig);
 
             try {
                 const roles = await apiClientService.get("admin/system/role");
@@ -135,9 +195,22 @@
             }
         }
 
-        async function copyAsConfig() {
-            const roles = await apiClientService.get("admin/system/role?format=config");
-            alert(roles.data);
+        let configStringVisible = false;
+
+        async function asConfig(e) {
+            if (!configStringVisible) {
+                const roles = await apiClientService.get("admin/system/role?format=config");
+                // alert(roles.data);
+                const panel = $("#config-string .panel-body");
+                panel.empty();
+                panel.append(roles.data);
+            }
+            $("#config-string").toggle();
+            $("#config-btn-text").toggleClass("opened closed");
+            $(e.currentTarget).toggleClass("opened closed");
+            $("#logout-btn").toggleClass("config-menu-opened");
+
+            configStringVisible = !configStringVisible;
         }
 
         function addRoleHtml(role, scopes) {
@@ -404,8 +477,14 @@
             </div>
             <div class="col-md-6" style="text-align: right; margin-top: 25px;">
                 <div id="logout-btn-container" hidden>
-                    <button id="copy-as-config-btn" type="button" class="btn btn-default btn-sm">To config string</button>
+                    <button id="config-btn" type="button" class="btn btn-default btn-sm">
+                        <span id="config-btn-text" class="closed"> Config string</span>
+                    </button>
                     <button id="logout-btn" type="button" class="btn btn-default">Logout</button>
+                    <div id="config-string" hidden class="panel panel-default">
+                        <div class="panel-body">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -426,7 +505,10 @@
             </form>
         </div>
         <div hidden id="roles">
-            <b>Note:</b> Role names and scopes should not have any special characters nor spaces.
+            <br/>
+            <span class="alert alert-info">
+                <b>Note:</b> Role names and scopes should not have any special characters nor spaces.
+            </span>
             <h2>System roles
                 <span class="panel">
                     <span title="Add role" id="add-system-role">
