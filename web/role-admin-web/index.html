@@ -182,6 +182,7 @@
                         else
                             return 0;
                     });
+
                     addRoleHtml(roleObj.role, roleObj.scopes);
                 });
 
@@ -200,8 +201,8 @@
         async function asConfig(e) {
             if (!configStringVisible) {
                 const roles = await apiClientService.get("admin/system/role?format=config");
-                // alert(roles.data);
                 const panel = $("#config-string .panel-body");
+
                 panel.empty();
                 panel.append(roles.data);
             }
@@ -215,11 +216,11 @@
 
         function addRoleHtml(role, scopes) {
             let roleHtml = `
-                    <div id="{{role}}">
-                        <h3 class="role-header">{{role}} role
+                    <div id="${role}">
+                        <h3 class="role-header">${role} role
                             <span class="panel">
-                                <span role="{{role}}" class="add-scope"><span title="Add scope(s)" class="text-success  clickable glyphicon glyphicon-plus"></span>Add scope(s)</span>
-                                <span role="{{role}}" class="remove-role"><span title="Remove role" class="clickable text-danger glyphicon glyphicon-remove"></span>Remove role</span>
+                                <span role="${role}" class="add-scope"><span title="Add scope(s)" class="text-success  clickable glyphicon glyphicon-plus"></span>Add scope(s)</span>
+                                <span role="${role}" class="remove-role"><span title="Remove role" class="clickable text-danger glyphicon glyphicon-remove"></span>Remove role</span>
                             </span>
                         </h3>
                         has scopes:
@@ -444,7 +445,6 @@
                     }
                     const onError = function () {
                         console.error("request error");
-
                         reject(xhr.statusText);
                     }
 
@@ -507,7 +507,8 @@
         <div hidden id="roles">
             <br/>
             <span class="alert alert-info">
-                <b>Note:</b> Role names and scopes should not have any special characters nor spaces.
+                <b>Note:</b> Role names and scopes should not have any special characters nor spaces. Each role should have
+                at least one scope.
             </span>
             <h2>System roles
                 <span class="panel">
