@@ -202,6 +202,48 @@ describe("ValidatePasswordHandler", () => {
         }
     });
 
+    it("should not be possible to login using an incomplete email", async done => {
+        try {
+            mocks.mockMailService();
+            const user = mocks.getUserObject();
+            await bus.request({
+                subject: constants.endpoints.service.CREATE_USER,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: user
+                }
+            });
+
+            let email = user.email;
+            email = email.substring(0, email.indexOf("@"));
+
+            try {
+                await bus.request({
+                    subject: constants.endpoints.service.VALIDATE_PASSWORD,
+                    skipOptionsRequest: true,
+                    message: {
+                        reqId: uuid.v4(),
+                        data: {
+                            username: email,
+                            password: user.password
+                        }
+                    }
+                });
+
+                done.fail();
+            } catch (err) {
+                expect(err.status).toBe(401, "err.status");
+                expect(err.data).toBeUndefined("err.data");
+
+                done();
+            }
+        } catch (err) {
+            log.error(err);
+            testUtils.fail(done, err);
+        }
+    });
+
     it("should return 400 when user without verified email logs in with config.requireEmailVerification set to true", async done => {
         try {
             mocks.mockMailService();

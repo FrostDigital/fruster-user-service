@@ -8,6 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <style>
+        body {
+            overflow-y: scroll;
+            background-color: #f8f9fa !important;
+        }
+
+        .container {
+            background-color: #fff !important;
+        }
+
         input {
             display: block;
             width: 100%;
@@ -29,7 +38,7 @@
         }
 
         li:nth-child(even) {
-            background-color: rgb(247, 247, 247);
+            background-color: #f8f9fa;
         }
 
         li:nth-child(odd) {
@@ -49,6 +58,7 @@
             font-size: 15px;
             border-top-right-radius: 0 !important;
             /* opacity: 0; */
+            background-color: inherit !important;
         }
 
         .panel span {
@@ -56,9 +66,8 @@
             float: right
         }
 
-        #roles div,
-        #scopes-in-use {
-            margin-left: 30px;
+        .role-header-role {
+            font-weight: bold;
         }
 
         #config-string {
@@ -125,6 +134,28 @@
         .btn.opened:active {
             background-color: white;
         }
+
+        .permissions:nth-child(even):nth-child(4n),
+        .permissions:nth-child(odd):nth-child(4n-7) {
+            background-color: #f7f7f7;
+        }
+
+        .role-container {
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f7f7f7;
+        }
+
+        #sort {
+            font-size: 15px;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .row {
+            width: 1150px;
+            margin-left: -6px !important;
+        }
     </style>
 
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/styles/googlecode.min.css">
@@ -136,6 +167,8 @@
             var target = this;
             return target.split(search).join(replacement);
         };
+
+        let sortOrder = 1;
 
         let apiClientService;
         const baseUrl = "http://localhost:3000";
@@ -191,6 +224,13 @@
                 $(".remove-role").click(removeRole);
                 $("#logout-btn").click(logout);
 
+                $("#sort").click(e => {
+                    sortOrder *= -1;
+                    sortRolesHtml();
+                    $("#sort").toggleClass("glyphicon glyphicon-sort-by-attributes");
+                    $("#sort").toggleClass("glyphicon glyphicon-sort-by-attributes-alt");
+                });
+
             } catch (err) {
                 console.log(err);
             }
@@ -216,16 +256,16 @@
 
         function addRoleHtml(role, scopes) {
             let roleHtml = `
-                    <div id="${role}">
-                        <h3 class="role-header">${role} role
+                    <div class="role-container" id="${role}">
+                        <h3 class="role-header"><span class="role-header-role">${role}</span> role
                             <span class="panel">
                                 <span role="${role}" class="add-scope"><span title="Add scope(s)" class="text-success  clickable glyphicon glyphicon-plus"></span>Add scope(s)</span>
                                 <span role="${role}" class="remove-role"><span title="Remove role" class="clickable text-danger glyphicon glyphicon-remove"></span>Remove role</span>
                             </span>
+                            <span style="font-size: 11px">has scopes:</span>
                         </h3>
-                        has scopes:
                     </div>`;
-            const scopesList = $(`<ul></ul>`);
+            const scopesList = $(`<div class="row"></div>`);
 
             scopes.forEach(scope => scopesList.append(addScopeHtml(scope, role)));
 
@@ -237,15 +277,15 @@
 
         function addScopeHtml(scope, role) {
             const listItem = $(`
-                    <li id="${(encodeURI(role) + "-" + encodeURI(scope)).replaceAll(".", "DOT").replaceAll("*", "STAR")}" role="${role}" scope="${scope}">
+                    <div class="col-md-6 permissions" id="${(encodeURI(role) + "-" + encodeURI(scope)).replaceAll(".", "DOT").replaceAll("*", "STAR")}" role="${role}" scope="${scope}">
                         ${scope} 
                         <span title="Remove scope" class="panel">
                             <span class="clickable text-danger glyphicon glyphicon-remove"></span>
                         </span>
-                    </i>
+                    </div>
                     `);
 
-            listItem.click(removeScope);
+            $(listItem).find(".clickable").click(removeScope);
 
             return listItem;
         }
@@ -254,10 +294,13 @@
             const sortedRoleList = $("#roles #roles-list")
                 .children()
                 .sort((a, b) => {
-                    if ($(a).attr("id").toLowerCase() > $(b).attr("id").toLowerCase())
-                        return 1;
-                    else if ($(a).attr("id").toLowerCase() < $(b).attr("id").toLowerCase())
-                        return -1
+                    const aAttr = $(a).attr("id").toLowerCase();
+                    const bAttr = $(b).attr("id").toLowerCase();
+
+                    if (aAttr > bAttr)
+                        return 1 * sortOrder;
+                    else if (aAttr < bAttr)
+                        return -1 * sortOrder;
                     else
                         return 0;
                 });
@@ -272,18 +315,21 @@
         }
 
         function sortScopesHtml(role) {
-            const sortedRoleList = $(`#roles #roles-list #${role} ul li`)
+            const sortedRoleList = $(`#roles #roles-list #${role} .row .permissions`)
                 .sort((a, b) => {
-                    if ($(a).attr("id").toLowerCase() > $(b).attr("id").toLowerCase())
+                    const aId = $(a).attr("id").toLowerCase();
+                    const bId = $(b).attr("id").toLowerCase();
+
+                    if (aId > bId)
                         return 1;
-                    else if ($(a).attr("id").toLowerCase() < $(b).attr("id").toLowerCase())
+                    else if (aId < bId)
                         return -1
                     else
                         return 0;
                 });
 
-            $(`#roles #roles-list #${role} ul`).empty();
-            $(`#roles #roles-list #${role} ul`).append(sortedRoleList);
+            $(`#roles #roles-list #${role} .row`).empty();
+            $(`#roles #roles-list #${role} .row`).append(sortedRoleList);
 
             setScopeClickEvents(role);
         }
@@ -298,8 +344,8 @@
         }
 
         function setScopeClickEvents(role) {
-            $(`#roles #roles-list #${role} ul li`).each((i, a) => {
-                $(a).click((e) => removeScope(e));
+            $(`#roles #roles-list #${role} .row .permissions`).each((i, a) => {
+                $(a).find(".clickable").click((e) => removeScope(e));
             })
         }
 
@@ -371,8 +417,19 @@
             if (scopeNames)
                 try {
                     const response = await apiClientService.post(`admin/system/role/scope`, { scopes: scopeNames, role: roleToCreateScopeFor });
-                    const scopeList = $(`#roles #roles-list #${roleToCreateScopeFor} ul`);
-                    const scopesToAddToList = response.data.scopes.filter(a => scopeNames.includes(a));
+                    const scopeList = $(`#roles #roles-list #${roleToCreateScopeFor} .row`);
+
+                    const scopesInList = [];
+
+                    scopeList.each((i, item) => {
+                        return $(item).children().each((i, child) => {
+                            scopesInList.push($(child).attr("scope"));
+                        });
+                    });
+
+                    const scopesToAddToList = response.data.scopes.filter(a => {
+                        return !scopesInList.includes(a);
+                    });
 
                     scopesToAddToList.forEach(scope => {
                         scopeList.append(addScopeHtml(scope, roleToCreateScopeFor));
@@ -385,8 +442,11 @@
         }
 
         async function removeScope(e) {
-            const scopeToRemove = e.currentTarget.attributes["scope"].nodeValue;
-            const roleToRemoveFrom = e.currentTarget.attributes["role"].nodeValue;
+            console.log(e.currentTarget);
+            const currentTarget = $(e.currentTarget).parent().parent();
+            const scopeToRemove = $(currentTarget).attr("scope");
+            const roleToRemoveFrom = $(currentTarget).attr("role");
+
             const confirmed = confirm(`Do you want to remove the scope ${scopeToRemove} from the role ${roleToRemoveFrom}?`);
 
             if (confirmed)
@@ -461,7 +521,7 @@
 
 </head>
 
-<body>
+<body class="bg-light">
     <div class="container">
 
         <div id="error-box" class="alert alert-danger" hidden>
@@ -471,7 +531,7 @@
             <span id="error-message"></span>
         </div>
 
-        <div class="row">
+        <div class="row" style="margin-left: -15px !important;">
             <div class="col-md-6">
                 <h1>Fruster role administration</h1>
             </div>
@@ -511,6 +571,9 @@
                 at least one scope.
             </span>
             <h2>System roles
+
+                <span class="glyphicon glyphicon-sort-by-attributes" id="sort"></span>
+
                 <span class="panel">
                     <span title="Add role" id="add-system-role">
                         <span class="text-success clickable glyphicon glyphicon-plus"></span>Add role
@@ -522,7 +585,7 @@
             </span>
         </div>
     </div>
-
+    <br>
 </body>
 
 </html>
