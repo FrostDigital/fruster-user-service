@@ -30,13 +30,7 @@
             "description": "mongodb like query object in a <String<any>> fashion, e.g. { id: { $in: ['7a967d8b-8a25-4d20-b0e9-8ebe9383d488', '9f6b47c0-628c-45ca-8c43-8a99bf37e241'] }} to get users with ids '7a967d8b-8a25-4d20-b0e9-8ebe9383d488' and '9f6b47c0-628c-45ca-8c43-8a99bf37e241.'",
             "additionalProperties": true,
             "minProperties": 1,
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "format": "uuid",
-                    "description": "Just an example property."
-                }
-            }
+            "properties": {}
         }
     }
 }
