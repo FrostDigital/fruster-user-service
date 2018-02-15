@@ -283,6 +283,46 @@ describe("ValidatePasswordHandler", () => {
         }
     });
 
+    it("should be possible for to login even if the email has not been verified but config.optionalEmailVerification is set to true", async done => {
+        try {
+            mocks.mockMailService();
+
+            const user = mocks.getUserObject();
+
+            await bus.request({
+                subject: constants.endpoints.service.CREATE_USER,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: user
+                }
+            });
+
+            config.optionalEmailVerification = true;
+
+            const response = await bus.request({
+                subject: constants.endpoints.service.VALIDATE_PASSWORD,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {
+                        username: user.email,
+                        password: user.password
+                    }
+                }
+            });
+
+            expect(response.status).toBe(200, "response.status");
+            expect(response.error).toBeUndefined("response.error");
+
+            config.optionalEmailVerification = false;
+
+            done();
+        } catch (err) {
+            testUtils.fail(done, err);
+        }
+    });
+
     it("should be possible for old accounts to login even if the email has not been verified", async done => {
         try {
             mocks.mockMailService();
