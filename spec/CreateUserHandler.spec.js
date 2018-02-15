@@ -391,6 +391,54 @@ describe("CreateUserHandler", () => {
         }
     });
 
+    it("should generate email verification token when config optionalEmailVerification is true", async done => {
+        mocks.mockMailService();
+        try {
+            conf.optionalEmailVerification = true;
+
+            const user = mocks.getUserObject();
+            const response = await bus.request({
+                subject: constants.endpoints.service.CREATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: user
+                }
+            });
+
+            expect(response.status).toBe(201, "response.status");
+
+            expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
+            expect(response.error).toBeUndefined("response.error");
+
+            expect(response.data.firstName).toBe(user.firstName, "response.data.firstName");
+            expect(response.data.middleName).toBe(user.middleName, "response.data.middleName");
+            expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
+            expect(response.data.email).toBe(user.email, "response.data.email");
+            expect(response.data.emailVerified).toBe(false, "response.data.emailVerified");
+            expect(response.data.emailVerificationToken).toBeUndefined("response.data.emailVerificationToken");
+
+            const userFromDatabase = await (db.collection(conf.userCollection).findOne({ id: response.data.id }));
+            expect(userFromDatabase.emailVerified).toBe(false, "userFromDatabase.emailVerified");
+            expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
+
+            const roles = await roleService.getRoles();
+
+            user.roles.forEach(role => {
+                expect(response.data.scopes.length).toBe(Object.keys(roles[role.toLowerCase()]).length);
+            });
+
+            conf.optionalEmailVerification = false;
+
+            done();
+        } catch (err) {
+            conf.optionalEmailVerification = false;
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
     it("should not allow multiple users with the same email to be created", async done => {
         mocks.mockMailService();
         const user = mocks.getUserObject();

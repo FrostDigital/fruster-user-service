@@ -283,4 +283,46 @@ describe("UpdateUserHandler", () => {
         }
     });
 
+    it("should resend verification mail when updating email if conf.optionalEmailVerification is set to true", async (done) => {
+        try {
+            conf.optionalEmailVerification = true;
+            mocks.mockMailService();
+            const user = mocks.getUserObject();
+            const email = user.email;
+            let id;
+
+            const createdUserResponse = await testUtils.createUser(user);
+            id = createdUserResponse.data.id;
+            user.email = email;
+
+            const updateResponse = await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {
+                        id: id,
+                        email: email,
+                        firstName: user.firstName,
+                        lastName: user.lastName
+                    }
+                }
+            });
+
+            const testUser = await db.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
+
+            expect(updateResponse.status).toBe(200, "updateResponse.status");
+            expect(testUser.emailVerified).toBe(false, "updateResponse.data.emailVerified");
+            expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
+
+            conf.optionalEmailVerification = false;
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
 });

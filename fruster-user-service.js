@@ -330,12 +330,12 @@ module.exports = {
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
-		if (!busAddress.includes("mock") && (config.requireEmailVerification || config.useDbRolesAndScopes))
+		if (!busAddress.includes("mock") && (config.requireEmailVerification || config.useDbRolesAndScopes || config.optionalEmailVerification))
 			expressApp.start(config.port);
 	},
 
 	stop: () => {
-		if (config.requireEmailVerification || config.useDbRolesAndScopes) {
+		if (config.requireEmailVerification || config.optionalEmailVerification ||  config.useDbRolesAndScopes) {
 			expressApp.stop();
 		}
 	}
