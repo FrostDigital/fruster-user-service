@@ -91,6 +91,9 @@ describe("GetSystemRolesHandler", () => {
                 });
             }
 
+            'padmin0:0;padmin1:1;super-admin:*;admin:profile.get,user.*;user:profile.get;padmin2:2;'
+            'super-admin:*;admin:profile.get,user.*;user:profile.get;padmin0:0;padmin1:1;padmin2:2;'
+
             const rolesResponse = await bus.request({
                 subject: constants.endpoints.http.admin.GET_SYSTEM_ROLES,
                 skipOptionsRequest: true,
@@ -102,7 +105,22 @@ describe("GetSystemRolesHandler", () => {
                 }
             });
 
-            expect(rolesResponse.data).toBe("super-admin:*;admin:profile.get,user.*;user:profile.get;padmin0:0;padmin1:1;padmin2:2;");
+            /** Order of the roles in the config may vary */
+            const pt1 = "super-admin:*;";
+            const pt2 = "admin:profile.get,user.*;";
+            const pt3 = "user:profile.get;";
+            const pt4 = "padmin0:0;";
+            const pt5 = "padmin1:1;";
+            const pt6 = "padmin2:2;";
+
+            expect(rolesResponse.data.includes(pt1)).toBeTruthy("rolesResponse.data.includes(pt1)");
+            expect(rolesResponse.data.includes(pt2)).toBeTruthy("rolesResponse.data.includes(pt2)");
+            expect(rolesResponse.data.includes(pt3)).toBeTruthy("rolesResponse.data.includes(pt3)");
+            expect(rolesResponse.data.includes(pt4)).toBeTruthy("rolesResponse.data.includes(pt4)");
+            expect(rolesResponse.data.includes(pt5)).toBeTruthy("rolesResponse.data.includes(pt5)");
+            expect(rolesResponse.data.includes(pt6)).toBeTruthy("rolesResponse.data.includes(pt6)");
+
+            expect(rolesResponse.data.replace(pt1, "").replace(pt2, "").replace(pt3, "").replace(pt4, "").replace(pt5, "").replace(pt6, "").length).toBe(0, "rolesResponse.data with all parts replaced with \"\"");
 
             done();
         } catch (err) {
