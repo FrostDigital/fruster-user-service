@@ -1,9 +1,9 @@
-const PasswordService = require("../lib/services/PasswordService");
+const PasswordManager = require("../lib/managers/PasswordManager");
 const config = require("../config");
 const log = require("fruster-log");
 
 
-describe("PasswordService", () => {
+describe("PasswordManager", () => {
 
     let hashingAlgoritmDefaultValue;
 
@@ -19,14 +19,14 @@ describe("PasswordService", () => {
         try {
             const password = " hello";
             const id = "user-id";
-            const passwordService = new PasswordService();
-            const salt = passwordService._generateSalt();
+            const passwordManager = new PasswordManager(null);
+            const salt = passwordManager._generateSalt();
             const hashDate = new Date();
-            const pepper = passwordService._generatePepper(id, password, hashDate);
-            const hashResponse = await passwordService._hashPassword(password, salt, pepper);
+            const pepper = passwordManager._generatePepper(id, password, hashDate);
+            const hashResponse = await passwordManager._hashPassword(password, salt, pepper);
 
             expect(hashResponse.length).toBe(128);
-            expect(await passwordService.validatePassword(hashResponse, salt, id, password, hashDate)).toBe(true, "await passwordService.validatePassword(hashResponse, salt, id, password, hashDate)");
+            expect(await passwordManager.validatePassword(hashResponse, salt, id, password, hashDate)).toBe(true, "await passwordManager.validatePassword(hashResponse, salt, id, password, hashDate)");
 
             done();
         } catch (err) {
@@ -41,14 +41,14 @@ describe("PasswordService", () => {
 
             const password = " hello";
             const id = "user-id";
-            const passwordService = new PasswordService();
-            const salt = passwordService._generateSalt();
+            const passwordManager = new PasswordManager(null);
+            const salt = passwordManager._generateSalt();
             const hashDate = new Date();
-            const pepper = passwordService._generatePepper(id, password, hashDate);
-            const hashResponse = await passwordService._hashPassword(password, salt, pepper);
+            const pepper = passwordManager._generatePepper(id, password, hashDate);
+            const hashResponse = await passwordManager._hashPassword(password, salt, pepper);
 
             expect(hashResponse.length).toBe(128);
-            expect(await passwordService.validatePassword(hashResponse, salt, id, password, hashDate)).toBe(true, "await passwordService.validatePassword(hashResponse, salt, id, password, hashDate)");
+            expect(await passwordManager.validatePassword(hashResponse, salt, id, password, hashDate)).toBe(true, "await passwordManager.validatePassword(hashResponse, salt, id, password, hashDate)");
 
             done();
         } catch (err) {
@@ -63,15 +63,15 @@ describe("PasswordService", () => {
 
             const password = " hello";
             const id = "user-id";
-            const passwordService = new PasswordService();
-            const salt = passwordService._generateSalt();
+            const passwordManager = new PasswordManager(null);
+            const salt = passwordManager._generateSalt();
             const hashDate = new Date();
-            const pepper = passwordService._generatePepper(id, password, hashDate);
-            const hashResponse = await passwordService._hashPassword(password, salt, pepper);
+            const pepper = passwordManager._generatePepper(id, password, hashDate);
+            const hashResponse = await passwordManager._hashPassword(password, salt, pepper);
 
             config.hashingAlgorithm = "pbkdf2";
 
-            expect(await passwordService.validatePassword(hashResponse, salt, id, password, hashDate)).toBe(false, "await passwordService.validatePassword(hashResponse, salt, id, password, hashDate)");
+            expect(await passwordManager.validatePassword(hashResponse, salt, id, password, hashDate)).toBe(false, "await passwordManager.validatePassword(hashResponse, salt, id, password, hashDate)");
 
             done();
         } catch (err) {
@@ -86,15 +86,15 @@ describe("PasswordService", () => {
 
             const password = " hello";
             const id = "user-id";
-            const passwordService = new PasswordService();
-            const salt = passwordService._generateSalt();
+            const passwordManager = new PasswordManager(null);
+            const salt = passwordManager._generateSalt();
             const hashDate = new Date();
-            const pepper = passwordService._generatePepper(id, password, hashDate);
-            const hashResponse = await passwordService._hashPassword(password, salt, pepper);
+            const pepper = passwordManager._generatePepper(id, password, hashDate);
+            const hashResponse = await passwordManager._hashPassword(password, salt, pepper);
 
             config.hashingAlgorithm = "sha512";
 
-            expect(await passwordService.validatePassword(hashResponse, salt, id, password, hashDate)).toBe(false, "await passwordService.validatePassword(hashResponse, salt, id, password, hashDate)");
+            expect(await passwordManager.validatePassword(hashResponse, salt, id, password, hashDate)).toBe(false, "await passwordManager.validatePassword(hashResponse, salt, id, password, hashDate)");
 
             done();
         } catch (err) {

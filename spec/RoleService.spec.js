@@ -1,7 +1,7 @@
 const Db = require("mongodb").Db;
 const frusterTestUtils = require("fruster-test-utils");
 const RoleScopesDbRepo = require("../lib/repos/RoleScopesDbRepo");
-const RoleService = require("../lib/services/RoleService");
+const RoleManager = require("../lib/managers/RoleManager");
 const constants = require("../lib/constants");
 const config = require("../config");
 const RoleModel = require("../lib/models/RoleModel");
@@ -9,7 +9,7 @@ const specConstants = require("./support/spec-constants");
 const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
 const log = require("fruster-log");
 
-describe("RoleService", () => {
+describe("RoleManager", () => {
 
     const defaults = {
         /** @type {String} */
@@ -49,8 +49,8 @@ describe("RoleService", () => {
             const roleScopesConfigRepo = new RoleScopesConfigRepo();
             await roleScopesConfigRepo.prepareRoles();
 
-            const roleService = new RoleService(roleScopesConfigRepo);
-            const roles = await roleService.getRoles();
+            const roleManager = new RoleManager(roleScopesConfigRepo);
+            const roles = await roleManager.getRoles();
 
             expect(roles.admin[0]).toBe("user.hello", "roles.admin[0]");
             expect(roles.user[0]).toBe("admin.hello", "roles.user[0]");
@@ -70,8 +70,8 @@ describe("RoleService", () => {
                     new RoleModel("user", ["admin.hello"])
                 ]);
 
-            const roleService = new RoleService(new RoleScopesDbRepo(db));
-            const roles = await roleService.getRoles();
+            const roleManager = new RoleManager(new RoleScopesDbRepo(db));
+            const roles = await roleManager.getRoles();
 
             expect(config.roles).not.toBe("admin:user.hello;user:admin.hello", config.roles);
             expect(roles.admin[0]).toBe("user.hello", "roles.admin[0]");
@@ -91,8 +91,8 @@ describe("RoleService", () => {
             const roleScopesDbRepo = new RoleScopesDbRepo(db);
             await roleScopesDbRepo.prepareRoles();
 
-            const roleService = new RoleService(roleScopesDbRepo);
-            const roles = await roleService.getRoles();
+            const roleManager = new RoleManager(roleScopesDbRepo);
+            const roles = await roleManager.getRoles();
 
             expect(roles["super-admin"][0]).toBe("*", "roles[\"super-admin\"][0]");
             expect(roles.admin[0]).toBe("profile.get", "roles.admin[0]");

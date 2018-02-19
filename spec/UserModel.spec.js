@@ -1,5 +1,5 @@
 const UserModel = require("../lib/models/UserModel");
-const RoleService = require("../lib/services/RoleService");
+const RoleManager = require("../lib/managers/RoleManager");
 const config = require("../config");
 const mocks = require("./support/mocks");
 const utils = require("../lib/utils/utils");
@@ -32,12 +32,12 @@ describe("UserModel", () => {
 
     it("should convert names to title case for view model if if `config.lowerCaseName` is true", async done => {
         try {
-            const roleService = new RoleService();
+            const roleManager = new RoleManager();
 
             config.lowerCaseName = true;
 
             const mockUser = mocks.getUserObject();
-            const user = await new UserModel(mockUser).toViewModel(roleService);
+            const user = await new UserModel(mockUser).toViewModel(roleManager);
 
             expect(user.firstName).toBe(utils.toTitleCase(mockUser.firstName), "user.firstName");
             expect(user.middleName).toBe(utils.toTitleCase(mockUser.middleName), "user.middleName");
