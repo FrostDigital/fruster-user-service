@@ -13,6 +13,7 @@ const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
+const errors = require('../lib/errors');
 
 
 describe("UpdateUserHandler", () => {
@@ -25,6 +26,9 @@ describe("UpdateUserHandler", () => {
 
     afterEach((done) => {
         conf.requireEmailVerification = false;
+        conf.requirePasswordOnEmailUpdate = false;
+        conf.optionalEmailVerification = false;
+
         done();
     });
 
@@ -213,6 +217,96 @@ describe("UpdateUserHandler", () => {
         }
     });
 
+    it("should require password when updating email if config.requirePasswordOnEmailUpdate is true", async done => {
+        try {
+            conf.requirePasswordOnEmailUpdate = true;
+
+            const user = mocks.getUserObject();
+            const email = "rambo.dreadlock@fejkmejl.se";
+
+            const createdUserResponse = await testUtils.createUser(user);
+            const id = createdUserResponse.data.id;
+            user.email = email;
+
+            const updateResponse = await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: { id, email }
+                }
+            });
+
+            done.fail();
+        } catch (err) {
+            expect(err.status).toBe(errors.get("PASSWORD_REQUIRED").status);
+            expect(err.error.code).toBe(errors.get("PASSWORD_REQUIRED").error.code);
+
+            done();
+        }
+    });
+
+    it("should not be possible to provide incorrect password when updating email if config.requirePasswordOnEmailUpdate is true", async done => {
+        try {
+            conf.requirePasswordOnEmailUpdate = true;
+
+            const user = mocks.getUserObject();
+            const email = "rambo.dreadlock@fejkmejl.se";
+
+            const createdUserResponse = await testUtils.createUser(user);
+            const id = createdUserResponse.data.id;
+            user.email = email;
+
+            const updateResponse = await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: { id, email, password: "This is incorrect" }
+                }
+            });
+            done.fail();
+        } catch (err) {
+            expect(err.status).toBe(errors.get("UNAUTHORIZED").status);
+            expect(err.error.code).toBe(errors.get("UNAUTHORIZED").error.code);
+
+            done();
+        }
+    });
+
+    it("should be possible to update email with correct password if config.requirePasswordOnEmailUpdate is true", async done => {
+        try {
+            conf.requirePasswordOnEmailUpdate = true;
+
+            const user = mocks.getUserObject();
+            const email = "rambo.dreadlock@fejkmejl.se";
+
+            const createdUserResponse = await testUtils.createUser(user);
+            const id = createdUserResponse.data.id;
+            user.email = email;
+
+            const updateResponse = await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: { id, email, password: user.password }
+                }
+            });
+
+            expect(updateResponse.status).toBe(200, "updateResponse.status");
+            expect(updateResponse.data.email).toBe(email, "updateResponse.data.email");
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
     it("should not return error if no fields are updated", async done => {
         try {
             const user = mocks.getUserObject();
@@ -315,8 +409,6 @@ describe("UpdateUserHandler", () => {
             expect(updateResponse.status).toBe(200, "updateResponse.status");
             expect(testUser.emailVerified).toBe(false, "updateResponse.data.emailVerified");
             expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
-
-            conf.optionalEmailVerification = false;
 
             done();
         } catch (err) {

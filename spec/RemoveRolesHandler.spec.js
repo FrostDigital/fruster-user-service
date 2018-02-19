@@ -53,7 +53,7 @@ describe("RemoveRolesHandler", () => {
 
             done();
         } catch (err) {
-            log.erro(err);
+            log.error(err);
             done.fail(err);
         }
     });

@@ -58,7 +58,7 @@ describe("ValidatePasswordHandler", () => {
             done();
         } catch (err) {
             log.error(err);
-            testUtils.fail(done, err);
+            done.fail(err);
         }
     });
 
@@ -91,7 +91,7 @@ describe("ValidatePasswordHandler", () => {
             done();
         } catch (err) {
             log.error(err);
-            testUtils.fail(done, err);
+            done.fail(err);
         }
     });
 
@@ -125,7 +125,7 @@ describe("ValidatePasswordHandler", () => {
             done();
         } catch (err) {
             log.error(err);
-            testUtils.fail(done, err);
+            done.fail(err);
         }
     });
 
@@ -161,7 +161,7 @@ describe("ValidatePasswordHandler", () => {
             done();
         } catch (err) {
             log.error(err);
-            testUtils.fail(done, err);
+            done.fail(err);
         }
     });
 
@@ -198,7 +198,7 @@ describe("ValidatePasswordHandler", () => {
             }
         } catch (err) {
             log.error(err);
-            testUtils.fail(done, err);
+            done.fail(err);
         }
     });
 
@@ -240,7 +240,7 @@ describe("ValidatePasswordHandler", () => {
             }
         } catch (err) {
             log.error(err);
-            testUtils.fail(done, err);
+            done.fail(err);
         }
     });
 
@@ -272,7 +272,7 @@ describe("ValidatePasswordHandler", () => {
                 }
             });
 
-            testUtils.fail(done, response);
+            done.fail();
         } catch (err) {
             expect(err.status).toBe(400, "err.status");
             expect(err.error.code).toBe(errors.get("EMAIL_NOT_VERIFIED").error.code, "err.error.code");
@@ -319,7 +319,7 @@ describe("ValidatePasswordHandler", () => {
 
             done();
         } catch (err) {
-            testUtils.fail(done, err);
+            done.fail(err);
         }
     });
 
@@ -359,7 +359,7 @@ describe("ValidatePasswordHandler", () => {
 
             done();
         } catch (err) {
-            testUtils.fail(done, err);
+            done.fail(err);
         }
     });
 

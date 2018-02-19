@@ -34,6 +34,9 @@ describe("CreateUserHandler", () => {
 
     afterEach((done) => {
         conf.requireEmailVerification = false;
+        conf.optionalEmailVerification = false;
+        conf.requirePassword = true;
+
         done();
     });
 
@@ -270,28 +273,33 @@ describe("CreateUserHandler", () => {
     });
 
     it("should validate required fields when creating user", async done => {
-        mocks.mockMailService();
-        let user = mocks.getUserObject();
-        delete user.firstName;
-        await doRequest(user);
+        try {
+            mocks.mockMailService();
+            let user = mocks.getUserObject();
+            delete user.firstName;
+            await doRequest(user);
 
-        user = mocks.getUserObject();
-        delete user.lastName;
-        await doRequest(user);
+            user = mocks.getUserObject();
+            delete user.lastName;
+            await doRequest(user);
 
-        user = mocks.getUserObject();
-        delete user.email;
-        await doRequest(user);
+            user = mocks.getUserObject();
+            delete user.email;
+            await doRequest(user);
 
-        user = mocks.getUserObject();
-        delete user.password;
-        await doRequest(user);
+            user = mocks.getUserObject();
+            delete user.password;
+            await doRequest(user);
 
-        user = mocks.getUserObject();
-        delete user.lastName;
-        await doRequest(user);
+            user = mocks.getUserObject();
+            delete user.lastName;
+            await doRequest(user);
 
-        done();
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
 
         function doRequest(userToCreate) {
             return new Promise(resolve => {
@@ -334,7 +342,6 @@ describe("CreateUserHandler", () => {
             });
 
             expect(savedUser.data.id).toBeDefined("savedUser.data.id");
-            conf.requirePassword = true;
 
             done();
         } catch (err) {
@@ -381,11 +388,8 @@ describe("CreateUserHandler", () => {
                 expect(response.data.scopes.length).toBe(Object.keys(roles[role.toLowerCase()]).length);
             });
 
-            conf.requireEmailVerification = false;
-
             done();
         } catch (err) {
-            conf.requireEmailVerification = false;
             log.error(err);
             done.fail(err);
         }
@@ -429,11 +433,8 @@ describe("CreateUserHandler", () => {
                 expect(response.data.scopes.length).toBe(Object.keys(roles[role.toLowerCase()]).length);
             });
 
-            conf.optionalEmailVerification = false;
-
             done();
         } catch (err) {
-            conf.optionalEmailVerification = false;
             log.error(err);
             done.fail(err);
         }

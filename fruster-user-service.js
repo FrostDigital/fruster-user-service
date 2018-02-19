@@ -31,7 +31,7 @@ module.exports = {
 
 		// SERVICES
 		const PasswordService = require("./lib/services/PasswordService");
-		const passwordService = new PasswordService();
+		const passwordService = new PasswordService(userRepo);
 
 		const RoleService = require("./lib/services/RoleService");
 		const roleService = new RoleService(config.useDbRolesAndScopes ? roleScopesDbRepo : roleScopesConfigRepo);
@@ -62,7 +62,7 @@ module.exports = {
 
 		// UPDATE
 		const UpdateUserHandler = require("./lib/handlers/UpdateUserHandler");
-		const updateUserHandler = new UpdateUserHandler(userRepo);
+		const updateUserHandler = new UpdateUserHandler(userRepo, passwordService);
 
 		// DELETE
 		const DeleteUserHandler = require("./lib/handlers/DeleteUserHandler");
@@ -335,7 +335,7 @@ module.exports = {
 	},
 
 	stop: () => {
-		if (config.requireEmailVerification || config.optionalEmailVerification ||  config.useDbRolesAndScopes) {
+		if (config.requireEmailVerification || config.optionalEmailVerification || config.useDbRolesAndScopes) {
 			expressApp.stop();
 		}
 	}
@@ -350,13 +350,13 @@ function createIndexes(db) {
 		.createIndex({
 			email: 1
 		}, {
-			unique: true,
-			partialFilterExpression: {
-				email: {
-					$exists: true
+				unique: true,
+				partialFilterExpression: {
+					email: {
+						$exists: true
+					}
 				}
-			}
-		});
+			});
 
 	config.uniqueIndexes.forEach(index => {
 		const indexObj = {};
