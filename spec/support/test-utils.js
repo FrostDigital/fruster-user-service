@@ -7,10 +7,6 @@ const uuid = require("uuid");
 
 module.exports = {
 
-    fail: (done, reason) => {
-        done.fail(util.inspect(reason, null, null, true));
-    },
-
     createUser: (user) => {
         return bus.request({
             subject: constants.endpoints.service.CREATE_USER,

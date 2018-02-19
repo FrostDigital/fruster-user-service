@@ -30,39 +30,39 @@ module.exports = {
 		await roleScopesConfigRepo.prepareRoles();
 
 		// SERVICES
-		const PasswordService = require("./lib/services/PasswordService");
-		const passwordService = new PasswordService();
+		const PasswordManager = require("./lib/managers/PasswordManager");
+		const passwordManager = new PasswordManager(userRepo);
 
-		const RoleService = require("./lib/services/RoleService");
-		const roleService = new RoleService(config.useDbRolesAndScopes ? roleScopesDbRepo : roleScopesConfigRepo);
+		const RoleManager = require("./lib/managers/RoleManager");
+		const roleManager = new RoleManager(config.useDbRolesAndScopes ? roleScopesDbRepo : roleScopesConfigRepo);
 
 		// HANDLERS
 		const CreateInitialUserHandler = require("./lib/handlers/CreateInitialUserHandler");
-		const createInitialUserHandler = new CreateInitialUserHandler(userRepo, initialUserRepo, passwordService);
+		const createInitialUserHandler = new CreateInitialUserHandler(userRepo, initialUserRepo, passwordManager);
 		await createInitialUserHandler.handle();
 
 		// CREATE
 		const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
-		const createUserHandler = new CreateUserHandler(userRepo, passwordService, roleService);
+		const createUserHandler = new CreateUserHandler(userRepo, passwordManager, roleManager);
 
 		// READ
 		/** DEPRECATED */
 		const GetUserHandler = require("./lib/handlers/GetUserHandler");
 		/** DEPRECATED */
-		const getUserHandler = new GetUserHandler(userRepo, roleService);
+		const getUserHandler = new GetUserHandler(userRepo, roleManager);
 
 		const GetUsersByQueryHandler = require("./lib/handlers/GetUsersByQueryHandler");
-		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleService);
+		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleManager);
 
 		const GetUserByIdHandler = require("./lib/handlers/GetUserByIdHandler");
-		const getUserByIdHandler = new GetUserByIdHandler(userRepo, roleService);
+		const getUserByIdHandler = new GetUserByIdHandler(userRepo, roleManager);
 
 		const GetScopesForRolesHandler = require("./lib/handlers/GetScopesForRolesHandler");
-		const getScopesForRolesHandler = new GetScopesForRolesHandler(roleService);
+		const getScopesForRolesHandler = new GetScopesForRolesHandler(roleManager);
 
 		// UPDATE
 		const UpdateUserHandler = require("./lib/handlers/UpdateUserHandler");
-		const updateUserHandler = new UpdateUserHandler(userRepo);
+		const updateUserHandler = new UpdateUserHandler(userRepo, passwordManager);
 
 		// DELETE
 		const DeleteUserHandler = require("./lib/handlers/DeleteUserHandler");
@@ -70,20 +70,20 @@ module.exports = {
 
 		// PASSWORD
 		const ValidatePasswordHandler = require("./lib/handlers/ValidatePasswordHandler");
-		const validatePasswordHandler = new ValidatePasswordHandler(userRepo, passwordService, roleService);
+		const validatePasswordHandler = new ValidatePasswordHandler(userRepo, passwordManager, roleManager);
 
 		const UpdatePasswordHandler = require("./lib/handlers/UpdatePasswordHandler");
-		const updatePasswordHandler = new UpdatePasswordHandler(userRepo, passwordService);
+		const updatePasswordHandler = new UpdatePasswordHandler(userRepo, passwordManager);
 
 		const SetPasswordHandler = require("./lib/handlers/SetPasswordHandler");
-		const setPasswordHandler = new SetPasswordHandler(userRepo, passwordService);
+		const setPasswordHandler = new SetPasswordHandler(userRepo, passwordManager);
 
 		// ROLES
 		const AddRolesHandler = require("./lib/handlers/AddRolesHandler");
-		const addRolesHandler = new AddRolesHandler(userRepo, roleService);
+		const addRolesHandler = new AddRolesHandler(userRepo, roleManager);
 
 		const RemoveRolesHandler = require("./lib/handlers/RemoveRolesHandler");
-		const removeRolesHandler = new RemoveRolesHandler(userRepo, roleService);
+		const removeRolesHandler = new RemoveRolesHandler(userRepo, roleManager);
 
 		// EMAIL VERIFICATION
 		const VerifyEmailAddressHandler = require("./lib/handlers/email-verification/VerifyEmailAddressHandler.js");
@@ -335,7 +335,7 @@ module.exports = {
 	},
 
 	stop: () => {
-		if (config.requireEmailVerification || config.optionalEmailVerification ||  config.useDbRolesAndScopes) {
+		if (config.requireEmailVerification || config.optionalEmailVerification || config.useDbRolesAndScopes) {
 			expressApp.stop();
 		}
 	}
@@ -350,13 +350,13 @@ function createIndexes(db) {
 		.createIndex({
 			email: 1
 		}, {
-			unique: true,
-			partialFilterExpression: {
-				email: {
-					$exists: true
+				unique: true,
+				partialFilterExpression: {
+					email: {
+						$exists: true
+					}
 				}
-			}
-		});
+			});
 
 	config.uniqueIndexes.forEach(index => {
 		const indexObj = {};

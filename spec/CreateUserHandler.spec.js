@@ -10,15 +10,15 @@ const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");
 const testUtils = require("./support/test-utils.js");
 const frusterTestUtils = require("fruster-test-utils");
-const RoleService = require("../lib/services/RoleService");
+const RoleManager = require("../lib/managers/RoleManager");
 const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
 const specConstants = require("./support/spec-constants");
 
 
 describe("CreateUserHandler", () => {
 
-    /** @type {RoleService} */
-    let roleService;
+    /** @type {RoleManager} */
+    let roleManager;
 
     /** @type {Db} */
     let db;
@@ -29,11 +29,14 @@ describe("CreateUserHandler", () => {
                 db = connection.db;
                 const roleScopesConfigRepo = new RoleScopesConfigRepo();
                 await roleScopesConfigRepo.prepareRoles();
-                roleService = new RoleService(roleScopesConfigRepo);
+                roleManager = new RoleManager(roleScopesConfigRepo);
             }));
 
     afterEach((done) => {
         conf.requireEmailVerification = false;
+        conf.optionalEmailVerification = false;
+        conf.requirePassword = true;
+
         done();
     });
 
@@ -64,7 +67,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
             expect(response.data.email).toBe(user.email, "response.data.email");
 
-            const roles = await roleService.getRoles();
+            const roles = await roleManager.getRoles();
             const currentRoleScopes = [];
 
             Object.keys(roles)
@@ -111,7 +114,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
             expect(response.data.email).toBe(user.email, "response.data.email");
 
-            const roles = await roleService.getRoles();
+            const roles = await roleManager.getRoles();
             const currentRoleScopes = [];
 
             Object.keys(roles)
@@ -163,7 +166,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.profileImage).toBe(user.profileImage, "response.data.profileImage");
             expect(response.data.custom).toBe(user.custom, "response.data.custom");
 
-            const roles = await roleService.getRoles();
+            const roles = await roleManager.getRoles();
             const currentRoleScopes = [];
 
             Object.keys(roles)
@@ -270,28 +273,33 @@ describe("CreateUserHandler", () => {
     });
 
     it("should validate required fields when creating user", async done => {
-        mocks.mockMailService();
-        let user = mocks.getUserObject();
-        delete user.firstName;
-        await doRequest(user);
+        try {
+            mocks.mockMailService();
+            let user = mocks.getUserObject();
+            delete user.firstName;
+            await doRequest(user);
 
-        user = mocks.getUserObject();
-        delete user.lastName;
-        await doRequest(user);
+            user = mocks.getUserObject();
+            delete user.lastName;
+            await doRequest(user);
 
-        user = mocks.getUserObject();
-        delete user.email;
-        await doRequest(user);
+            user = mocks.getUserObject();
+            delete user.email;
+            await doRequest(user);
 
-        user = mocks.getUserObject();
-        delete user.password;
-        await doRequest(user);
+            user = mocks.getUserObject();
+            delete user.password;
+            await doRequest(user);
 
-        user = mocks.getUserObject();
-        delete user.lastName;
-        await doRequest(user);
+            user = mocks.getUserObject();
+            delete user.lastName;
+            await doRequest(user);
 
-        done();
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
 
         function doRequest(userToCreate) {
             return new Promise(resolve => {
@@ -334,7 +342,6 @@ describe("CreateUserHandler", () => {
             });
 
             expect(savedUser.data.id).toBeDefined("savedUser.data.id");
-            conf.requirePassword = true;
 
             done();
         } catch (err) {
@@ -375,17 +382,14 @@ describe("CreateUserHandler", () => {
             expect(userFromDatabase.emailVerified).toBe(false, "userFromDatabase.emailVerified");
             expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
 
-            const roles = await roleService.getRoles();
+            const roles = await roleManager.getRoles();
 
             user.roles.forEach(role => {
                 expect(response.data.scopes.length).toBe(Object.keys(roles[role.toLowerCase()]).length);
             });
 
-            conf.requireEmailVerification = false;
-
             done();
         } catch (err) {
-            conf.requireEmailVerification = false;
             log.error(err);
             done.fail(err);
         }
@@ -423,17 +427,14 @@ describe("CreateUserHandler", () => {
             expect(userFromDatabase.emailVerified).toBe(false, "userFromDatabase.emailVerified");
             expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
 
-            const roles = await roleService.getRoles();
+            const roles = await roleManager.getRoles();
 
             user.roles.forEach(role => {
                 expect(response.data.scopes.length).toBe(Object.keys(roles[role.toLowerCase()]).length);
             });
 
-            conf.optionalEmailVerification = false;
-
             done();
         } catch (err) {
-            conf.optionalEmailVerification = false;
             log.error(err);
             done.fail(err);
         }
