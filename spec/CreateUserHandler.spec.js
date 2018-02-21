@@ -4,7 +4,7 @@ const Db = require("mongodb").Db;
 const uuid = require("uuid");
 
 const userService = require("../fruster-user-service");
-const utils = require("../lib/utils/utils");
+const Utils = require("../lib/utils/Utils");
 const conf = require("../config");
 const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");
