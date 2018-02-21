@@ -2,7 +2,7 @@ const UserModel = require("../lib/models/UserModel");
 const RoleManager = require("../lib/managers/RoleManager");
 const config = require("../config");
 const mocks = require("./support/mocks");
-const utils = require("../lib/utils/utils");
+const Utils = require("../lib/utils/Utils");
 const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
 const log = require("fruster-log");
 
@@ -39,9 +39,9 @@ describe("UserModel", () => {
             const mockUser = mocks.getUserObject();
             const user = await new UserModel(mockUser).toViewModel(roleManager);
 
-            expect(user.firstName).toBe(utils.toTitleCase(mockUser.firstName), "user.firstName");
-            expect(user.middleName).toBe(utils.toTitleCase(mockUser.middleName), "user.middleName");
-            expect(user.lastName).toBe(utils.toTitleCase(mockUser.lastName), "user.lastName");
+            expect(user.firstName).toBe(Utils.toTitleCase(mockUser.firstName), "user.firstName");
+            expect(user.middleName).toBe(Utils.toTitleCase(mockUser.middleName), "user.middleName");
+            expect(user.lastName).toBe(Utils.toTitleCase(mockUser.lastName), "user.lastName");
 
             done();
         } catch (err) {
