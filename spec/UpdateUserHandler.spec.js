@@ -28,6 +28,7 @@ describe("UpdateUserHandler", () => {
         conf.requireEmailVerification = false;
         conf.requirePasswordOnEmailUpdate = false;
         conf.optionalEmailVerification = false;
+        conf.emailVerificationEmailTempate = undefined;
 
         done();
     });
@@ -368,7 +369,56 @@ describe("UpdateUserHandler", () => {
             expect(testUser.emailVerified).toBe(false, "updateResponse.data.emailVerified");
             expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
 
-            conf.requireEmailVerification = false;
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
+    it("should resend verification mail when updating email if conf.requireEmailVerification is set to true and conf.emailVerificationEmailTempate and config.requirePasswordOnEmailUpdate set", async (done) => {
+        try {
+            conf.requireEmailVerification = true;
+            conf.requirePasswordOnEmailUpdate = true;
+            conf.emailVerificationEmailTempate = uuid.v4();
+
+            const newEmail = "ram@ram.se";
+            let invocations = 0;
+
+            mocks.mockMailService(req => {
+                /** The first time mail service will be contacted is when the user is created, so we only want check the second */
+                if (invocations > 0) {
+                    expect(req.data.templateArgs.user.email).toBe(newEmail, "req.data.templateArgs.user.email");
+                    expect(req.data.templateArgs.user.firstName).toBe(user.firstName, "req.data.templateArgs.user.firstName");
+                    expect(req.data.templateArgs.user.lastName).toBe(user.lastName, "req.data.templateArgs.user.lastName");
+                }
+
+                invocations++;
+            });
+
+            const user = mocks.getUserObject();
+            const createdUserResponse = await testUtils.createUser(user);
+            const updateResponse = await bus.request({
+                subject: constants.endpoints.service.UPDATE_USER,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: {
+                        id: createdUserResponse.data.id,
+                        email: newEmail,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        password: user.password
+                    }
+                }
+            });
+
+            const testUser = await db.collection(conf.userCollection).findOne({ id: updateResponse.data.id });
+
+            expect(updateResponse.status).toBe(200, "updateResponse.status");
+            expect(testUser.emailVerified).toBe(false, "updateResponse.data.emailVerified");
+            expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
+            expect(invocations).toBeGreaterThan(0, "mail service invocations");
 
             done();
         } catch (err) {

@@ -46,10 +46,8 @@ module.exports = {
 		const createUserHandler = new CreateUserHandler(userRepo, passwordManager, roleManager);
 
 		// READ
-		/** DEPRECATED */
-		const GetUserHandler = require("./lib/handlers/GetUserHandler");
-		/** DEPRECATED */
-		const getUserHandler = new GetUserHandler(userRepo, roleManager);
+		/** DEPRECATED */ const GetUserHandler = require("./lib/handlers/GetUserHandler");
+		/** DEPRECATED */ const getUserHandler = new GetUserHandler(userRepo, roleManager);
 
 		const GetUsersByQueryHandler = require("./lib/handlers/GetUsersByQueryHandler");
 		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleManager);
@@ -62,7 +60,7 @@ module.exports = {
 
 		// UPDATE
 		const UpdateUserHandler = require("./lib/handlers/UpdateUserHandler");
-		const updateUserHandler = new UpdateUserHandler(userRepo, passwordManager);
+		const updateUserHandler = new UpdateUserHandler(userRepo, passwordManager, roleManager);
 
 		// DELETE
 		const DeleteUserHandler = require("./lib/handlers/DeleteUserHandler");
@@ -90,7 +88,7 @@ module.exports = {
 		const verifyEmailAddressHandler = new VerifyEmailAddressHandler(userRepo);
 
 		const ResendVerificationEmailHandler = require("./lib/handlers/email-verification/ResendVerificationEmailHandler.js");
-		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(userRepo);
+		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(userRepo, roleManager);
 
 		// ENDPOINTS ///////////////////////////////////////////////////////////////////////////////
 
@@ -239,8 +237,7 @@ module.exports = {
 			handle: (req) => createUserHandler.handle(req)
 		});
 
-		/** DEPRECATED */
-		bus.subscribe({
+		/** DEPRECATED */ bus.subscribe({
 			deprecated: docs.deprecated.GET_USER,
 			subject: constants.endpoints.service.GET_USER,
 			responseSchema: constants.schemas.response.USER_LIST_RESPONSE,
