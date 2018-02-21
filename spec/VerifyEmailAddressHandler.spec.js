@@ -5,7 +5,6 @@ const uuid = require("uuid");
 const errors = require("../lib/errors");
 
 const userService = require("../fruster-user-service");
-const utils = require("../lib/utils/utils");
 const config = require("../config");
 const mocks = require("./support/mocks.js");
 const frusterTestUtils = require("fruster-test-utils");

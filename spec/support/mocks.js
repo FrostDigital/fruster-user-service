@@ -55,8 +55,10 @@ module.exports = {
         });
     },
 
-    mockMailService: () => {
+    mockMailService: (expectFunc) => {
         bus.subscribe("mail-service.send", (req) => {
+            if (expectFunc)
+                expectFunc(req);
             return {
                 reqId: req.reqId,
                 status: 200
