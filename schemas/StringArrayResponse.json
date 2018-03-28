@@ -1,0 +1,9 @@
+{
+    "id": "StringArrayResponse",
+    "description": "Response with array array of strings.",
+    "additionalProperties": false,
+    "type": "array",
+    "items": {
+        "type": "string"
+    }
+}

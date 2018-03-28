@@ -1,0 +1,23 @@
+{
+    "id": "AddRemoveRolesRequest",
+    "description": "Request to add or remove roles to/from a user. The same structure is used for both. ",
+    "additionalProperties": false,
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "Id of the user to add/remove roles to/from:"
+        },
+        "roles": {
+            "type": "array",
+            "description": "An array of roles to add/remove to/from the user. The list must contain valid roles, the same as those configured.",
+            "items": {
+                "type": "string",
+                "description": "A role, for instance \"admin\""
+            }
+        }
+    },
+    "required": [
+        "id",
+        "roles"
+    ]
+}
