@@ -43,7 +43,7 @@ describe("Fruster - User service", () => {
 	// get scopes
 	it("should return scopes for requested role", done => {
 		const roles = ["admin"];
-		return bus.request(constants.endpoints.service.GET_SCOPES, {
+		return bus.request(constants.endpoints.service.GET_SCOPES_FOR_ROLES, {
 			data: roles
 		})
 			.then(resp => {
@@ -101,7 +101,7 @@ describe("Fruster - User service", () => {
 					.find({
 						id: response.data.id
 					})
-					.toArray()	
+					.toArray()
 					.then(userResp => {
 						oldUser = userResp[0];
 					})
@@ -119,7 +119,7 @@ describe("Fruster - User service", () => {
 									.then(userResp => {
 										var newUser = userResp[0];
 										expect(newUser.password).not.toBe(oldUser.password);
-										expect(newUser.salt).not.toBe(oldUser.salt);										
+										expect(newUser.salt).not.toBe(oldUser.salt);
 										expect(newUser.hashDate).not.toBe(oldUser.hashDate);
 										done();
 									});
