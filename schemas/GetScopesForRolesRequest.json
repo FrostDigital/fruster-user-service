@@ -1,0 +1,10 @@
+{
+    "id": "GetScopesForRolesRequest",
+    "description": "Request for getting all scopes associated with the provided roles.",
+    "additionalProperties": false,
+    "type": "array",
+    "items": {
+        "type": "string",
+        "description": "A list of roles to get scopes for."
+    }
+}

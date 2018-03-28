@@ -1,0 +1,11 @@
+{
+    "id": "ResendVerificationEmailRequest",
+    "description": "Request to resend email verification email.",
+    "additionalProperties": false,
+    "properties": {
+        "email": {
+            "type": "string",
+            "description": "The email address to resent the verification email to."
+        }
+    }
+}

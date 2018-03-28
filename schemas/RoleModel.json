@@ -1,0 +1,25 @@
+{
+    "id": "RoleModel",
+    "description": "A system role.",
+    "additionalProperties": false,
+    "properties": {
+        "role": {
+            "type": "string",
+            "description": "The role name to add.",
+            "faker": "name.jobType"
+        },
+        "scopes": {
+            "type": "array",
+            "description": "Scopes for the role.",
+            "items": {
+                "type": "string",
+                "description": "The scopes",
+                "faker": "lorem.word"
+            }
+        }
+    },
+    "required": [
+        "role",
+        "scopes"
+    ]
+}

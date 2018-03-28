@@ -1,6 +1,6 @@
 const uuid = require("uuid");
 const bus = require("fruster-bus");
-const constants = require('../../lib/constants.js');
+const constants = require("../../lib/constants.js");
 
 module.exports = {
 
@@ -44,15 +44,21 @@ module.exports = {
         };
     },
 
-    createUser: async(userObj) => {
-        return await bus.request(constants.endpoints.service.CREATE_USER, {
-            reqId: uuid.v4(),
-            data: userObj
+    createUser: async (userObj) => {
+        return await bus.request({
+            subject: constants.endpoints.service.CREATE_USER,
+            skipOptionsRequest: true,
+            message: {
+                reqId: uuid.v4(),
+                data: userObj
+            }
         });
     },
 
-    mockMailService: () => {
+    mockMailService: (expectFunc) => {
         bus.subscribe("mail-service.send", (req) => {
+            if (expectFunc)
+                expectFunc(req);
             return {
                 reqId: req.reqId,
                 status: 200

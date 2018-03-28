@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Fruster role administration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            overflow-y: scroll;
+            background-color: #f8f9fa !important;
+        }
+
+        .container {
+            background-color: #fff !important;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            padding: 5px;
+            height: 30px;
+        }
+
+        .input-group {
+            width: 250px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            height: 40px;
+        }
+
+        li {
+            width: 100%;
+        }
+
+        li:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        li:nth-child(odd) {
+            background-color: rgb(255, 255, 255);
+        }
+
+        .clickable {
+            cursor: pointer;
+        }
+
+        .inline {
+            display: inline;
+        }
+
+        .panel {
+            cursor: pointer;
+            font-size: 15px;
+            border-top-right-radius: 0 !important;
+            /* opacity: 0; */
+            background-color: inherit !important;
+        }
+
+        .panel span {
+            margin-left: 10px;
+            float: right
+        }
+
+        .role-header-role {
+            font-weight: bold;
+        }
+
+        #config-string {
+            text-align: left;
+            margin-top: -1px;
+            cursor: inherit;
+        }
+
+        .panel-body {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        #config-btn-text.closed::before {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            margin-left: 0px;
+            vertical-align: middle;
+            border-top: 4px dashed;
+            border-top: 4px solid\9;
+            border-right: 4px solid transparent;
+            border-left: 4px solid transparent;
+            content: " ";
+        }
+
+        #config-btn-text.opened::before {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            margin-left: 0px;
+            vertical-align: middle;
+            border-right: 4px solid transparent;
+            border-left: 4px solid transparent;
+            content: " ";
+            border-top: 0;
+            border-bottom: 4px dashed;
+            border-bottom: 4px solid\9;
+        }
+
+        .btn.opened {
+            padding-top: 4px;
+            border-bottom: none;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .btn.config-menu-opened {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .btn {
+            border-color: #ddd !important;
+        }
+
+        .btn.opened:hover,
+        .btn.opened:focus,
+        .btn.opened:active {
+            border-color: #ddd !important;
+        }
+
+        .btn.opened:focus,
+        .btn.opened:active {
+            background-color: white;
+        }
+
+        .permissions:nth-child(even):nth-child(4n),
+        .permissions:nth-child(odd):nth-child(4n-7) {
+            background-color: #f7f7f7;
+        }
+
+        .role-container {
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f7f7f7;
+        }
+
+        #sort {
+            font-size: 15px;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .row {
+            width: 1150px;
+            margin-left: -6px !important;
+        }
+    </style>
+
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/styles/googlecode.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <script src="https://code.jquery.com/jquery-3.1.0.js" integrity="sha256-slogkvB1K3VOkzAI8QITxV3VzpOnkeNVsKvtkYLMjfk=" crossorigin="anonymous"></script>
+
+    <script>
+        String.prototype.replaceAll = function (search, replacement) {
+            var target = this;
+            return target.split(search).join(replacement);
+        };
+
+        let sortOrder = 1;
+
+        let apiClientService;
+        const baseUrl = "http://localhost:3000";
+
+        $(() => {
+            $("#login-form").submit(() => { return false; });
+            apiClientService = new ApiClientService();
+
+            $("#close-error-btn").click(() => { $("#error-box").hide() });
+
+            if (window.isLoggedIn) {
+                userLoggedIn();
+            } else {
+                userNotLoggedIn();
+            }
+        });
+
+        async function userLoggedIn() {
+            console.log("userLoggedIn");
+
+            $("#logout-btn-container").show();
+            $("#roles").show();
+
+            $("#config-btn").click(asConfig);
+
+            try {
+                const roles = await apiClientService.get("admin/system/role");
+
+                roles.data = roles.data.sort((a, b) => {
+                    if (a.role.toLowerCase() > b.role.toLowerCase())
+                        return 1;
+                    else if (a.role.toLowerCase() < b.role.toLowerCase())
+                        return -1;
+                    else
+                        return 0;
+                });
+
+                roles.data.forEach(roleObj => {
+                    roleObj.scopes = roleObj.scopes.sort((a, b) => {
+                        if (a.toLowerCase() > b.toLowerCase())
+                            return 1;
+                        else if (a.toLowerCase() < b.toLowerCase())
+                            return -1;
+                        else
+                            return 0;
+                    });
+
+                    addRoleHtml(roleObj.role, roleObj.scopes);
+                });
+
+                $("#add-system-role").click(addRole);
+                $(".add-scope").click(addScope);
+                $(".remove-role").click(removeRole);
+                $("#logout-btn").click(logout);
+
+                $("#sort").click(e => {
+                    sortOrder *= -1;
+                    sortRolesHtml();
+                    $("#sort").toggleClass("glyphicon glyphicon-sort-by-attributes");
+                    $("#sort").toggleClass("glyphicon glyphicon-sort-by-attributes-alt");
+                });
+
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        let configStringVisible = false;
+
+        async function asConfig(e) {
+            if (!configStringVisible) {
+                const roles = await apiClientService.get("admin/system/role?format=config");
+                const panel = $("#config-string .panel-body");
+
+                panel.empty();
+                panel.append(roles.data);
+            }
+            $("#config-string").toggle();
+            $("#config-btn-text").toggleClass("opened closed");
+            $(e.currentTarget).toggleClass("opened closed");
+            $("#logout-btn").toggleClass("config-menu-opened");
+
+            configStringVisible = !configStringVisible;
+        }
+
+        function addRoleHtml(role, scopes) {
+            let roleHtml = `
+                    <div class="role-container" id="${role}">
+                        <h3 class="role-header"><span class="role-header-role">${role}</span> role
+                            <span class="panel">
+                                <span role="${role}" class="add-scope"><span title="Add scope(s)" class="text-success  clickable glyphicon glyphicon-plus"></span>Add scope(s)</span>
+                                <span role="${role}" class="remove-role"><span title="Remove role" class="clickable text-danger glyphicon glyphicon-remove"></span>Remove role</span>
+                            </span>
+                            <span style="font-size: 11px">has scopes:</span>
+                        </h3>
+                    </div>`;
+            const scopesList = $(`<div class="row"></div>`);
+
+            scopes.forEach(scope => scopesList.append(addScopeHtml(scope, role)));
+
+            roleHtml = roleHtml.replaceAll("{{role}}", role);
+            roleHtml = $(roleHtml);
+            roleHtml.append(scopesList);
+            $("#roles #roles-list").append($(roleHtml));
+        }
+
+        function addScopeHtml(scope, role) {
+            const listItem = $(`
+                    <div class="col-md-6 permissions" id="${(encodeURI(role) + "-" + encodeURI(scope)).replaceAll(".", "DOT").replaceAll("*", "STAR")}" role="${role}" scope="${scope}">
+                        ${scope} 
+                        <span title="Remove scope" class="panel">
+                            <span class="clickable text-danger glyphicon glyphicon-remove"></span>
+                        </span>
+                    </div>
+                    `);
+
+            $(listItem).find(".clickable").click(removeScope);
+
+            return listItem;
+        }
+
+        function sortRolesHtml() {
+            const sortedRoleList = $("#roles #roles-list")
+                .children()
+                .sort((a, b) => {
+                    const aAttr = $(a).attr("id").toLowerCase();
+                    const bAttr = $(b).attr("id").toLowerCase();
+
+                    if (aAttr > bAttr)
+                        return 1 * sortOrder;
+                    else if (aAttr < bAttr)
+                        return -1 * sortOrder;
+                    else
+                        return 0;
+                });
+            $("#roles #roles-list").empty();
+            $("#roles #roles-list").append(sortedRoleList);
+
+            setRoleClickEvents();
+
+            sortedRoleList.each((i, elem) => {
+                setScopeClickEvents($(elem).attr("id"));
+            });
+        }
+
+        function sortScopesHtml(role) {
+            const sortedRoleList = $(`#roles #roles-list #${role} .row .permissions`)
+                .sort((a, b) => {
+                    const aId = $(a).attr("id").toLowerCase();
+                    const bId = $(b).attr("id").toLowerCase();
+
+                    if (aId > bId)
+                        return 1;
+                    else if (aId < bId)
+                        return -1
+                    else
+                        return 0;
+                });
+
+            $(`#roles #roles-list #${role} .row`).empty();
+            $(`#roles #roles-list #${role} .row`).append(sortedRoleList);
+
+            setScopeClickEvents(role);
+        }
+
+        function setRoleClickEvents() {
+            $(`#roles #roles-list .add-scope`).each((i, a) => {
+                $(a).click((e) => addScope(e));
+            });
+            $(`#roles #roles-list .remove-role`).each((i, a) => {
+                $(a).click((e) => removeRole(e));
+            });
+        }
+
+        function setScopeClickEvents(role) {
+            $(`#roles #roles-list #${role} .row .permissions`).each((i, a) => {
+                $(a).find(".clickable").click((e) => removeScope(e));
+            })
+        }
+
+        async function userNotLoggedIn() {
+            console.log("userNotLoggedIn");
+            $("#login").show();
+            $("#submit-login").click(login);
+
+            $("#login-form").onsubmit = function () {
+                login();
+            };
+        }
+
+        async function login() {
+            try {
+                await apiClientService.post("auth/cookie", {
+                    username: $("#username").val(),
+                    password: $("#password").val()
+                });
+
+                location.reload();
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        async function logout() {
+            try {
+                await apiClientService.get("/auth/logout");
+                location.reload();
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        async function addRole() {
+            const roleName = prompt("Please enter a role to be created");
+
+            if (roleName)
+                try {
+                    await apiClientService.post("admin/system/role", { role: roleName });
+                    addRoleHtml(roleName, []);
+                    sortRolesHtml();
+                } catch (err) {
+                    console.log(err);
+                }
+        }
+
+        async function removeRole(e) {
+            const roleToRemove = e.currentTarget.attributes["role"].nodeValue;
+            const confirmed = confirm(`Do you want to remove the role ${roleToRemove}?`);
+
+            if (confirmed)
+                try {
+                    await apiClientService.delete(`admin/system/role`, { role: roleToRemove });
+                    $(`#${roleToRemove}`).remove();
+                } catch (err) {
+                    console.log(err);
+                }
+        }
+
+        async function addScope(e) {
+            const roleToCreateScopeFor = e.currentTarget.attributes["role"].nodeValue;
+            let scopeNames = prompt(`Please enter a scope  to be created for ${roleToCreateScopeFor}. Can be csv.`);
+
+            if (scopeNames)
+                scopeNames = scopeNames.split(",");
+
+            if (scopeNames)
+                try {
+                    const response = await apiClientService.post(`admin/system/role/scope`, { scopes: scopeNames, role: roleToCreateScopeFor });
+                    const scopeList = $(`#roles #roles-list #${roleToCreateScopeFor} .row`);
+
+                    const scopesInList = [];
+
+                    scopeList.each((i, item) => {
+                        return $(item).children().each((i, child) => {
+                            scopesInList.push($(child).attr("scope"));
+                        });
+                    });
+
+                    const scopesToAddToList = response.data.scopes.filter(a => {
+                        return !scopesInList.includes(a);
+                    });
+
+                    scopesToAddToList.forEach(scope => {
+                        scopeList.append(addScopeHtml(scope, roleToCreateScopeFor));
+                    });
+
+                    sortScopesHtml(roleToCreateScopeFor);
+                } catch (err) {
+                    console.log(err);
+                }
+        }
+
+        async function removeScope(e) {
+            console.log(e.currentTarget);
+            const currentTarget = $(e.currentTarget).parent().parent();
+            const scopeToRemove = $(currentTarget).attr("scope");
+            const roleToRemoveFrom = $(currentTarget).attr("role");
+
+            const confirmed = confirm(`Do you want to remove the scope ${scopeToRemove} from the role ${roleToRemoveFrom}?`);
+
+            if (confirmed)
+                try {
+                    await apiClientService.delete(`admin/system/role/scope`, { scopes: [scopeToRemove], role: roleToRemoveFrom });
+                    $(`#${(encodeURI(roleToRemoveFrom) + "-" + encodeURI(scopeToRemove)).replaceAll(".", "DOT").replaceAll("*", "STAR")}`).remove();
+                } catch (err) {
+                    console.log(err);
+                }
+        }
+
+        class ApiClientService {
+            constructor(root) {
+                this.apiRoot = root || "/api/";
+            }
+
+            post(path, body) {
+                return this._request("POST", path, body);
+            }
+
+            get(path) {
+                return this._request("GET", path);
+            }
+
+            delete(path, body) {
+                return this._request("DELETE", path, body);
+            }
+
+            _request(method, path, body) {
+                return new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    const url = `${this.apiRoot}${path}`;
+                    const JSONBody = JSON.stringify(body);
+
+                    const onLoad = function (response) {
+                        if (xhr.status === 200) {
+                            resolve(JSON.parse(xhr.response));
+                        } else {
+                            console.error("request error");
+
+                            let errorJson;
+                            if (response.currentTarget && response.currentTarget.response) {
+                                errorJson = JSON.parse(response.currentTarget.response);
+
+                                if (errorJson.status === 403 && userLoggedIn) {
+                                    logout();
+                                    return;
+                                }
+                            }
+
+                            $("#error-message").replaceWith(`${errorJson.status} ${xhr.statusText}:<br/> ${errorJson.error.code} - ${errorJson.error.title} - ${errorJson.error.detail}`);
+                            $("#error-box").show();
+
+                            reject(errorJson || xhr.statusText);
+                        }
+                    }
+                    const onError = function () {
+                        console.error("request error");
+                        reject(xhr.statusText);
+                    }
+
+                    xhr.onload = onLoad;
+                    xhr.onerror = onError;
+
+                    xhr.open(method, url);
+                    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                    xhr.send(JSONBody);
+                });
+            }
+        }
+    </script>
+
+</head>
+
+<body class="bg-light">
+    <div class="container">
+
+        <div id="error-box" class="alert alert-danger" hidden>
+            <span style="float: right" id="close-error-btn" class="clickable text-danger glyphicon glyphicon-remove"></span>
+            <strong data-reactid="7">Something went wrong:</strong>
+
+            <span id="error-message"></span>
+        </div>
+
+        <div class="row" style="margin-left: -15px !important;">
+            <div class="col-md-6">
+                <h1>Fruster role administration</h1>
+            </div>
+            <div class="col-md-6" style="text-align: right; margin-top: 25px;">
+                <div id="logout-btn-container" hidden>
+                    <button id="config-btn" type="button" class="btn btn-default btn-sm">
+                        <span id="config-btn-text" class="closed"> Config string</span>
+                    </button>
+                    <button id="logout-btn" type="button" class="btn btn-default">Logout</button>
+                    <div id="config-string" hidden class="panel panel-default">
+                        <div class="panel-body">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="clearfix"></div>
+
+        <div id="login" hidden>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="username">Username:</label>
+                    <input id="username" type="text" />
+                </div>
+                <div class="input-group">
+                    <label for="password">Password:</label>
+                    <input id="password" type="password" />
+                </div>
+                <button id="submit-login" type="submit" class="btn btn-default">Login</button>
+            </form>
+        </div>
+        <div hidden id="roles">
+            <br/>
+            <span class="alert alert-info">
+                <b>Note:</b> Role names and scopes should not have any special characters nor spaces. Each role should have
+                at least one scope.
+            </span>
+            <h2>System roles
+
+                <span class="glyphicon glyphicon-sort-by-attributes" id="sort"></span>
+
+                <span class="panel">
+                    <span title="Add role" id="add-system-role">
+                        <span class="text-success clickable glyphicon glyphicon-plus"></span>Add role
+                    </span>
+                </span>
+            </h2>
+            <span id="roles-list">
+                <!-- Role list will show up here -->
+            </span>
+        </div>
+    </div>
+    <br>
+</body>
+
+</html>

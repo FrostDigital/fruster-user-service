@@ -1,0 +1,28 @@
+{
+    "id": "UserResponse",
+    "description": "Single user response.",
+    "additionalProperties": true,
+    "properties": {
+        "id": {
+            "$ref": "User#/properties/id"
+        },
+        "firstName": {
+            "$ref": "User#/properties/firstName"
+        },
+        "lastName": {
+            "$ref": "User#/properties/lastName"
+        },
+        "middleName": {
+            "$ref": "User#/properties/middleName"
+        },
+        "email": {
+            "$ref": "User#/properties/email"
+        },
+        "roles": {
+            "$ref": "User#/properties/roles"
+        },
+        "scopes": {
+            "$ref": "User#/properties/scopes"
+        }
+    }
+}
