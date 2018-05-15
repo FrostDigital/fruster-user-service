@@ -3,7 +3,7 @@
     "definitions": {
         "filter": {
             "type": "object",
-            "description": "mongodb like filtering object in a <String<Number>> fashion: firstName: 0 to exclude & firstName: 1 to include.",
+            "description": "mongodb like filtering object in a String: Number fashion: firstName: 0 to exclude & firstName: 1 to include.",
             "additionalProperties": true,
             "minProperties": 1,
             "properties": {
@@ -27,10 +27,24 @@
         },
         "query": {
             "type": "object",
-            "description": "mongodb like query object in a <String<any>> fashion, e.g. { id: { $in: ['7a967d8b-8a25-4d20-b0e9-8ebe9383d488', '9f6b47c0-628c-45ca-8c43-8a99bf37e241'] }} to get users with ids '7a967d8b-8a25-4d20-b0e9-8ebe9383d488' and '9f6b47c0-628c-45ca-8c43-8a99bf37e241.'",
+            "description": "mongodb like query object in a String: any fashion, e.g. { id: { $in: ['7a967d8b-8a25-4d20-b0e9-8ebe9383d488', '9f6b47c0-628c-45ca-8c43-8a99bf37e241'] }} to get users with ids '7a967d8b-8a25-4d20-b0e9-8ebe9383d488' and '9f6b47c0-628c-45ca-8c43-8a99bf37e241.'",
             "additionalProperties": true,
             "minProperties": 1,
             "properties": {}
+        },
+        "sort": {
+            "type": "object",
+            "description": "mongodb like sort object in a String: Number fashion, e.g. { id: 1} to sort by id.",
+            "additionalProperties": true,
+            "minProperties": 1,
+            "properties": {
+                "id": {
+                    "minimum": -1,
+                    "maximum": 1,
+                    "type": "number",
+                    "description": "Just an example property."
+                }
+            }
         }
     }
 }
