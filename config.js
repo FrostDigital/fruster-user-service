@@ -84,7 +84,10 @@ module.exports = {
 	apiRoot: process.env.API_ROOT || "http://localhost:3000",
 
 	/** Whether or not to require password when updating email address */
-	requirePasswordOnEmailUpdate: process.env.REQUIRE_PASSWORD_ON_EMAIL_UPDATE === "true"
+	requirePasswordOnEmailUpdate: process.env.REQUIRE_PASSWORD_ON_EMAIL_UPDATE === "true",
+
+	/** Whether or not to require a new user to have firstName and lastName */
+	requireNames: parseBool(process.env.REQUIRE_NAMES || "true")
 
 };
 
