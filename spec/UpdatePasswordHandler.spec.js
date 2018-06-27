@@ -5,8 +5,6 @@ const mongo = require("mongodb");
 const Db = mongo.Db;
 const uuid = require("uuid");
 
-const userService = require('../fruster-user-service');
-const conf = require('../config');
 const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');

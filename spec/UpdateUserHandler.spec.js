@@ -1,11 +1,8 @@
-const nsc = require("nats-server-control");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
-const mongo = require("mongodb");
 const uuid = require("uuid");
 const _ = require("lodash");
 
-const userService = require('../fruster-user-service');
 const conf = require('../config');
 const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');

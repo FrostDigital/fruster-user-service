@@ -4,7 +4,6 @@ const Db = require("mongodb").Db;
 const uuid = require("uuid");
 const config = require("../config");
 
-const userService = require('../fruster-user-service');
 const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
@@ -79,8 +78,6 @@ describe("DeleteUserHandler", () => {
 
     it("should return 404 when trying to remove non-existent user", async done => {
         try {
-            const user = mocks.getUserObject();
-
             try {
                 await bus.request({
                     subject: constants.endpoints.service.DELETE_USER,

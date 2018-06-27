@@ -1,28 +1,19 @@
 const bus = require("fruster-bus");
 const log = require("fruster-log");
-const Db = require("mongodb").Db;
 const frusterTestUtils = require("fruster-test-utils");
-const RoleScopesDbRepo = require("../lib/repos/RoleScopesDbRepo");
-const RoleManager = require("../lib/managers/RoleManager");
 const constants = require("../lib/constants");
 const config = require("../config");
-const RoleModel = require("../lib/models/RoleModel");
 const specConstants = require("./support/spec-constants");
-const errors = require("../lib/errors");
 
 
 describe("GetSystemRolesHandler", () => {
 
-    /** @type {Db} */
-    let db;
     /** @type {Boolean} */
     let useDbRolesAndScopesDefaultValue;
 
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => {
-                db = connection.db;
-            }));
+            .testUtilsOptions());
 
     beforeAll(() => {
         useDbRolesAndScopesDefaultValue = config.useDbRolesAndScopes;

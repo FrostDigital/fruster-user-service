@@ -3,10 +3,8 @@ const log = require("fruster-log");
 const Db = require("mongodb").Db;
 const uuid = require("uuid");
 
-const userService = require('../fruster-user-service');
 const config = require('../config');
 const mocks = require('./support/mocks.js');
-const testUtils = require('./support/test-utils.js');
 const errors = require('../lib/errors.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
@@ -40,6 +38,7 @@ describe("ValidatePasswordHandler", () => {
                     data: user
                 }
             });
+
             const response = await bus.request({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
                 skipOptionsRequest: true,
@@ -143,6 +142,7 @@ describe("ValidatePasswordHandler", () => {
                     data: user
                 }
             });
+
             const response = await bus.request({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
                 skipOptionsRequest: true,
@@ -260,7 +260,7 @@ describe("ValidatePasswordHandler", () => {
                 }
             });
 
-            const response = await bus.request({
+            await bus.request({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
                 skipOptionsRequest: true,
                 message: {

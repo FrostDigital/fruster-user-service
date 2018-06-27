@@ -332,9 +332,8 @@ module.exports = {
 	},
 
 	stop: () => {
-		if (config.requireEmailVerification || config.optionalEmailVerification || config.useDbRolesAndScopes) {
+		if (config.requireEmailVerification || config.optionalEmailVerification || config.useDbRolesAndScopes)
 			expressApp.stop();
-		}
 	}
 
 };
@@ -344,24 +343,13 @@ module.exports = {
  */
 function createIndexes(db) {
 	db.collection(config.userCollection)
-		.createIndex({
-			email: 1
-		}, {
-				unique: true,
-				partialFilterExpression: {
-					email: {
-						$exists: true
-					}
-				}
-			});
+		.createIndex({ email: 1 }, { unique: true, partialFilterExpression: { email: { $exists: true } } });
 
 	config.uniqueIndexes.forEach(index => {
 		const indexObj = {};
 		indexObj[index] = 1;
 		db.collection(config.userCollection)
-			.createIndex(indexObj, {
-				unique: true
-			});
+			.createIndex(indexObj, { unique: true });
 	});
 
 	return db;

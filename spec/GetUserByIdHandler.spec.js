@@ -1,5 +1,4 @@
 const frusterTestUtils = require("fruster-test-utils");
-const userService = require("../fruster-user-service");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
 const constants = require("../lib/constants");

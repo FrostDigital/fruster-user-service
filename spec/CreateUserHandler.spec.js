@@ -3,8 +3,6 @@ const log = require("fruster-log");
 const Db = require("mongodb").Db;
 const uuid = require("uuid");
 
-const userService = require("../fruster-user-service");
-const Utils = require("../lib/utils/Utils");
 const conf = require("../config");
 const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");

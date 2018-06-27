@@ -10,6 +10,7 @@ const mocks = require("./support/mocks.js");
 const frusterTestUtils = require("fruster-test-utils");
 const constants = require("../lib/constants.js");
 const specConstants = require("./support/spec-constants");
+const MailServiceClient = require("../lib/clients/MailServiceClient");
 
 
 describe("VerifyEmailAddressHandler", () => {
@@ -40,7 +41,7 @@ describe("VerifyEmailAddressHandler", () => {
         try {
             const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
-            bus.subscribe("mail-service.send", (req) => {
+            bus.subscribe(MailServiceClient.endpoints.SEND, (req) => {
                 expect(req.data.from).toBe(config.emailVerificationFrom, "req.data.from");
                 expect(req.data.to.includes(testUserData.email)).toBeTruthy("req.data.to.includes(testUserData.email)");
                 return { reqId: req.reqId, status: 200 }
@@ -101,7 +102,7 @@ describe("VerifyEmailAddressHandler", () => {
 
             const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
-            bus.subscribe("mail-service.send", (req) => {
+            bus.subscribe(MailServiceClient.endpoints.SEND, (req) => {
                 expect(req.data.from).toBe(config.emailVerificationFrom);
                 expect(req.data.to[0]).toBe(testUserData.email);
                 expect(req.data.templateId).toBe(config.emailVerificationEmailTempate);

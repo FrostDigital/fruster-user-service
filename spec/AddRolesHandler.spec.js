@@ -1,9 +1,7 @@
 const bus = require("fruster-bus");
 const log = require("fruster-log");
-const Db = require("mongodb").Db;
 const uuid = require("uuid");
 
-const userService = require('../fruster-user-service');
 const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
@@ -13,12 +11,10 @@ const specConstants = require("./support/spec-constants");
 
 describe("AddRolesHandler", () => {
 
-    /** @type {Db} */
-    let db;
 
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => { db = connection.db; }));
+            .testUtilsOptions());
 
     it("should be possible to add a role to a user", async done => {
         try {

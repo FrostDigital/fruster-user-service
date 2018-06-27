@@ -1,7 +1,9 @@
 module.exports = {
 
+	/** Nats bus address to connect to */
 	bus: process.env.BUS || "nats://localhost:4222",
 
+	/** Url to database */
 	mongoUrl: process.env.MONGO_URL || "mongodb://localhost:27017/user-service",
 
 	/** Predefined permissions for roles*/
@@ -16,16 +18,22 @@ module.exports = {
 	/** Regex used for validating ids in requests, checks for UUID v4 */
 	idValidationRegex: process.env.ID_VALIDATION_REGEX || /[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}/,
 
+	/** Unique indexes set in the database for users, sets id as default */
 	uniqueIndexes: parseArray(process.env.UNIQUE_INDEXES) || [],
 
+	/** The email of the initial account being created upon first run */
 	initialUserEmail: process.env.INITIAL_USER_EMAIL || "admin@frost.se",
 
+	/** The password of the initial account being created upon first run. Should be changed in prod! */
 	initialUserPassword: process.env.INITIAL_USER_PASSWORD || "FrusterR0ckS",
 
+	/** The roles of the initial account being created upon first run */
 	initialUserRole: process.env.INITIAL_USER_ROLE || "super-admin",
 
+	// TODO: double check if this really is used or not
 	userCollection: "users",
 
+	/** Wether or not to require users to have a password. Typically used with some external login method such as BankID or facebook. */
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
 	/** Wether or not to require the users to verify their email address before being able to signin. 
@@ -44,7 +52,7 @@ module.exports = {
 
 	/** :user-{field}: can be used to display user information in the email. e.g. :user-firstName:
 	     :token is the email verification token to be used to validate the email address. */
-	emailVerificationMessage: process.env.EMAIL_VERIFICATION_MESSAGE || "Hello :user-firstName: :user-lastName:, \nVisit http://localhost:3120/verify-email?token=:token: to validate your email.",
+	emailVerificationMessage: process.env.EMAIL_VERIFICATION_MESSAGE || "Hello :user-firstName: :user-lastName:, \nVisit http://localhost:3120/verify-email?token=:token: to verify your email.",
 
 	emailVerificationSubject: process.env.EMAIL_VERIFICATION_SUBJECT || "Verify email",
 
@@ -92,10 +100,7 @@ module.exports = {
 };
 
 function parseArray(str) {
-	if (str) {
-		return str.split(",");
-	}
-
+	if (str) return str.split(",");
 	return null;
 }
 

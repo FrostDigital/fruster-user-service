@@ -1,9 +1,7 @@
 const frusterTestUtils = require("fruster-test-utils");
-const userService = require("../fruster-user-service");
 const bus = require("fruster-bus");
 const log = require("fruster-log");
 const constants = require("../lib/constants");
-const uuid = require("uuid");
 const Db = require("mongodb").Db;
 const specConstants = require("./support/spec-constants");
 

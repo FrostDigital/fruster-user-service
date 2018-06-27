@@ -1,10 +1,7 @@
 const bus = require("fruster-bus");
 const log = require("fruster-log");
-const Db = require("mongodb").Db;
 const uuid = require("uuid");
 
-const userService = require('../fruster-user-service');
-const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
@@ -12,12 +9,9 @@ const specConstants = require("./support/spec-constants");
 
 describe("GetScopesForRolesHandler", () => {
 
-    /** @type {Db} */
-    let db;
-
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => { db = connection.db; }));
+            .testUtilsOptions());
 
     it("should return scopes for requested role", async done => {
         try {

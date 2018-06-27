@@ -2,13 +2,13 @@ const conf = require('../config');
 const mocks = require('./support/mocks');
 const constants = require('../lib/constants');
 const RoleManager = require('../lib/managers/RoleManager');
-const Db = require("mongodb").Db;
 const specConstants = require('./support/spec-constants');
 const frusterTestUtils = require("fruster-test-utils");
 const RoleScopesConfigRepo = require('../lib/repos/RoleScopesConfigRepo');
 const log = require("fruster-log");
 const bus = require("fruster-bus");
 const uuid = require("uuid");
+
 
 /** This is a seperate test because we need to set the config before  frusterTestUtils.startBeforeEach which means all other tests fail if set in the other test file 🤔 */
 describe("CreateUserHandler w/ requireNames set to false", () => {

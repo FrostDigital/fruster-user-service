@@ -2,7 +2,6 @@ const bus = require("fruster-bus");
 const log = require("fruster-log");
 const uuid = require("uuid");
 
-const userService = require('../fruster-user-service');
 const mocks = require('./support/mocks.js');
 const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
