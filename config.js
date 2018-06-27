@@ -95,7 +95,16 @@ module.exports = {
 	requirePasswordOnEmailUpdate: process.env.REQUIRE_PASSWORD_ON_EMAIL_UPDATE === "true",
 
 	/** Whether or not to require a new user to have firstName and lastName */
-	requireNames: parseBool(process.env.REQUIRE_NAMES || "true")
+	requireNames: parseBool(process.env.REQUIRE_NAMES || "true"),
+
+	// TODO: REVERT AND FIX COMMENTS
+	// userFields: parseArray(process.env.USER_FIELDS || "ALL"),
+	// profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL")
+
+	// TODO: add metadata to user => created, updated etc
+	userFields: parseArray("email,password,hashDate,salt,roles,emailVerified,emailVerificationToken,registered"),
+	profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL")
+
 
 };
 

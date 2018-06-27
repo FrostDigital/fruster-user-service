@@ -39,7 +39,7 @@ describe("CreateUserHandler", () => {
         done();
     });
 
-    it("should be possible to create user", async done => {
+    fit("should be possible to create user", async done => {
         mocks.mockMailService();
 
         try {
