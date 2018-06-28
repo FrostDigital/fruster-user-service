@@ -98,11 +98,11 @@ module.exports = {
 	requireNames: parseBool(process.env.REQUIRE_NAMES || "true"),
 
 	// TODO: REVERT AND FIX COMMENTS
-	// userFields: parseArray(process.env.USER_FIELDS || "ALL"),
-	// profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL")
+	userFields: parseArray(process.env.USER_FIELDS || "ALL"),
+	profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL"),
 
 	// TODO: add metadata to user => created, updated etc
-	userFields: parseArray("email,password,hashDate,salt,roles,emailVerified,emailVerificationToken,registered"),
+	// userFields: parseArray("email,password,hashDate,salt,roles,emailVerified,emailVerificationToken,registered"),
 	profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL")
 
 

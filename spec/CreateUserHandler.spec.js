@@ -76,6 +76,12 @@ describe("CreateUserHandler", () => {
                             currentRoleScopes.push(scope);
                     });
                 });
+            console.log("\n");
+            console.log("=======================================");
+            console.log("response");
+            console.log("=======================================");
+            console.log(require("util").inspect(response, null, null, true));
+            console.log("\n");
 
             expect(response.data.scopes.length).toBe(currentRoleScopes.length, "response.data.scopes.length");
 
