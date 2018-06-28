@@ -4,7 +4,7 @@ const Db = require("mongodb").Db;
 const uuid = require("uuid");
 const config = require("../config");
 
-const testUtils = require('./support/test-utils.js');
+const TestUtils = require('./support/TestUtils');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const mocks = require("./support/mocks");
@@ -23,21 +23,13 @@ describe("DeleteUserHandler", () => {
     it("should return 200 when user is successfully removed", async done => {
         try {
             const user = mocks.getUserObject();
-            const createdUserResponse = await testUtils.createUser(user);
-            const deleteResponse = await bus.request({
-                subject: constants.endpoints.service.DELETE_USER,
-                skipOptionsRequest: true,
-                timeout: 1000,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUserResponse.data.id }
-                }
-            });
-
+            const createdUserResponse = await TestUtils.createUser(user);
+            const reqData = { id: createdUserResponse.data.id };
+            const deleteResponse = await TestUtils.busRequest(constants.endpoints.service.DELETE_USER, reqData);
 
             expect(deleteResponse.status).toBe(200, "deleteResponse.status");
 
-            const userInDatabase = await db.collection(config.userCollection).findOne({ id: createdUserResponse.data.id });
+            const userInDatabase = await db.collection(constants.collections.USERS).findOne(reqData);
             expect(userInDatabase).toBe(null, "userInDatabase");
 
             done();
@@ -52,21 +44,13 @@ describe("DeleteUserHandler", () => {
             const user = mocks.getUserObject();
             user.scopes = ["admin.*"];
 
-            const createdUserResponse = await testUtils.createUser(user);
-            const deleteResponse = await bus.request({
-                subject: constants.endpoints.http.admin.DELETE_USER,
-                skipOptionsRequest: true,
-                timeout: 1000,
-                message: {
-                    reqId: uuid.v4(),
-                    user: user,
-                    params: { id: createdUserResponse.data.id }
-                }
-            });
+            const createdUserResponse = await TestUtils.createUser(user);
+            const reqData = { id: createdUserResponse.data.id };
+            const deleteResponse = await TestUtils.busRequest(constants.endpoints.service.DELETE_USER, reqData);
 
             expect(deleteResponse.status).toBe(200, "deleteResponse.status");
 
-            const userInDatabase = await db.collection(config.userCollection).findOne({ id: createdUserResponse.data.id });
+            const userInDatabase = await db.collection(constants.collections.USERS).findOne(reqData);
             expect(userInDatabase).toBe(null, "userInDatabase");
 
             done();
@@ -79,15 +63,7 @@ describe("DeleteUserHandler", () => {
     it("should return 404 when trying to remove non-existent user", async done => {
         try {
             try {
-                await bus.request({
-                    subject: constants.endpoints.service.DELETE_USER,
-                    timeout: 1000,
-                    skipOptionsRequest: true,
-                    message: {
-                        reqId: uuid.v4(),
-                        data: { id: uuid.v4() }
-                    }
-                });
+                await TestUtils.busRequest(constants.endpoints.service.DELETE_USER, { id: uuid.v4() });
 
                 done.fail();
             } catch (err) {
@@ -107,16 +83,7 @@ describe("DeleteUserHandler", () => {
             user.scopes = ["admin.*"];
 
             try {
-                await bus.request({
-                    subject: constants.endpoints.http.admin.DELETE_USER,
-                    timeout: 1000,
-                    skipOptionsRequest: true,
-                    message: {
-                        user: user,
-                        reqId: uuid.v4(),
-                        params: { id: uuid.v4() }
-                    }
-                });
+                await TestUtils.busRequest({ subject: constants.endpoints.http.admin.DELETE_USER, data: { id: uuid.v4() }, user, params: { id: uuid.v4() } });
 
                 done.fail();
             } catch (err) {

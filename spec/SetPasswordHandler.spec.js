@@ -3,7 +3,7 @@ const log = require("fruster-log");
 const uuid = require("uuid");
 
 const mocks = require('./support/mocks.js');
-const testUtils = require('./support/test-utils.js');
+const TestUtils = require('./support/TestUtils');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
@@ -20,14 +20,13 @@ describe("SetPasswordHandler", () => {
 	it("should be possible to set password", async done => {
 		try {
 			const user = mocks.getUserObject();
-			const createdUserResponse = await testUtils.createUser(user);
+			const createdUserResponse = await TestUtils.createUser(user);
 
 			const oldUser = await db.collection("users")
 				.findOne({ id: createdUserResponse.data.id });
 
 			await bus.request({
 				subject: constants.endpoints.service.SET_PASSWORD,
-				timeout: 1000,
 				skipOptionsRequest: true,
 				message: {
 					reqId: uuid.v4(),

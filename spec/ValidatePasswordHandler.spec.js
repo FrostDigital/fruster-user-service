@@ -29,7 +29,7 @@ describe("ValidatePasswordHandler", () => {
         try {
             const user = mocks.getUserObject();
             //@ts-ignore
-            await db.dropDatabase(config.userCollection);
+            await db.dropDatabase(constants.collections.USERS);
             await bus.request({
                 subject: constants.endpoints.service.CREATE_USER,
                 skipOptionsRequest: true,
@@ -65,8 +65,8 @@ describe("ValidatePasswordHandler", () => {
         try {
             const user = mocks.getOldUserObject();
             //@ts-ignore
-            await db.dropDatabase(config.userCollection);
-            await db.collection(config.userCollection).update({
+            await db.dropDatabase(constants.collections.USERS);
+            await db.collection(constants.collections.USERS).update({
                 id: user.id
             }, user, {
                     upsert: true
@@ -99,8 +99,8 @@ describe("ValidatePasswordHandler", () => {
             const user = mocks.getOldUserObject();
             user.hashDate = new Date("1970");
             //@ts-ignore
-            await db.dropDatabase(config.userCollection);
-            await db.collection(config.userCollection).update({
+            await db.dropDatabase(constants.collections.USERS);
+            await db.collection(constants.collections.USERS).update({
                 id: user.id
             }, user, {
                     upsert: true

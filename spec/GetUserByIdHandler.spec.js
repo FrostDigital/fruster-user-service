@@ -5,6 +5,7 @@ const constants = require("../lib/constants");
 const specConstants = require("./support/spec-constants");
 const Db = require("mongodb").Db;
 const config = require("../config");
+const TestUtils = require("./support/TestUtils");
 
 
 describe("GetUserByIdHandler", () => {
@@ -20,15 +21,11 @@ describe("GetUserByIdHandler", () => {
 
 	it("should get 404 if user does not exist", async done => {
 		try {
-			await bus.request({
+			await TestUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: {},
-					user: { scopes: ["admin.*"] },
-					params: { id: "non-existing-user-id" }
-				}
+				data: {},
+				user: { scopes: ["admin.*"] },
+				params: { id: "non-existing-user-id" }
 			});
 
 			done.fail();
@@ -40,15 +37,11 @@ describe("GetUserByIdHandler", () => {
 
 	it("should get user by id", async done => {
 		try {
-			const res = await bus.request({
+			const res = await TestUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: {},
-					user: { scopes: ["admin.*"] },
-					params: { id: "user1" }
-				}
+				data: {},
+				user: { scopes: ["admin.*"] },
+				params: { id: "user1" }
 			});
 
 			expect(res.status).toBe(200);
@@ -67,17 +60,7 @@ describe("GetUserByIdHandler", () => {
 			config.lowerCaseName = true;
 			await insertTestUserWithEmptyLastName(db);
 
-			const userFromDb = await db.collection(constants.collections.USERS).findOne({ id: "user1337" });
-
-			const res = (await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					user: { scopes: ["admin.*"] },
-					data: { id: "user1337" }
-				}
-			})).data[0];
+			const res = (await TestUtils.busRequest(constants.endpoints.service.GET_USER, { id: "user1337" })).data[0];
 
 			expect(res.id).toBe("user1337");
 			expect(res.lastName).toBe("");
@@ -93,7 +76,7 @@ describe("GetUserByIdHandler", () => {
 });
 
 function insertTestUsers(db) {
-	let users = ["user1", "user2"]
+	const users = ["user1", "user2"]
 		.map((username) => {
 			return {
 				id: username,

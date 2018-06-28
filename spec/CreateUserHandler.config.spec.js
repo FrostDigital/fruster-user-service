@@ -8,6 +8,7 @@ const RoleScopesConfigRepo = require('../lib/repos/RoleScopesConfigRepo');
 const log = require("fruster-log");
 const bus = require("fruster-bus");
 const uuid = require("uuid");
+const TestUtils = require("./support/TestUtils");
 
 
 /** This is a seperate test because we need to set the config before  frusterTestUtils.startBeforeEach which means all other tests fail if set in the other test file 🤔 */
@@ -46,15 +47,7 @@ describe("CreateUserHandler w/ requireNames set to false", () => {
             delete user.middleName;
             delete user.lastName;
 
-            const response = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -94,15 +87,7 @@ describe("CreateUserHandler w/ requireNames set to false", () => {
             const user = mocks.getUserObject();
             user.roles.push("super-admin");
 
-            const response = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 

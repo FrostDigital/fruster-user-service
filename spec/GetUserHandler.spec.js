@@ -5,6 +5,7 @@ const constants = require("../lib/constants");
 const uuid = require("uuid");
 const Db = require("mongodb").Db;
 const specConstants = require("./support/spec-constants");
+const TestUtils = require("./support/TestUtils");
 
 
 describe("GetUserHandler", () => {
@@ -15,14 +16,7 @@ describe("GetUserHandler", () => {
 
 	it("should fail to get ALL users when passing in empty object as query", async done => {
 		try {
-			await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: {}
-				}
-			});
+			await TestUtils.busRequest(constants.endpoints.service.GET_USER, {});
 
 			done.fail();
 		} catch (err) {
@@ -33,13 +27,8 @@ describe("GetUserHandler", () => {
 
 	it("should fail to get ALL users when query is empty", async done => {
 		try {
-			await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId"
-				}
-			});
+			// @ts-ignore
+			await TestUtils.busRequest(constants.endpoints.service.GET_USER);
 
 			done.fail();
 		} catch (err) {
@@ -50,14 +39,7 @@ describe("GetUserHandler", () => {
 
 	it("should fail to query by password", async done => {
 		try {
-			await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: { password: "foo" }
-				}
-			});
+			await TestUtils.busRequest(constants.endpoints.service.GET_USER, { password: "foo" });
 
 			done.fail();
 		} catch (err) {
@@ -68,14 +50,7 @@ describe("GetUserHandler", () => {
 
 	it("should fail to query by salt", async done => {
 		try {
-			await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: { salt: "foo" }
-				}
-			});
+			await TestUtils.busRequest(constants.endpoints.service.GET_USER, { salt: "foo" });
 
 			done.fail();
 		} catch (err) {
@@ -86,14 +61,7 @@ describe("GetUserHandler", () => {
 
 	it("should get users by email", async done => {
 		try {
-			const res = await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: { email: "user1@example.com" }
-				}
-			});
+			const res = await TestUtils.busRequest(constants.endpoints.service.GET_USER, { email: "user1@example.com" });
 
 			expect(res.data.length).toBe(1, "res.data.length");
 			expect(res.data[0].id).toBe("user1", "res.data[0].id");
@@ -108,15 +76,10 @@ describe("GetUserHandler", () => {
 
 	it("should get users as admin using HTTP endpoint", async done => {
 		try {
-			const res = await bus.request({
-				subject: constants.endpoints.http.admin.GET_USERS,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					query: { email: "user1@example.com" },
-					user: { scopes: ["admin.*"] }
-				}
-			});
+			const res = await TestUtils.busRequest({ 
+				subject: constants.endpoints.http.admin.GET_USERS, 
+				user: { scopes: ["admin.*"] }, 
+			query: { email: "user1@example.com" } });
 
 			expect(res.data.length).toBe(1, "res.data.length");
 			expect(res.data[0].id).toBe("user1", "res.data[0].id");

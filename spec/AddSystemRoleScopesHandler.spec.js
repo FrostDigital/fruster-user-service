@@ -5,6 +5,7 @@ const frusterTestUtils = require("fruster-test-utils");
 const constants = require("../lib/constants");
 const config = require("../config");
 const specConstants = require("./support/spec-constants");
+const TestUtils = require("./support/TestUtils");
 
 
 describe("AddSystemRoleScopesHandler", () => {
@@ -32,25 +33,8 @@ describe("AddSystemRoleScopesHandler", () => {
             const role = "padmin";
             const newScopes = ["hello.from.vienna", "bye.from.vienna"];
 
-            await bus.request({
-                subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: "reqId",
-                    user: { scopes: ["system.add-role"] },
-                    data: { role }
-                }
-            });
-
-            await bus.request({
-                subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: "reqId",
-                    user: { scopes: ["system.add-role-scopes"] },
-                    data: { scopes: newScopes, role }
-                }
-            });
+            await TestUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role }, user: { scopes: ["system.add-role"] } });
+            await TestUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES, data: { scopes: newScopes, role }, user: { scopes: ["system.add-role-scopes"] } });
 
             const roles = await db.collection(constants.collections.ROLE_SCOPES).find({ role }).toArray();
 
@@ -71,27 +55,15 @@ describe("AddSystemRoleScopesHandler", () => {
             const role = "padmin";
             const newScopes = ["hello.from.vienna", "bye.from.vienna"];
 
-            await bus.request({
-                subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: "reqId",
-                    user: { scopes: ["system.add-role"] },
-                    data: { role }
-                }
-            });
-
-            for (let i = 0; i < 10; i++) {
-                await bus.request({
-                    subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES,
-                    skipOptionsRequest: true,
-                    message: {
-                        reqId: "reqId",
-                        user: { scopes: ["system.add-role-scopes"] },
-                        data: { scopes: newScopes, role }
-                    }
-                });
-            }
+            await TestUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role }, user: { scopes: ["system.add-role"] } });
+            await Promise.all(
+                new Array(10).fill(null)
+                    .map(() => TestUtils.busRequest({
+                        subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES,
+                        data: { scopes: newScopes, role },
+                        user: { scopes: ["system.add-role-scopes"] }
+                    }))
+            );
 
             const roles = await db.collection(constants.collections.ROLE_SCOPES).find({ role }).toArray();
 

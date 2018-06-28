@@ -4,7 +4,7 @@ const Db = require("mongodb").Db;
 const uuid = require("uuid");
 
 const mocks = require('./support/mocks.js');
-const testUtils = require('./support/test-utils.js');
+const TestUtils = require('./support/TestUtils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
@@ -21,7 +21,7 @@ describe("RemoveRolesHandler", () => {
             const user = mocks.getUserObject();
             user.roles = ["user", "admin"];
 
-            const createdUser = (await testUtils.createUser(user)).data;
+            const createdUser = (await TestUtils.createUser(user)).data;
 
             await bus.request({
                 subject: constants.endpoints.service.REMOVE_ROLES,
@@ -59,7 +59,7 @@ describe("RemoveRolesHandler", () => {
             const user = mocks.getUserObject();
             user.roles = ["user", "admin", "super-admin"];
 
-            const createdUser = (await testUtils.createUser(user)).data;
+            const createdUser = (await TestUtils.createUser(user)).data;
 
             await bus.request({
                 subject: constants.endpoints.service.REMOVE_ROLES,
@@ -96,7 +96,7 @@ describe("RemoveRolesHandler", () => {
     it("should not be possible to remove all from a user", async done => {
         try {
             const user = mocks.getUserObject();
-            const createdUser = (await testUtils.createUser(user)).data;
+            const createdUser = (await TestUtils.createUser(user)).data;
 
             try {
                 await bus.request({

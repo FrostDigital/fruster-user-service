@@ -52,7 +52,7 @@ describe("ResendVerificationEmailHandler", () => {
             });
 
             const createUserResponse = (await mocks.createUser(testUserData)).data;
-            const testUser = await db.collection(conf.userCollection).findOne({ id: createUserResponse.id });
+            const testUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
 
             verificationToken = testUser.emailVerificationToken;
 

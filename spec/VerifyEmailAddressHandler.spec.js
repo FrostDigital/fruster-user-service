@@ -48,7 +48,7 @@ describe("VerifyEmailAddressHandler", () => {
             });
 
             const createUserResponse = (await mocks.createUser(testUserData)).data;
-            const testUser = await db.collection(config.userCollection).findOne({ id: createUserResponse.id });
+            const testUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
             const verificationResponse = await bus.request({
                 subject: constants.endpoints.http.VERIFY_EMAIL,
                 skipOptionsRequest: true,
@@ -63,7 +63,7 @@ describe("VerifyEmailAddressHandler", () => {
 
             expect(verificationResponse.status).toBe(200, "verificationResponse.status");
 
-            const updatedTestUser = await db.collection(config.userCollection).findOne({ id: createUserResponse.id });
+            const updatedTestUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
 
             expect(updatedTestUser.emailVerificationToken).toBeUndefined("should remove emailVerificationToken");
             expect(updatedTestUser.emailVerified).toBe(true, "should set emailVerified to true");

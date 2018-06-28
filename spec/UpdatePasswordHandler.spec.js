@@ -6,7 +6,7 @@ const Db = mongo.Db;
 const uuid = require("uuid");
 
 const mocks = require('./support/mocks.js');
-const testUtils = require('./support/test-utils.js');
+const TestUtils = require('./support/TestUtils');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const deprecatedErrors = require("../lib/deprecatedErrors");
@@ -27,7 +27,7 @@ describe("UpdatePasswordHandler", () => {
     it("should be possible to update password", async done => {
         try {
             const user = mocks.getUserObject();
-            const createdUser = await testUtils.createUser(user);
+            const createdUser = await TestUtils.createUser(user);
             const updatePassword = {
                 newPassword: "Localhost:8081",
                 oldPassword: user.password,
@@ -45,8 +45,7 @@ describe("UpdatePasswordHandler", () => {
                     reqId: uuid.v4(),
                     user: createdUser.data,
                     data: updatePassword
-                },
-                timeout: 1000
+                }
             });
 
             const updatedUser = await db.collection("users")
@@ -68,7 +67,7 @@ describe("UpdatePasswordHandler", () => {
     it("should be possible to update password via http", async done => {
         try {
             const user = mocks.getUserObject();
-            const createdUser = await testUtils.createUser(user);
+            const createdUser = await TestUtils.createUser(user);
             const updatePassword = {
                 newPassword: "Localhost:8081",
                 oldPassword: user.password
@@ -85,8 +84,7 @@ describe("UpdatePasswordHandler", () => {
                     reqId: uuid.v4(),
                     user: createdUser.data,
                     data: updatePassword
-                },
-                timeout: 1000
+                }
             });
 
             const updatedUser = await db.collection("users")
@@ -108,7 +106,7 @@ describe("UpdatePasswordHandler", () => {
     it("should not be possible to update someone else's password", async done => {
         try {
             const user = mocks.getUserObject();
-            const response = await testUtils.createUser(user);
+            const response = await TestUtils.createUser(user);
             const updatePassword = {
                 newPassword: "Localhost:8081",
                 oldPassword: user.password,
@@ -118,7 +116,6 @@ describe("UpdatePasswordHandler", () => {
             try {
                 await bus.request({
                     subject: constants.endpoints.service.UPDATE_PASSWORD,
-                    timeout: 1000,
                     skipOptionsRequest: true,
                     message: {
                         reqId: uuid.v4(),
@@ -141,7 +138,7 @@ describe("UpdatePasswordHandler", () => {
     it("should not be possible to update password without validating the old password", async done => {
         try {
             const user = mocks.getUserObject();
-            const response = await testUtils.createUser(user);
+            const response = await TestUtils.createUser(user);
             const updatePassword = {
                 newPassword: "Localhost:8081",
                 oldPassword: "nothing",
@@ -151,7 +148,6 @@ describe("UpdatePasswordHandler", () => {
             try {
                 await bus.request({
                     subject: constants.endpoints.service.UPDATE_PASSWORD,
-                    timeout: 1000,
                     skipOptionsRequest: true,
                     message: {
                         reqId: uuid.v4(),

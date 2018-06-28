@@ -3,10 +3,10 @@ const log = require("fruster-log");
 const Db = require("mongodb").Db;
 const uuid = require("uuid");
 
-const conf = require("../config");
+const config = require("../config");
 const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");
-const testUtils = require("./support/test-utils.js");
+const TestUtils = require("./support/TestUtils");
 const frusterTestUtils = require("fruster-test-utils");
 const RoleManager = require("../lib/managers/RoleManager");
 const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
@@ -21,9 +21,12 @@ describe("CreateUserHandler", () => {
     /** @type {Db} */
     let db;
 
+    let configBackup;
+
     frusterTestUtils
         .startBeforeEach(specConstants
             .testUtilsOptions(async connection => {
+                configBackup = Object.assign({}, config);
                 db = connection.db;
                 const roleScopesConfigRepo = new RoleScopesConfigRepo();
                 await roleScopesConfigRepo.prepareRoles();
@@ -31,30 +34,20 @@ describe("CreateUserHandler", () => {
             }));
 
     afterEach((done) => {
-        conf.requireEmailVerification = false;
-        conf.optionalEmailVerification = false;
-        conf.requirePassword = true;
-        conf.emailVerificationForRoles = ["*"];
+        Object.keys(configBackup)
+            .forEach(conf => config[conf] = configBackup[conf]);
 
         done();
     });
 
-    fit("should be possible to create user", async done => {
+    it("should be possible to create user", async done => {
         mocks.mockMailService();
 
         try {
             const user = mocks.getUserObject();
             user.roles.push("super-admin");
 
-            const response = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -76,12 +69,66 @@ describe("CreateUserHandler", () => {
                             currentRoleScopes.push(scope);
                     });
                 });
-            console.log("\n");
-            console.log("=======================================");
-            console.log("response");
-            console.log("=======================================");
-            console.log(require("util").inspect(response, null, null, true));
-            console.log("\n");
+
+            expect(response.data.scopes.length).toBe(currentRoleScopes.length, "response.data.scopes.length");
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
+    it("should be possible to create user split into user and profile datasets", async done => {
+        const testBegan = new Date();
+        mocks.mockMailService();
+
+        config.userFields = ["isRelatedToSlatan"];
+
+        try {
+            const user = mocks.getUserObject();
+            user.roles.push("super-admin");
+            user.isRelatedToSlatan = true;
+
+            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+            expect(response.status).toBe(201, "response.status");
+
+            expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
+            expect(response.error).toBeUndefined("response.error");
+
+            expect(response.data.profile.firstName).toBe(user.firstName, "response.data.firstName");
+            expect(response.data.profile.middleName).toBe(user.middleName, "response.data.middleName");
+            expect(response.data.profile.lastName).toBe(user.lastName, "response.data.lastName");
+            expect(response.data.email).toBe(user.email, "response.data.email");
+
+            const userFromDatabase = await db.collection(constants.collections.USERS).findOne({ id: response.data.id });
+            const profileFromDatabase = await db.collection(constants.collections.PROFILES).findOne({ id: response.data.profile.id });
+
+            expect(userFromDatabase.password).toBeDefined("userFromDatabase.password");
+            expect(new Date(userFromDatabase.hashDate).getTime()).toBeGreaterThan(testBegan.getTime());
+            expect(userFromDatabase.salt).toBeDefined("userFromDatabase.salt");
+            expect(userFromDatabase.roles).toBeDefined("userFromDatabase.roles");
+            expect(userFromDatabase.roles.length).toBe(user.roles.length, "userFromDatabase.roles.length");
+            expect(userFromDatabase.roles.join(",")).toBe(user.roles.join(","), "userFromDatabase.roles.join(',')");
+            expect(userFromDatabase.emailVerified).toBeDefined("userFromDatabase.emailVerified");
+            expect(userFromDatabase.id).toBeDefined("userFromDatabase.id");
+            expect(userFromDatabase.isRelatedToSlatan).toBeDefined("userFromDatabase.isRelatedToSlatan");
+
+            expect(profileFromDatabase.firstName).toBe(user.firstName, "profileFromDatabase.firstName");
+            expect(profileFromDatabase.lastName).toBe(user.lastName, "profileFromDatabase.lastName");
+            expect(profileFromDatabase.userId).toBe(userFromDatabase.id, "profileFromDatabase.userId");
+
+            const roles = await roleManager.getRoles();
+            const currentRoleScopes = [];
+
+            Object.keys(roles)
+                .forEach(role => {
+                    roles[role].forEach(scope => {
+                        if (!currentRoleScopes.includes(scope))
+                            currentRoleScopes.push(scope);
+                    });
+                });
 
             expect(response.data.scopes.length).toBe(currentRoleScopes.length, "response.data.scopes.length");
 
@@ -99,16 +146,7 @@ describe("CreateUserHandler", () => {
             const user = mocks.getUserObject();
             user.roles.push("super-admin");
 
-            const response = await bus.request({
-                subject: constants.endpoints.http.admin.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    user: { scopes: ["admin.*"] },
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user, { scopes: ["admin.*"] });
 
             expect(response.status).toBe(201, "response.status");
 
@@ -150,15 +188,7 @@ describe("CreateUserHandler", () => {
             user.profileImage = "http://pipsum.com/435x310.jpg";
             user.custom = "field";
 
-            const response = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -201,15 +231,7 @@ describe("CreateUserHandler", () => {
             user.roles.push("admin");
             user.roles.push("user");
 
-            const response = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -231,15 +253,7 @@ describe("CreateUserHandler", () => {
         user.password = "hej";
 
         try {
-            await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             done.fail("should not be possible to create user with faulty password");
         } catch (err) {
@@ -257,15 +271,7 @@ describe("CreateUserHandler", () => {
         const user = mocks.getUserObject();
         user.email = "email";
         try {
-            await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             done.fail("should not be possible to create user with faulty email");
         } catch (err) {
@@ -307,45 +313,27 @@ describe("CreateUserHandler", () => {
             done.fail(err);
         }
 
-        function doRequest(userToCreate) {
-            return new Promise(resolve => {
-                bus.request({
-                    subject: constants.endpoints.service.CREATE_USER,
-                    timeout: 1000,
-                    skipOptionsRequest: true,
-                    message: {
-                        reqId: uuid.v4(),
-                        data: userToCreate
-                    }
-                })
-                    .catch(err => {
-                        expect(err.status).toBe(400, "err.status");
-
-                        expect(err.data).toBeUndefined("err.data");
-                        expect(Object.keys(err.error).length).not.toBe(0, "Object.keys(err.error).length");
-
-                        resolve();
-                    });
-            });
+        async function doRequest(userToCreate) {
+            try {
+                await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, userToCreate);
+            } catch (err) {
+                expect(err.status).toBe(400, "err.status");
+                expect(err.data).toBeUndefined("err.data");
+                expect(Object.keys(err.error).length).not.toBe(0, "Object.keys(err.error).length");
+                return;
+            }
         }
     });
 
     it("should not require password to be set if configured not to", async done => {
         mocks.mockMailService();
         try {
-            conf.requirePassword = false;
+            config.requirePassword = false;
 
             const user = mocks.getUserObject();
             delete user.password;
 
-            const savedUser = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const savedUser = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(savedUser.data.id).toBeDefined("savedUser.data.id");
 
@@ -359,18 +347,10 @@ describe("CreateUserHandler", () => {
     it("should generate email verification token when config requireEmailVerification is true", async done => {
         mocks.mockMailService();
         try {
-            conf.requireEmailVerification = true;
+            config.requireEmailVerification = true;
 
             const user = mocks.getUserObject();
-            const response = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -384,7 +364,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.emailVerified).toBe(false, "response.data.emailVerified");
             expect(response.data.emailVerificationToken).toBeUndefined("response.data.emailVerificationToken");
 
-            const userFromDatabase = await (db.collection(conf.userCollection).findOne({ id: response.data.id }));
+            const userFromDatabase = await (db.collection(constants.collections.USERS).findOne({ id: response.data.id }));
             expect(userFromDatabase.emailVerified).toBe(false, "userFromDatabase.emailVerified");
             expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
 
@@ -405,19 +385,11 @@ describe("CreateUserHandler", () => {
         mocks.mockMailService();
 
         try {
-            conf.requireEmailVerification = true;
-            conf.emailVerificationForRoles = ["admin"]
+            config.requireEmailVerification = true;
+            config.emailVerificationForRoles = ["admin"]
 
             const user = mocks.getUserObject();
-            const response = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -431,7 +403,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.emailVerified).toBe(false, "response.data.emailVerified");
             expect(response.data.emailVerificationToken).toBeUndefined("response.data.emailVerificationToken");
 
-            const userFromDatabase = await (db.collection(conf.userCollection).findOne({ id: response.data.id }));
+            const userFromDatabase = await (db.collection(constants.collections.USERS).findOne({ id: response.data.id }));
             expect(userFromDatabase.emailVerified).toBe(false, "userFromDatabase.emailVerified");
             expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
 
@@ -452,19 +424,11 @@ describe("CreateUserHandler", () => {
         mocks.mockMailService();
 
         try {
-            conf.requireEmailVerification = true;
-            conf.emailVerificationForRoles = ["user", "super-admin", "ramjam"]
+            config.requireEmailVerification = true;
+            config.emailVerificationForRoles = ["user", "super-admin", "ramjam"]
 
             const user = mocks.getUserObject();
-            const response = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -478,7 +442,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.emailVerified).toBeTruthy("response.data.emailVerified");
             expect(response.data.emailVerificationToken).toBeUndefined("response.data.emailVerificationToken");
 
-            const userFromDatabase = await (db.collection(conf.userCollection).findOne({ id: response.data.id }));
+            const userFromDatabase = await (db.collection(constants.collections.USERS).findOne({ id: response.data.id }));
 
             expect(userFromDatabase.emailVerified).toBeTruthy("userFromDatabase.emailVerified");
             expect(userFromDatabase.emailVerificationToken).toBeUndefined("userFromDatabase.emailVerificationToken");
@@ -499,18 +463,10 @@ describe("CreateUserHandler", () => {
     it("should generate email verification token when config optionalEmailVerification is true", async done => {
         mocks.mockMailService();
         try {
-            conf.optionalEmailVerification = true;
+            config.optionalEmailVerification = true;
 
             const user = mocks.getUserObject();
-            const response = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -524,7 +480,7 @@ describe("CreateUserHandler", () => {
             expect(response.data.emailVerified).toBe(false, "response.data.emailVerified");
             expect(response.data.emailVerificationToken).toBeUndefined("response.data.emailVerificationToken");
 
-            const userFromDatabase = await (db.collection(conf.userCollection).findOne({ id: response.data.id }));
+            const userFromDatabase = await (db.collection(constants.collections.USERS).findOne({ id: response.data.id }));
             expect(userFromDatabase.emailVerified).toBe(false, "userFromDatabase.emailVerified");
             expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
 
@@ -544,17 +500,17 @@ describe("CreateUserHandler", () => {
     it("should not allow multiple users with the same email to be created", async done => {
         mocks.mockMailService();
         const user = mocks.getUserObject();
-        await testUtils.createUser(user);
+        await TestUtils.createUser(user);
 
         try {
             await Promise.all([
-                testUtils.createUser(user),
-                testUtils.createUser(user),
-                testUtils.createUser(user),
-                testUtils.createUser(user),
-                testUtils.createUser(user),
-                testUtils.createUser(user),
-                testUtils.createUser(user)
+                TestUtils.createUser(user),
+                TestUtils.createUser(user),
+                TestUtils.createUser(user),
+                TestUtils.createUser(user),
+                TestUtils.createUser(user),
+                TestUtils.createUser(user),
+                TestUtils.createUser(user)
             ]);
 
             done.fail();

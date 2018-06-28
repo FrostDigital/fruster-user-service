@@ -30,9 +30,6 @@ module.exports = {
 	/** The roles of the initial account being created upon first run */
 	initialUserRole: process.env.INITIAL_USER_ROLE || "super-admin",
 
-	// TODO: double check if this really is used or not
-	userCollection: "users",
-
 	/** Wether or not to require users to have a password. Typically used with some external login method such as BankID or facebook. */
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
@@ -98,12 +95,13 @@ module.exports = {
 	requireNames: parseBool(process.env.REQUIRE_NAMES || "true"),
 
 	// TODO: REVERT AND FIX COMMENTS
+	// TODO: If only splitting based on constants.dataset.USER_REQUIRED_FIELDS, use "REQUIRED_ONLY"
 	userFields: parseArray(process.env.USER_FIELDS || "ALL"),
 	profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL"),
 
 	// TODO: add metadata to user => created, updated etc
 	// userFields: parseArray("email,password,hashDate,salt,roles,emailVerified,emailVerificationToken,registered"),
-	profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL")
+	// // profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL")
 
 
 };

@@ -1,9 +1,6 @@
-const bus = require("fruster-bus");
 const log = require("fruster-log");
-const uuid = require("uuid");
-
 const mocks = require('./support/mocks.js');
-const testUtils = require('./support/test-utils.js');
+const TestUtils = require('./support/TestUtils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
@@ -11,34 +8,15 @@ const specConstants = require("./support/spec-constants");
 
 describe("AddRolesHandler", () => {
 
-
     frusterTestUtils
         .startBeforeEach(specConstants
             .testUtilsOptions());
 
     it("should be possible to add a role to a user", async done => {
         try {
-            const createdUser = (await testUtils.createUser(mocks.getUserObject())).data;
-            await bus.request({
-                subject: constants.endpoints.service.ADD_ROLES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        id: createdUser.id,
-                        roles: ["user"]
-                    }
-                }
-            });
-
-            const userResponse = (await bus.request({
-                subject: constants.endpoints.service.GET_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUser.id }
-                }
-            }));
+            const createdUser = (await TestUtils.createUser(mocks.getUserObject())).data;
+            await TestUtils.busRequest(constants.endpoints.service.ADD_ROLES, { id: createdUser.id, roles: ["user"] });
+            const userResponse = await TestUtils.busRequest(constants.endpoints.service.GET_USER, { id: createdUser.id });
 
             expect(userResponse.data[0].roles.includes("admin")).toBe(true, `userResponse.data[0].roles.includes("admin")`);
             expect(userResponse.data[0].roles.includes("user")).toBe(true, `userResponse.data[0].roles.includes("user")`);
@@ -52,28 +30,9 @@ describe("AddRolesHandler", () => {
 
     it("should be possible to add multiple roles to a user", async done => {
         try {
-            const createdUser = (await testUtils.createUser(mocks.getUserObject())).data;
-
-            await bus.request({
-                subject: constants.endpoints.service.ADD_ROLES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        id: createdUser.id,
-                        roles: ["user", "super-admin"]
-                    }
-                }
-            });
-
-            const userResponse = await bus.request({
-                subject: constants.endpoints.service.GET_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUser.id }
-                }
-            });
+            const createdUser = (await TestUtils.createUser(mocks.getUserObject())).data;
+            await TestUtils.busRequest(constants.endpoints.service.ADD_ROLES, { id: createdUser.id, roles: ["user", "super-admin"] });
+            const userResponse = await TestUtils.busRequest(constants.endpoints.service.GET_USER, { id: createdUser.id });
 
             expect(userResponse.data[0].roles.includes("admin")).toBe(true, `userResponse.data[0].roles.includes("admin")`);
             expect(userResponse.data[0].roles.includes("user")).toBe(true, `userResponse.data[0].roles.includes("user")`);
@@ -88,28 +47,9 @@ describe("AddRolesHandler", () => {
 
     it("should not be possible to add multiples of same role", async done => {
         try {
-            const createdUser = (await testUtils.createUser(mocks.getUserObject())).data;
-
-            await bus.request({
-                subject: constants.endpoints.service.ADD_ROLES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        id: createdUser.id,
-                        roles: ["admin"]
-                    }
-                }
-            });
-
-            const userResponse = await bus.request({
-                subject: constants.endpoints.service.GET_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUser.id }
-                }
-            });
+            const createdUser = (await TestUtils.createUser(mocks.getUserObject())).data;
+            await TestUtils.busRequest(constants.endpoints.service.ADD_ROLES, { id: createdUser.id, roles: ["admin"] });
+            const userResponse = await TestUtils.busRequest(constants.endpoints.service.GET_USER, { id: createdUser.id });
 
             expect(userResponse.data[0].roles.length).toBe(1, "userResponse.data[0].roles.length");
 
