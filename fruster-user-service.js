@@ -5,6 +5,7 @@ const RoleScopesDbRepo = require("./lib/repos/RoleScopesDbRepo");
 const RoleScopesConfigRepo = require("./lib/repos/RoleScopesConfigRepo");
 const PasswordManager = require("./lib/managers/PasswordManager");
 const RoleManager = require("./lib/managers/RoleManager");
+const ProfileManager = require("./lib/managers/ProfileManager");
 const CreateInitialUserHandler = require("./lib/handlers/CreateInitialUserHandler");
 const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
 const GetUserHandler = require("./lib/handlers/GetUserHandler"); /** DEPRECATED */
@@ -54,16 +55,17 @@ module.exports = {
 		// MANAGERS
 		const passwordManager = new PasswordManager(userRepo);
 		const roleManager = new RoleManager(config.useDbRolesAndScopes ? roleScopesDbRepo : roleScopesConfigRepo);
+		const profileManager = new ProfileManager(profileRepo);
 
 		// HANDLERS
 		const createInitialUserHandler = new CreateInitialUserHandler(userRepo, initialUserRepo, passwordManager);
 		await createInitialUserHandler.handle();
-		const createUserHandler = new CreateUserHandler(userRepo, profileRepo, passwordManager, roleManager);
+		const createUserHandler = new CreateUserHandler(userRepo, passwordManager, roleManager, profileManager);
 		const getUserHandler = new GetUserHandler(userRepo, roleManager); /** DEPRECATED */
-		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleManager);
-		const getUserByIdHandler = new GetUserByIdHandler(userRepo, roleManager);
+		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleManager, profileManager);
+		const getUserByIdHandler = new GetUserByIdHandler(userRepo, roleManager, profileManager);
 		const getScopesForRolesHandler = new GetScopesForRolesHandler(roleManager);
-		const updateUserHandler = new UpdateUserHandler(userRepo, passwordManager, roleManager);
+		const updateUserHandler = new UpdateUserHandler(userRepo, passwordManager, roleManager, profileManager);
 		const deleteUserHandler = new DeleteUserHandler(userRepo);
 		const validatePasswordHandler = new ValidatePasswordHandler(userRepo, passwordManager, roleManager);
 		const updatePasswordHandler = new UpdatePasswordHandler(userRepo, passwordManager);

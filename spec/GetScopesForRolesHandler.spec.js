@@ -1,7 +1,4 @@
-const bus = require("fruster-bus");
 const log = require("fruster-log");
-const uuid = require("uuid");
-
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");

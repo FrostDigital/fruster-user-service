@@ -1,7 +1,4 @@
-const bus = require("fruster-bus");
 const log = require("fruster-log");
-const uuid = require("uuid");
-
 const mocks = require('./support/mocks.js');
 const TestUtils = require('./support/TestUtils');
 const constants = require('../lib/constants.js');
@@ -25,16 +22,12 @@ describe("SetPasswordHandler", () => {
 			const oldUser = await db.collection("users")
 				.findOne({ id: createdUserResponse.data.id });
 
-			await bus.request({
+			await TestUtils.busRequest({
 				subject: constants.endpoints.service.SET_PASSWORD,
-				skipOptionsRequest: true,
-				message: {
-					reqId: uuid.v4(),
-					user: createdUserResponse.data,
-					data: {
-						newPassword: "Localhost:8081",
-						id: createdUserResponse.data.id
-					}
+				user: createdUserResponse.data,
+				data: {
+					newPassword: "Localhost:8081",
+					id: createdUserResponse.data.id
 				}
 			});
 

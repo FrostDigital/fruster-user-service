@@ -1,10 +1,10 @@
-const bus = require("fruster-bus");
 const log = require("fruster-log");
 const Db = require("mongodb").Db;
 const frusterTestUtils = require("fruster-test-utils");
 const constants = require("../lib/constants");
 const config = require("../config");
 const specConstants = require("./support/spec-constants");
+const TestUtils = require("./support/TestUtils");
 
 
 describe("RemoveSystemRoleHandler", () => {
@@ -31,27 +31,19 @@ describe("RemoveSystemRoleHandler", () => {
         try {
             const role = "padmin";
 
-            await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: "reqId",
-                    user: { scopes: ["system.add-role"] },
-                    data: { role }
-                }
+                user: { scopes: ["system.add-role"] },
+                data: { role }
             });
 
             const rolesPreRemove = await db.collection(constants.collections.ROLE_SCOPES).find({ role }).toArray();
             expect(rolesPreRemove.length).toBe(1, "roles.length");
 
-            await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.http.admin.REMOVE_SYSTEM_ROLE,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: "reqId",
-                    user: { scopes: ["system.remove-role"] },
-                    data: { role }
-                }
+                user: { scopes: ["system.remove-role"] },
+                data: { role }
             });
 
             const rolesPostRemove = await db.collection(constants.collections.ROLE_SCOPES).find({ role }).toArray();

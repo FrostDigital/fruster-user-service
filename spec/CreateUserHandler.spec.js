@@ -1,8 +1,5 @@
-const bus = require("fruster-bus");
 const log = require("fruster-log");
 const Db = require("mongodb").Db;
-const uuid = require("uuid");
-
 const config = require("../config");
 const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");
@@ -21,12 +18,9 @@ describe("CreateUserHandler", () => {
     /** @type {Db} */
     let db;
 
-    let configBackup;
-
     frusterTestUtils
         .startBeforeEach(specConstants
             .testUtilsOptions(async connection => {
-                configBackup = Object.assign({}, config);
                 db = connection.db;
                 const roleScopesConfigRepo = new RoleScopesConfigRepo();
                 await roleScopesConfigRepo.prepareRoles();
@@ -34,9 +28,7 @@ describe("CreateUserHandler", () => {
             }));
 
     afterEach((done) => {
-        Object.keys(configBackup)
-            .forEach(conf => config[conf] = configBackup[conf]);
-
+        TestUtils.resetConfig();
         done();
     });
 
@@ -146,7 +138,11 @@ describe("CreateUserHandler", () => {
             const user = mocks.getUserObject();
             user.roles.push("super-admin");
 
-            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user, { scopes: ["admin.*"] });
+            const response = await TestUtils.busRequest({
+                subject: constants.endpoints.service.CREATE_USER,
+                data: user,
+                user: { scopes: ["admin.*"] }
+            });
 
             expect(response.status).toBe(201, "response.status");
 

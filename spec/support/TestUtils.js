@@ -2,38 +2,15 @@ const bus = require("fruster-bus");
 const constants = require("../../lib/constants.js");
 const uuid = require("uuid");
 const FrusterResponse = require("fruster-bus").FrusterResponse;
+const config = require("../../config");
+const configBackup = Object.assign({}, config);
+
 
 class TestUtils {
 
     static createUser(user) {
         return TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
     }
-
-    // /**
-    //  * Makes a bus request with the appropriate options for most tests.
-    //  * 
-    //  * @param {String} subject 
-    //  * @param {Object} data 
-    //  * @param {Object=} user
-    //  * @param {String=} reqId
-    //  * @param {Object=} params
-    //  * @param {Object=} query
-    //  * 
-    //  * @return {Promise<FrusterResponse>}
-    //  */
-    // static async busRequest(subject, data, user, reqId, params, query) {
-    //     return await bus.request({
-    //         subject: subject,
-    //         skipOptionsRequest: true,
-    //         message: {
-    //             reqId: reqId || uuid.v4(),
-    //             params: params,
-    //             query: query,
-    //             user,
-    //             data
-    //         }
-    //     });
-    // }
 
     /**
      * Makes a bus request with the appropriate options for most tests.
@@ -73,6 +50,11 @@ class TestUtils {
             req.message.data = data;
 
         return await bus.request(req);
+    }
+
+    static resetConfig() {
+        Object.keys(configBackup)
+            .forEach(conf => config[conf] = configBackup[conf]);
     }
 
 }

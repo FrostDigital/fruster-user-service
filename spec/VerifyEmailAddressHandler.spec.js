@@ -1,9 +1,7 @@
 const bus = require("fruster-bus");
 const log = require("fruster-log");
 const Db = require("mongodb").Db;
-const uuid = require("uuid");
 const errors = require("../lib/errors");
-
 const userService = require("../fruster-user-service");
 const config = require("../config");
 const mocks = require("./support/mocks.js");
@@ -11,6 +9,7 @@ const frusterTestUtils = require("fruster-test-utils");
 const constants = require("../lib/constants.js");
 const specConstants = require("./support/spec-constants");
 const MailServiceClient = require("../lib/clients/MailServiceClient");
+const TestUtils = require("./support/TestUtils");
 
 
 describe("VerifyEmailAddressHandler", () => {
@@ -49,16 +48,9 @@ describe("VerifyEmailAddressHandler", () => {
 
             const createUserResponse = (await mocks.createUser(testUserData)).data;
             const testUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
-            const verificationResponse = await bus.request({
+            const verificationResponse = await TestUtils.busRequest({
                 subject: constants.endpoints.http.VERIFY_EMAIL,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {},
-                    params: {
-                        tokenId: testUser.emailVerificationToken
-                    }
-                }
+                params: { tokenId: testUser.emailVerificationToken }
             });
 
             expect(verificationResponse.status).toBe(200, "verificationResponse.status");
@@ -77,16 +69,9 @@ describe("VerifyEmailAddressHandler", () => {
 
     it("should not be able to verify email with faulty token", async (done) => {
         try {
-            const verificationResponse = await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.http.VERIFY_EMAIL,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {},
-                    params: {
-                        tokenId: "ram.jam"
-                    }
-                }
+                params: { tokenId: "ram.jam" }
             });
 
             done.fail();

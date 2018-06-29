@@ -6,8 +6,6 @@ const specConstants = require('./support/spec-constants');
 const frusterTestUtils = require("fruster-test-utils");
 const RoleScopesConfigRepo = require('../lib/repos/RoleScopesConfigRepo');
 const log = require("fruster-log");
-const bus = require("fruster-bus");
-const uuid = require("uuid");
 const TestUtils = require("./support/TestUtils");
 
 
@@ -17,15 +15,11 @@ describe("CreateUserHandler w/ requireNames set to false", () => {
     /** @type {RoleManager} */
     let roleManager;
 
-    /** @type {Boolean} */
-    let requireNamesConfigDefaultValue;
-
     beforeAll(() => {
-        requireNamesConfigDefaultValue = conf.requireNames;
         conf.requireNames = false;
     });
 
-    afterAll(() => { conf.requireNames = requireNamesConfigDefaultValue; });
+    afterAll(() => { TestUtils.resetConfig(); });
 
     frusterTestUtils
         .startBeforeEach(specConstants

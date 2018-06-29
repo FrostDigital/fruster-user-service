@@ -1,10 +1,10 @@
-const bus = require("fruster-bus");
 const log = require("fruster-log");
 const Db = require("mongodb").Db;
 const frusterTestUtils = require("fruster-test-utils");
 const constants = require("../lib/constants");
 const config = require("../config");
 const specConstants = require("./support/spec-constants");
+const TestUtils = require("./support/TestUtils");
 
 
 describe("RemoveSystemRoleScopesHandler", () => {
@@ -32,34 +32,22 @@ describe("RemoveSystemRoleScopesHandler", () => {
             const role = "padmin";
             const newScopes = ["hello.from.vienna", "bye.from.vienna", "ram"];
 
-            await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: "reqId",
-                    user: { scopes: ["system.add-role"] },
-                    data: { role }
-                }
+                user: { scopes: ["system.add-role"] },
+                data: { role }
             });
 
-            const resP = await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: "reqId",
-                    user: { scopes: ["system.add-role-scopes"] },
-                    data: { scopes: newScopes, role }
-                }
+                user: { scopes: ["system.add-role-scopes"] },
+                data: { scopes: newScopes, role }
             });
 
-            const roleRemovedFrom = await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.http.admin.REMOVE_SYSTEM_ROLE_SCOPES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: "reqId",
-                    user: { scopes: ["system.remove-role-scopes"] },
-                    data: { scopes: [newScopes[0], newScopes[1]], role }
-                }
+                user: { scopes: ["system.remove-role-scopes"] },
+                data: { scopes: [newScopes[0], newScopes[1]], role }
             });
 
             const roles = await db.collection(constants.collections.ROLE_SCOPES).find({ role }).toArray();

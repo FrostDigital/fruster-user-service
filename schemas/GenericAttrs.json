@@ -45,6 +45,13 @@
                     "description": "Just an example property."
                 }
             }
+        },
+        "expand": {
+            "type": "string",
+            "enum": [
+                "profile"
+            ],
+            "description": "Number of results."
         }
     }
 }

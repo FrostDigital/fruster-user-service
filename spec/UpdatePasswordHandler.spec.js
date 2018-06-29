@@ -1,10 +1,6 @@
-const nsc = require("nats-server-control");
-const bus = require("fruster-bus");
 const log = require("fruster-log");
 const mongo = require("mongodb");
 const Db = mongo.Db;
-const uuid = require("uuid");
-
 const mocks = require('./support/mocks.js');
 const TestUtils = require('./support/TestUtils');
 const constants = require('../lib/constants.js');
@@ -38,14 +34,10 @@ describe("UpdatePasswordHandler", () => {
                     id: createdUser.data.id
                 });
 
-            await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_PASSWORD,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    user: createdUser.data,
-                    data: updatePassword
-                }
+                user: createdUser.data,
+                data: updatePassword
             });
 
             const updatedUser = await db.collection("users")
@@ -77,14 +69,10 @@ describe("UpdatePasswordHandler", () => {
                     id: createdUser.data.id
                 });
 
-            await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.http.UPDATE_PASSWORD,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    user: createdUser.data,
-                    data: updatePassword
-                }
+                user: createdUser.data,
+                data: updatePassword
             });
 
             const updatedUser = await db.collection("users")
@@ -114,14 +102,10 @@ describe("UpdatePasswordHandler", () => {
             };
 
             try {
-                await bus.request({
+                await TestUtils.busRequest({
                     subject: constants.endpoints.service.UPDATE_PASSWORD,
-                    skipOptionsRequest: true,
-                    message: {
-                        reqId: uuid.v4(),
-                        user: response.data,
-                        data: updatePassword
-                    }
+                    user: response.data,
+                    data: updatePassword
                 });
 
                 done.fail();
@@ -146,14 +130,10 @@ describe("UpdatePasswordHandler", () => {
             };
 
             try {
-                await bus.request({
+                await TestUtils.busRequest({
                     subject: constants.endpoints.service.UPDATE_PASSWORD,
-                    skipOptionsRequest: true,
-                    message: {
-                        reqId: uuid.v4(),
-                        user: response.data,
-                        data: updatePassword
-                    }
+                    user: response.data,
+                    data: updatePassword
                 });
 
                 done.fail();

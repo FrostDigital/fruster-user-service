@@ -1,5 +1,4 @@
 const frusterTestUtils = require("fruster-test-utils");
-const bus = require("fruster-bus");
 const log = require("fruster-log");
 const constants = require("../lib/constants");
 const specConstants = require("./support/spec-constants");
@@ -7,6 +6,8 @@ const Db = require("mongodb").Db;
 const config = require("../config");
 const TestUtils = require("./support/TestUtils");
 
+
+//TODO: test expand
 
 describe("GetUserByIdHandler", () => {
 

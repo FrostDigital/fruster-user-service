@@ -1,8 +1,5 @@
-const bus = require("fruster-bus");
 const log = require("fruster-log");
 const uuid = require("uuid");
-const _ = require("lodash");
-
 const conf = require('../config');
 const mocks = require('./support/mocks.js');
 const TestUtils = require('./support/TestUtils');
@@ -35,13 +32,9 @@ describe("UpdateUserHandler", () => {
             const createdUserResponse = await TestUtils.createUser(user);
             const newFirstName = "Roland";
             const newLastName = "Svensson";
-            const updateResponse = await bus.request({
+            const updateResponse = await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUserResponse.data.id, firstName: newFirstName, lastName: newLastName }
-                }
+                data: { id: createdUserResponse.data.id, firstName: newFirstName, lastName: newLastName }
             });
 
             expect(updateResponse.data.firstName).toBe(newFirstName, "updateResponse.data.firstName");
@@ -65,15 +58,11 @@ describe("UpdateUserHandler", () => {
             const createdUserResponse = await TestUtils.createUser(user);
             const newFirstName = "Roland";
             const newLastName = "Svensson";
-            const updateResponse = await bus.request({
+            const updateResponse = await TestUtils.busRequest({
                 subject: constants.endpoints.http.admin.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    user: { scopes: ["admin.*"] },
-                    reqId: uuid.v4(),
-                    data: { firstName: newFirstName, lastName: newLastName },
-                    params: { id: createdUserResponse.data.id }
-                }
+                user: { scopes: ["admin.*"] },
+                data: { firstName: newFirstName, lastName: newLastName },
+                params: { id: createdUserResponse.data.id }
             });
 
             expect(updateResponse.data.firstName).toBe(newFirstName, "updateResponse.data.firstName");
@@ -93,13 +82,9 @@ describe("UpdateUserHandler", () => {
 
     it("should return error when user can't be updated", async done => {
         try {
-            await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: "ID_", email: "hello" }
-                }
+                data: { id: "ID_", email: "hello" }
             });
 
             done.fail();
@@ -114,13 +99,9 @@ describe("UpdateUserHandler", () => {
         const createdUserResponse = await TestUtils.createUser(user);
 
         try {
-            await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUserResponse.data.id, password: "new-password" }
-                }
+                data: { id: createdUserResponse.data.id, password: "new-password" }
             });
 
             done.fail();
@@ -137,13 +118,9 @@ describe("UpdateUserHandler", () => {
         const createdUserResponse = await TestUtils.createUser(user);
 
         try {
-            await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUserResponse.data.id, email: "hello" }
-                }
+                data: { id: createdUserResponse.data.id, email: "hello" }
             });
 
             done.fail();
@@ -164,13 +141,9 @@ describe("UpdateUserHandler", () => {
         await TestUtils.createUser(user);
 
         try {
-            await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: id, email: email }
-                }
+                data: { id: id, email: email }
             });
 
             done.fail();
@@ -189,13 +162,9 @@ describe("UpdateUserHandler", () => {
             const id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await bus.request({
+            const updateResponse = await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: id, email: email, firstName: "greg" }
-                }
+                data: { id: id, email: email, firstName: "greg" }
             });
 
             expect(updateResponse.status).toBe(200, "updateResponse.status");
@@ -218,13 +187,9 @@ describe("UpdateUserHandler", () => {
             const id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id, email }
-                }
+                data: { id, email }
             });
 
             done.fail();
@@ -247,13 +212,9 @@ describe("UpdateUserHandler", () => {
             const id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await bus.request({
+            await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id, email, password: "This is incorrect" }
-                }
+                data: { id, email, password: "This is incorrect" }
             });
             done.fail();
         } catch (err) {
@@ -275,13 +236,9 @@ describe("UpdateUserHandler", () => {
             const id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await bus.request({
+            const updateResponse = await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id, email, password: user.password }
-                }
+                data: { id, email, password: user.password }
             });
 
             expect(updateResponse.status).toBe(200, "updateResponse.status");
@@ -303,13 +260,9 @@ describe("UpdateUserHandler", () => {
             const id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await bus.request({
+            const updateResponse = await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: id, email: email, firstName: user.firstName, lastName: user.lastName }
-                }
+                data: { id: id, email: email, firstName: user.firstName, lastName: user.lastName }
             });
 
             expect(updateResponse.status).toBe(200, "updateResponse.status");
@@ -333,18 +286,9 @@ describe("UpdateUserHandler", () => {
             id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await bus.request({
+            const updateResponse = await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        id: id,
-                        email: email,
-                        firstName: user.firstName,
-                        lastName: user.lastName
-                    }
-                }
+                data: { id: id, email: email, firstName: user.firstName, lastName: user.lastName }
             });
 
             const testUser = await db.collection(constants.collections.USERS).findOne({ id: updateResponse.data.id });
@@ -382,19 +326,10 @@ describe("UpdateUserHandler", () => {
 
             const user = mocks.getUserObject();
             const createdUserResponse = await TestUtils.createUser(user);
-            const updateResponse = await bus.request({
+            const updateResponse = await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        id: createdUserResponse.data.id,
-                        email: newEmail,
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        password: user.password
-                    }
-                }
+                data: { id: createdUserResponse.data.id, email: newEmail, firstName: user.firstName, lastName: user.lastName, password: user.password }
             });
 
             const testUser = await db.collection(constants.collections.USERS).findOne({ id: updateResponse.data.id });
@@ -423,18 +358,9 @@ describe("UpdateUserHandler", () => {
             id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await bus.request({
+            const updateResponse = await TestUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        id: id,
-                        email: email,
-                        firstName: user.firstName,
-                        lastName: user.lastName
-                    }
-                }
+                data: { id: id, email: email, firstName: user.firstName, lastName: user.lastName }
             });
 
             const testUser = await db.collection(constants.collections.USERS).findOne({ id: updateResponse.data.id });

@@ -5,6 +5,7 @@ const mocks = require("./support/mocks");
 const Utils = require("../lib/utils/Utils");
 const log = require("fruster-log");
 
+
 describe("UserModel", () => {
 
     afterEach(() => {

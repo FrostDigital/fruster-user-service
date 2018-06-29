@@ -1,6 +1,7 @@
 const uuid = require("uuid");
 const bus = require("fruster-bus");
 const constants = require("../../lib/constants.js");
+const TestUtils = require("./TestUtils");
 
 module.exports = {
 
@@ -45,13 +46,9 @@ module.exports = {
     },
 
     createUser: async (userObj) => {
-        return await bus.request({
+        return await TestUtils.busRequest({
             subject: constants.endpoints.service.CREATE_USER,
-            skipOptionsRequest: true,
-            message: {
-                reqId: uuid.v4(),
-                data: userObj
-            }
+            data: userObj
         });
     },
 

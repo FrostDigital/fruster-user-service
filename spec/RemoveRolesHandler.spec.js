@@ -1,6 +1,5 @@
 const bus = require("fruster-bus");
 const log = require("fruster-log");
-const Db = require("mongodb").Db;
 const uuid = require("uuid");
 
 const mocks = require('./support/mocks.js');
@@ -35,13 +34,9 @@ describe("RemoveRolesHandler", () => {
                 }
             });
 
-            const userResponse = await bus.request({
+            const userResponse = await TestUtils.busRequest({
                 subject: constants.endpoints.service.GET_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUser.id }
-                }
+                data: { id: createdUser.id }
             });
 
             expect(userResponse.data[0].roles.includes("admin")).toBe(false, `userResponse.data[0].roles.includes("admin")`);
@@ -61,25 +56,14 @@ describe("RemoveRolesHandler", () => {
 
             const createdUser = (await TestUtils.createUser(user)).data;
 
-            await bus.request({
+            await await TestUtils.busRequest({
                 subject: constants.endpoints.service.REMOVE_ROLES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        id: createdUser.id,
-                        roles: ["admin", "super-admin"]
-                    }
-                }
+                data: { id: createdUser.id, roles: ["admin", "super-admin"] }
             });
 
-            const userResponse = await bus.request({
+            const userResponse = await TestUtils.busRequest({
                 subject: constants.endpoints.service.GET_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUser.id }
-                }
+                data: { id: createdUser.id }
             });
 
             expect(userResponse.data[0].roles.includes("admin")).toBe(false, `userResponse.data[0].roles.includes("admin")`);
@@ -99,16 +83,9 @@ describe("RemoveRolesHandler", () => {
             const createdUser = (await TestUtils.createUser(user)).data;
 
             try {
-                await bus.request({
+                await TestUtils.busRequest({
                     subject: constants.endpoints.service.REMOVE_ROLES,
-                    skipOptionsRequest: true,
-                    message: {
-                        reqId: uuid.v4(),
-                        data: {
-                            id: createdUser.id,
-                            roles: ["admin"]
-                        }
-                    }
+                    data: { id: createdUser.id, roles: ["admin"] }
                 });
             } catch (err) {
                 expect(err.status).toBe(400, "err.status");
