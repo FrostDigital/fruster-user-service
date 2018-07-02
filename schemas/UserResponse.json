@@ -1,6 +1,6 @@
 {
     "id": "UserResponse",
-    "description": "Single user response.",
+    "description": "Single user response. Response data may vary depending on configuration.",
     "additionalProperties": true,
     "properties": {
         "id": {

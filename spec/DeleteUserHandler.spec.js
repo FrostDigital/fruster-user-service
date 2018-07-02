@@ -6,6 +6,7 @@ const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const mocks = require("./support/mocks");
 const specConstants = require("./support/spec-constants");
+const config = require("../config");
 
 
 describe("DeleteUserHandler", () => {
@@ -16,6 +17,8 @@ describe("DeleteUserHandler", () => {
     frusterTestUtils
         .startBeforeEach(specConstants
             .testUtilsOptions((connection) => { db = connection.db; }));
+
+    afterEach(() => TestUtils.resetConfig());
 
     it("should return 200 when user is successfully removed", async done => {
         try {
@@ -28,6 +31,37 @@ describe("DeleteUserHandler", () => {
 
             const userInDatabase = await db.collection(constants.collections.USERS).findOne(reqData);
             expect(userInDatabase).toBe(null, "userInDatabase");
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
+    it("should return 200 when user is successfully removed with split datasets", async done => {
+        try {
+            config.userFields = constants.dataset.REQUIRED_ONLY;
+
+            const user = mocks.getUserObject();
+            const createdUserResponse = await TestUtils.createUser(user);
+            const reqData = { id: createdUserResponse.data.id };
+
+            const profileBeforeDelete = (await db.collection(constants.collections.PROFILES).findOne({ id: createdUserResponse.data.id }));
+
+            expect(profileBeforeDelete.firstName).toBeDefined("profile.firstName");
+            expect(profileBeforeDelete.lastName).toBeDefined("profile.lastName");
+            expect(profileBeforeDelete.id).toBeDefined("profile.id");
+
+            const deleteResponse = await TestUtils.busRequest(constants.endpoints.service.DELETE_USER, reqData);
+
+            expect(deleteResponse.status).toBe(200, "deleteResponse.status");
+
+            const userInDatabase = await db.collection(constants.collections.USERS).findOne(reqData);
+            expect(userInDatabase).toBe(null, "userInDatabase");
+
+            const profileAfterDelete = (await db.collection(constants.collections.PROFILES).findOne({ id: createdUserResponse.data.id }));
+            expect(profileAfterDelete).toBe(null, "userInDatabase");
 
             done();
         } catch (err) {

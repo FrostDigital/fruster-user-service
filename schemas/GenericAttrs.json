@@ -49,9 +49,10 @@
         "expand": {
             "type": "string",
             "enum": [
-                "profile"
+                "profile",
+                "true"
             ],
-            "description": "Number of results."
+            "description": "Whether or not to expand user object with its profile."
         }
     }
 }

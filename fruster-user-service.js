@@ -3,9 +3,12 @@ const ProfileRepo = require("./lib/repos/ProfileRepo");
 const InitialUserRepo = require("./lib/repos/InitialUserRepo");
 const RoleScopesDbRepo = require("./lib/repos/RoleScopesDbRepo");
 const RoleScopesConfigRepo = require("./lib/repos/RoleScopesConfigRepo");
+
 const PasswordManager = require("./lib/managers/PasswordManager");
 const RoleManager = require("./lib/managers/RoleManager");
 const ProfileManager = require("./lib/managers/ProfileManager");
+const UserManager = require("./lib/managers/UserManager");
+
 const CreateInitialUserHandler = require("./lib/handlers/CreateInitialUserHandler");
 const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
 const GetUserHandler = require("./lib/handlers/GetUserHandler"); /** DEPRECATED */
@@ -26,6 +29,10 @@ const AddSystemRoleScopesHandler = require("./lib/handlers/system/AddSystemRoleS
 const GetSystemRolesHandler = require("./lib/handlers/system/GetSystemRolesHandler");
 const RemoveSystemRoleHandler = require("./lib/handlers/system/RemoveSystemRoleHandler");
 const RemoveSystemRoleScopesHandler = require("./lib/handlers/system/RemoveSystemRoleScopesHandler");
+
+const GetProfilesByQueryHandler = require("./lib/handlers/GetProfilesByQueryHandler");
+const UpdateProfileHandler = require("./lib/handlers/UpdateProfileHandler");
+
 const bus = require("fruster-bus");
 const mongo = require("mongodb");
 const Db = mongo.Db;
@@ -56,6 +63,7 @@ module.exports = {
 		const passwordManager = new PasswordManager(userRepo);
 		const roleManager = new RoleManager(config.useDbRolesAndScopes ? roleScopesDbRepo : roleScopesConfigRepo);
 		const profileManager = new ProfileManager(profileRepo);
+		const userManager = new UserManager();
 
 		// HANDLERS
 		const createInitialUserHandler = new CreateInitialUserHandler(userRepo, initialUserRepo, passwordManager);
@@ -65,8 +73,8 @@ module.exports = {
 		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleManager, profileManager);
 		const getUserByIdHandler = new GetUserByIdHandler(userRepo, roleManager, profileManager);
 		const getScopesForRolesHandler = new GetScopesForRolesHandler(roleManager);
-		const updateUserHandler = new UpdateUserHandler(userRepo, passwordManager, roleManager, profileManager);
-		const deleteUserHandler = new DeleteUserHandler(userRepo);
+		const updateUserHandler = new UpdateUserHandler(userRepo, passwordManager, roleManager, profileManager, userManager);
+		const deleteUserHandler = new DeleteUserHandler(userRepo, profileRepo);
 		const validatePasswordHandler = new ValidatePasswordHandler(userRepo, passwordManager, roleManager);
 		const updatePasswordHandler = new UpdatePasswordHandler(userRepo, passwordManager);
 		const setPasswordHandler = new SetPasswordHandler(userRepo, passwordManager);
@@ -74,6 +82,9 @@ module.exports = {
 		const removeRolesHandler = new RemoveRolesHandler(userRepo, roleManager);
 		const verifyEmailAddressHandler = new VerifyEmailAddressHandler(userRepo);
 		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(userRepo, roleManager);
+
+		const getProfilesByQueryHandler = new GetProfilesByQueryHandler(roleManager, profileManager);
+		const updateProfileHandler = new UpdateProfileHandler(profileRepo, userManager, profileManager);
 
 		// ROLES & SCOPES, if configured
 		if (config.useDbRolesAndScopes) {
@@ -224,11 +235,25 @@ module.exports = {
 		});
 
 		bus.subscribe({
+			subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
+			requestSchema: constants.schemas.request.GET_PROFILES_BY_QUERY,
+			responseSchema: constants.schemas.response.GET_PROFILES_BY_QUERY,
+			docs: docs.service.GET_PROFILES_BY_QUERY,
+			handle: (req) => getProfilesByQueryHandler.handle(req)
+		});
+
+		bus.subscribe({
 			subject: constants.endpoints.service.UPDATE_USER,
 			requestSchema: constants.schemas.request.UPDATE_USER_REQUEST,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
 			docs: docs.service.UPDATE_USER,
 			handle: (req) => updateUserHandler.handle(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.service.UPDATE_PROFILE,
+
+			handle: (req) => updateProfileHandler.handle(req)
 		});
 
 		bus.subscribe({

@@ -7,8 +7,6 @@ const config = require("../config");
 const TestUtils = require("./support/TestUtils");
 
 
-//TODO: test expand
-
 describe("GetUserByIdHandler", () => {
 
 	/** @type {Db}] */
@@ -16,12 +14,18 @@ describe("GetUserByIdHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => { db = connection.db; return insertTestUsers(connection.db); }));
+			.testUtilsOptions((connection) => { db = connection.db; }));
 
-	afterEach(() => config.lowerCaseName = false);
+	afterEach(() => TestUtils.resetConfig());
+
+	async function setupTestUsers() {
+		await insertTestUsers(db);
+	}
 
 	it("should get 404 if user does not exist", async done => {
 		try {
+			await setupTestUsers();
+
 			await TestUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
 				data: {},
@@ -38,6 +42,8 @@ describe("GetUserByIdHandler", () => {
 
 	it("should get user by id", async done => {
 		try {
+			await setupTestUsers();
+
 			const res = await TestUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
 				data: {},
@@ -56,8 +62,36 @@ describe("GetUserByIdHandler", () => {
 		}
 	});
 
+	it("should expand user if expand query is provided", async done => {
+		config.userFields = ["isRelatedToSlatan"];
+
+		try {
+			const createdUsers = await createTestUsers();
+
+			const res = await TestUtils.busRequest({
+				subject: constants.endpoints.http.admin.GET_USER,
+				data: {},
+				user: { scopes: ["admin.*"] },
+				params: { id: createdUsers[0].data.id },
+				query: { expand: "profile" }
+			});
+
+			expect(res.status).toBe(200);
+			expect(res.data.id).toBe(createdUsers[0].data.id);
+			expect(res.data.profile.id).toBe(createdUsers[0].data.id);
+			expect(res.data.password).toBeUndefined();
+
+			done();
+		} catch (err) {
+			log.error(err);
+			done.fail(err);
+		}
+	});
+
 	it("should not remove empty fields", async done => {
 		try {
+			await setupTestUsers();
+
 			config.lowerCaseName = true;
 			await insertTestUserWithEmptyLastName(db);
 
@@ -91,6 +125,19 @@ function insertTestUsers(db) {
 		});
 
 	return db.collection("users").insert(users);
+}
+
+function createTestUsers() {
+	return Promise.all(["user1", "user2"]
+		.map((username) => TestUtils.createUser({
+			id: username,
+			firstName: `${username}-firstName`,
+			lastName: `${username}-lastName`,
+			email: `${username}@example.com`,
+			salt: `${username}-salt`,
+			roles: ["user"],
+			password: "Localhost:8080"
+		})));
 }
 
 function insertTestUserWithEmptyLastName(db) {

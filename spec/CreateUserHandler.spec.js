@@ -109,7 +109,6 @@ describe("CreateUserHandler", () => {
 
             expect(profileFromDatabase.firstName).toBe(user.firstName, "profileFromDatabase.firstName");
             expect(profileFromDatabase.lastName).toBe(user.lastName, "profileFromDatabase.lastName");
-            expect(profileFromDatabase.userId).toBe(userFromDatabase.id, "profileFromDatabase.userId");
 
             const roles = await roleManager.getRoles();
             const currentRoleScopes = [];

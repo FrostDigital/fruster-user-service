@@ -1,30 +1,25 @@
 const log = require("fruster-log");
 const uuid = require("uuid");
-const conf = require('../config');
+const config = require('../config');
 const mocks = require('./support/mocks.js');
 const TestUtils = require('./support/TestUtils');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
 const errors = require('../lib/errors');
+const Db = require("mongodb").Db;
 
 
 describe("UpdateUserHandler", () => {
 
+    /** @type {Db} */
     let db;
 
     frusterTestUtils
         .startBeforeEach(specConstants
             .testUtilsOptions((connection) => { db = connection.db; }));
 
-    afterEach((done) => {
-        conf.requireEmailVerification = false;
-        conf.requirePasswordOnEmailUpdate = false;
-        conf.optionalEmailVerification = false;
-        conf.emailVerificationEmailTempate = undefined;
-
-        done();
-    });
+    afterEach(() => TestUtils.resetConfig());
 
     it("should return updated user when updating user", async done => {
         try {
@@ -39,6 +34,36 @@ describe("UpdateUserHandler", () => {
 
             expect(updateResponse.data.firstName).toBe(newFirstName, "updateResponse.data.firstName");
             expect(updateResponse.data.lastName).toBe(newLastName, "updateResponse.data.lastName");
+
+            const testUser = await db.collection(constants.collections.USERS).findOne({ id: updateResponse.data.id });
+
+            expect(testUser.emailVerified).toBe(true, "updateResponse.data.emailVerified");
+            expect(testUser.emailVerificationToken).toBeUndefined("testUser.emailVerificationToken");
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
+    it("should filter out profile fields and only update user fields when updating user when configured to split user data", async done => {
+        config.userFields = ["isRelatedToSlatan"];
+
+        try {
+            const user = mocks.getUserObject();
+            const createdUserResponse = await TestUtils.createUser(user);
+            const newFirstName = "Roland";
+            const newLastName = "Svensson";
+
+            const updateResponse = await TestUtils.busRequest({
+                subject: constants.endpoints.service.UPDATE_USER,
+                data: { id: createdUserResponse.data.id, firstName: newFirstName, lastName: newLastName, isRelatedToSlatan: false }
+            });
+
+            expect(updateResponse.data.firstName).toBeUndefined("updateResponse.data.firstName");
+            expect(updateResponse.data.lastName).toBeUndefined("updateResponse.data.lastName");
+            expect(updateResponse.data.isRelatedToSlatan).toBeFalsy("updateResponse.data.isRelatedToSlatan");
 
             const testUser = await db.collection(constants.collections.USERS).findOne({ id: updateResponse.data.id });
 
@@ -178,7 +203,7 @@ describe("UpdateUserHandler", () => {
 
     it("should require password when updating email if config.requirePasswordOnEmailUpdate is true", async done => {
         try {
-            conf.requirePasswordOnEmailUpdate = true;
+            config.requirePasswordOnEmailUpdate = true;
 
             const user = mocks.getUserObject();
             const email = "rambo.dreadlock@fejkmejl.se";
@@ -203,7 +228,7 @@ describe("UpdateUserHandler", () => {
 
     it("should not be possible to provide incorrect password when updating email if config.requirePasswordOnEmailUpdate is true", async done => {
         try {
-            conf.requirePasswordOnEmailUpdate = true;
+            config.requirePasswordOnEmailUpdate = true;
 
             const user = mocks.getUserObject();
             const email = "rambo.dreadlock@fejkmejl.se";
@@ -227,7 +252,7 @@ describe("UpdateUserHandler", () => {
 
     it("should be possible to update email with correct password if config.requirePasswordOnEmailUpdate is true", async done => {
         try {
-            conf.requirePasswordOnEmailUpdate = true;
+            config.requirePasswordOnEmailUpdate = true;
 
             const user = mocks.getUserObject();
             const email = "rambo.dreadlock@fejkmejl.se";
@@ -276,7 +301,7 @@ describe("UpdateUserHandler", () => {
 
     it("should resend verification mail when updating email if conf.requireEmailVerification is set to true", async (done) => {
         try {
-            conf.requireEmailVerification = true;
+            config.requireEmailVerification = true;
             mocks.mockMailService();
             const user = mocks.getUserObject();
             const email = user.email;
@@ -306,9 +331,9 @@ describe("UpdateUserHandler", () => {
 
     it("should resend verification mail when updating email if conf.requireEmailVerification is set to true and conf.emailVerificationEmailTempate and config.requirePasswordOnEmailUpdate set", async (done) => {
         try {
-            conf.requireEmailVerification = true;
-            conf.requirePasswordOnEmailUpdate = true;
-            conf.emailVerificationEmailTempate = uuid.v4();
+            config.requireEmailVerification = true;
+            config.requirePasswordOnEmailUpdate = true;
+            config.emailVerificationEmailTempate = uuid.v4();
 
             const newEmail = "ram@ram.se";
             let invocations = 0;
@@ -348,7 +373,7 @@ describe("UpdateUserHandler", () => {
 
     it("should resend verification mail when updating email if conf.optionalEmailVerification is set to true", async (done) => {
         try {
-            conf.optionalEmailVerification = true;
+            config.optionalEmailVerification = true;
             mocks.mockMailService();
             const user = mocks.getUserObject();
             const email = user.email;
