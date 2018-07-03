@@ -85,7 +85,7 @@ module.exports = {
 	/** Whether or not to opt out of the admin web for handling roles and scopes.  */
 	optOutOfRoleAdminWeb: process.env.OPT_OUT_OF_ROLE_ADMIN_WEB === "true",
 
-	/** Base URL to API (the api gateway) */
+	/** Base URL to API (the api gateway) used by the frontend code served by the web server to make requests */
 	apiRoot: process.env.API_ROOT || "http://localhost:3000",
 
 	/** Whether or not to require password when updating email address */
@@ -94,15 +94,20 @@ module.exports = {
 	/** Whether or not to require a new user to have firstName and lastName */
 	requireNames: parseBool(process.env.REQUIRE_NAMES || "true"),
 
-	// TODO: REVERT AND FIX COMMENTS
-	// TODO: If only splitting based on constants.dataset.USER_REQUIRED_FIELDS, use "REQUIRED_ONLY"
+	/** 
+	 * The fields to be saved in the user dataset. If `ALL` is defined in both userFields and profileFields; userFields is dominant. 
+	 * If only fields are defined in userFields; those fields are saved in the user dataset and the rest in the profile dataset. 
+	 * In order to split between user and profile dataset with only the required fields stored in the user dataset `REQUIRED_ONLY` can be used.
+	 * See the required fields array in `constants.dataset.USER_REQUIRED_FIELDS`
+	 */
 	userFields: parseArray(process.env.USER_FIELDS || "ALL"),
+
+	/** 
+	 * The fields to be saved in the user dataset. If `ALL` is defined in both userFields and profileFields; userFields is dominant. 
+	 * If only fields are defined in profileFields; those fields are saved in the user dataset and the rest in the profile dataset. 
+	 * Typically this doesn't need to be configured.
+	 */
 	profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL"),
-
-	// TODO: add metadata to user => created, updated etc
-	// userFields: parseArray("email,password,hashDate,salt,roles,emailVerified,emailVerificationToken,registered"),
-	// // profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL")
-
 
 };
 
