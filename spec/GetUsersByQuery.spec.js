@@ -64,6 +64,13 @@ describe("GetUsersByQueryHandler", () => {
                 expect(res.data.users[i].profile.firstName).toBe(`user${i}-firstName`, "res.data.users[i].profile.firstName");
                 expect(res.data.users[i].profile.lastName).toBe(`user${i}-lastName`, "res.data.users[i].profile.lastName");
                 expect(res.data.users[i].profile.customField).toBe(Math.cos(i), "res.data.users[i].profile.customField");
+
+                expect(res.data.users[i].metadata).toBeDefined("res.data.users[i].profile.metadata");
+                expect(res.data.users[i].metadata.created).toBeDefined("res.data.users[i].profile.metadata.created");
+                expect(res.data.users[i].metadata.updated).toBeDefined("res.data.users[i].profile.metadata.updated");
+                expect(res.data.users[i].profile.metadata).toBeDefined("res.data.users[i].profile.metadata");
+                expect(res.data.users[i].profile.metadata.created).toBeDefined("res.data.users[i].profile.metadata.created");
+                expect(res.data.users[i].profile.metadata.updated).toBeDefined("res.data.users[i].profile.metadata.updated");
             }
 
             done();

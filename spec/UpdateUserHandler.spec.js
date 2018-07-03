@@ -34,6 +34,8 @@ describe("UpdateUserHandler", () => {
 
             expect(updateResponse.data.firstName).toBe(newFirstName, "updateResponse.data.firstName");
             expect(updateResponse.data.lastName).toBe(newLastName, "updateResponse.data.lastName");
+            expect(new Date(updateResponse.data.metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUserResponse.data.metadata.updated).getTime(), "updateResponse.data.metadata.updated")
 
             const testUser = await db.collection(constants.collections.USERS).findOne({ id: updateResponse.data.id });
 
@@ -64,6 +66,8 @@ describe("UpdateUserHandler", () => {
             expect(updateResponse.data.firstName).toBeUndefined("updateResponse.data.firstName");
             expect(updateResponse.data.lastName).toBeUndefined("updateResponse.data.lastName");
             expect(updateResponse.data.isRelatedToSlatan).toBeFalsy("updateResponse.data.isRelatedToSlatan");
+            expect(new Date(updateResponse.data.metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUserResponse.data.metadata.updated).getTime(), "updateResponse.data.metadata.updated")
 
             const testUser = await db.collection(constants.collections.USERS).findOne({ id: updateResponse.data.id });
 
@@ -92,6 +96,8 @@ describe("UpdateUserHandler", () => {
 
             expect(updateResponse.data.firstName).toBe(newFirstName, "updateResponse.data.firstName");
             expect(updateResponse.data.lastName).toBe(newLastName, "updateResponse.data.lastName");
+            expect(new Date(updateResponse.data.metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUserResponse.data.metadata.updated).getTime(), "updateResponse.data.metadata.updated")
 
             const testUser = await db.collection(constants.collections.USERS).findOne({ id: updateResponse.data.id });
 
@@ -321,6 +327,8 @@ describe("UpdateUserHandler", () => {
             expect(updateResponse.status).toBe(200, "updateResponse.status");
             expect(testUser.emailVerified).toBe(false, "updateResponse.data.emailVerified");
             expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
+            expect(new Date(updateResponse.data.metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUserResponse.data.metadata.updated).getTime(), "updateResponse.data.metadata.updated")
 
             done();
         } catch (err) {
@@ -363,6 +371,8 @@ describe("UpdateUserHandler", () => {
             expect(testUser.emailVerified).toBe(false, "updateResponse.data.emailVerified");
             expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
             expect(invocations).toBeGreaterThan(0, "mail service invocations");
+            expect(new Date(updateResponse.data.metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUserResponse.data.metadata.updated).getTime(), "updateResponse.data.metadata.updated")
 
             done();
         } catch (err) {

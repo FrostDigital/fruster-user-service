@@ -93,6 +93,14 @@ describe("CreateUserHandler", () => {
             expect(response.data.profile.middleName).toBe(user.middleName, "response.data.middleName");
             expect(response.data.profile.lastName).toBe(user.lastName, "response.data.lastName");
             expect(response.data.email).toBe(user.email, "response.data.email");
+            expect(response.data.metadata.created).toBeDefined("response.data.metadata.created");
+            expect(response.data.metadata.updated).toBeDefined("response.data.metadata.updated");
+            expect(response.data.metadata.updated).toBe(response.data.metadata.created, "when user has just been created metadata.updated and metadata.created should be the same");
+
+            expect(response.data.profile.metadata.created).toBeDefined("response.data.profile.metadata.created");
+            expect(response.data.profile.metadata.updated).toBeDefined("response.data.profile.metadata.updated");
+            expect(response.data.profile.metadata.updated)
+                .toBe(response.data.profile.metadata.created, "when user has just been created profile.metadata.updated and profile.metadata.created should be the same");
 
             const userFromDatabase = await db.collection(constants.collections.USERS).findOne({ id: response.data.id });
             const profileFromDatabase = await db.collection(constants.collections.PROFILES).findOne({ id: response.data.profile.id });

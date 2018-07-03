@@ -6,18 +6,13 @@ const TestUtils = require('./support/TestUtils');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
-const errors = require('../lib/errors');
-const Db = require("mongodb").Db;
+
 
 describe("UpdateProfileHandler", () => {
 
-
-    /** @type {Db} */
-    let db;
-
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => { db = connection.db; }));
+            .testUtilsOptions());
 
     afterEach(() => TestUtils.resetConfig());
 
@@ -41,6 +36,8 @@ describe("UpdateProfileHandler", () => {
             expect(updateResponse.data.firstName).toBe(newFirstName, "updateResponse.data.firstName");
             expect(updateResponse.data.lastName).toBe(newLastName, "updateResponse.data.lastName");
             expect(updateResponse.data.isRelatedToSlatan).toBeUndefined("updateResponse.data.isRelatedToSlatan");
+            expect(new Date(updateResponse.data.metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUserResponse.data.metadata.updated).getTime(), "updateResponse.data.metadata.updated")
 
             done();
         } catch (err) {
@@ -64,6 +61,8 @@ describe("UpdateProfileHandler", () => {
             expect(updateResponse.data.firstName).toBe(user.firstName, "updateResponse.data.firstName");
             expect(updateResponse.data.lastName).toBe(user.lastName, "updateResponse.data.lastName");
             expect(updateResponse.data.isRelatedToSlatan).toBeUndefined("updateResponse.data.isRelatedToSlatan");
+            expect(new Date(updateResponse.data.metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUserResponse.data.metadata.updated).getTime(), "updateResponse.data.metadata.updated")
 
             done();
         } catch (err) {

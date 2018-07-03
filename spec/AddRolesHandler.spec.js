@@ -21,6 +21,9 @@ describe("AddRolesHandler", () => {
             expect(userResponse.data[0].roles.includes("admin")).toBe(true, `userResponse.data[0].roles.includes("admin")`);
             expect(userResponse.data[0].roles.includes("user")).toBe(true, `userResponse.data[0].roles.includes("user")`);
 
+            expect(new Date(userResponse.data[0].metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUser.metadata.updated).getTime(), "userResponse.data.metadata.updated")
+
             done();
         } catch (err) {
             log.error(err);
@@ -38,10 +41,13 @@ describe("AddRolesHandler", () => {
             expect(userResponse.data[0].roles.includes("user")).toBe(true, `userResponse.data[0].roles.includes("user")`);
             expect(userResponse.data[0].roles.includes("super-admin")).toBe(true, `userResponse.data[0].roles.includes("super-admin")`);
 
+            expect(new Date(userResponse.data[0].metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUser.metadata.updated).getTime(), "userResponse.data.metadata.updated")
+
             done();
         } catch (err) {
             log.error(err);
-            done.fail(err);
+            done.fail(err); s
         }
     });
 
@@ -52,6 +58,9 @@ describe("AddRolesHandler", () => {
             const userResponse = await TestUtils.busRequest(constants.endpoints.service.GET_USER, { id: createdUser.id });
 
             expect(userResponse.data[0].roles.length).toBe(1, "userResponse.data[0].roles.length");
+
+            expect(new Date(userResponse.data[0].metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUser.metadata.updated).getTime(), "userResponse.data.metadata.updated")
 
             done();
 

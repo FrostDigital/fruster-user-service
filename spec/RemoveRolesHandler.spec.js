@@ -1,7 +1,4 @@
-const bus = require("fruster-bus");
 const log = require("fruster-log");
-const uuid = require("uuid");
-
 const mocks = require('./support/mocks.js');
 const TestUtils = require('./support/TestUtils.js');
 const constants = require('../lib/constants.js');
@@ -22,16 +19,9 @@ describe("RemoveRolesHandler", () => {
 
             const createdUser = (await TestUtils.createUser(user)).data;
 
-            await bus.request({
+            await await TestUtils.busRequest({
                 subject: constants.endpoints.service.REMOVE_ROLES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        id: createdUser.id,
-                        roles: ["admin"]
-                    }
-                }
+                data: { id: createdUser.id, roles: ["admin"] }
             });
 
             const userResponse = await TestUtils.busRequest({
@@ -41,6 +31,9 @@ describe("RemoveRolesHandler", () => {
 
             expect(userResponse.data[0].roles.includes("admin")).toBe(false, `userResponse.data[0].roles.includes("admin")`);
             expect(userResponse.data[0].roles.length).toBe(1, "userResponse.data[0].roles.length");
+
+            expect(new Date(userResponse.data[0].metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUser.metadata.updated).getTime(), "userResponse.data.metadata.updated")
 
             done();
         } catch (err) {
@@ -69,6 +62,9 @@ describe("RemoveRolesHandler", () => {
             expect(userResponse.data[0].roles.includes("admin")).toBe(false, `userResponse.data[0].roles.includes("admin")`);
             expect(userResponse.data[0].roles.includes("super-admin")).toBe(false, `userResponse.data[0].roles.includes("super-admin")`);
             expect(userResponse.data[0].roles.length).toBe(1, `userResponse.data[0].roles.length`);
+
+            expect(new Date(userResponse.data[0].metadata.updated).getTime())
+                .toBeGreaterThan(new Date(createdUser.metadata.updated).getTime(), "userResponse.data.metadata.updated")
 
             done();
         } catch (err) {
