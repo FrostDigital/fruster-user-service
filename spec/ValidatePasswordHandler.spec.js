@@ -6,7 +6,7 @@ const errors = require('../lib/errors.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
-const TestUtils = require("./support/TestUtils");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("ValidatePasswordHandler", () => {
@@ -28,12 +28,12 @@ describe("ValidatePasswordHandler", () => {
             const user = mocks.getUserObject();
             //@ts-ignore
             await db.dropDatabase(constants.collections.USERS);
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
                 data: user
             });
 
-            const response = await TestUtils.busRequest({
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
                 data: { username: user.email, password: user.password }
             });
@@ -59,7 +59,7 @@ describe("ValidatePasswordHandler", () => {
                     upsert: true
                 })
 
-            const response = await TestUtils.busRequest({
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
                 data: { username: user.email, password: config.initialUserPassword }
             });
@@ -86,7 +86,7 @@ describe("ValidatePasswordHandler", () => {
                     upsert: true
                 })
 
-            const response = await TestUtils.busRequest({
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
                 data: { username: user.email, password: config.initialUserPassword }
             });
@@ -107,12 +107,12 @@ describe("ValidatePasswordHandler", () => {
             const user = mocks.getUserObject();
             user.email = "urban@hello.se";
 
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
                 data: user
             });
 
-            const response = await TestUtils.busRequest({
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
                 data: { username: "UrbAn@HeLlO.se", password: user.password }
             });
@@ -131,13 +131,13 @@ describe("ValidatePasswordHandler", () => {
         try {
             mocks.mockMailService();
             const user = mocks.getUserObject();
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
                 data: user
             });
 
             try {
-                await TestUtils.busRequest({
+                await SpecUtils.busRequest({
                     subject: constants.endpoints.service.VALIDATE_PASSWORD,
                     data: { username: user.email, password: "yoyoyo" }
                 });
@@ -157,7 +157,7 @@ describe("ValidatePasswordHandler", () => {
         try {
             mocks.mockMailService();
             const user = mocks.getUserObject();
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
                 data: user
             });
@@ -166,7 +166,7 @@ describe("ValidatePasswordHandler", () => {
             email = email.substring(0, email.indexOf("@"));
 
             try {
-                await TestUtils.busRequest({
+                await SpecUtils.busRequest({
                     subject: constants.endpoints.service.VALIDATE_PASSWORD,
                     data: { username: email, password: user.password }
                 });
@@ -191,12 +191,12 @@ describe("ValidatePasswordHandler", () => {
 
             const user = mocks.getUserObject();
 
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
                 data: user
             });
 
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
                 data: { username: user.email, password: user.password }
             });
@@ -218,14 +218,14 @@ describe("ValidatePasswordHandler", () => {
 
             const user = mocks.getUserObject();
 
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
                 data: user
             });
 
             config.optionalEmailVerification = true;
 
-            const response = await TestUtils.busRequest({
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
                 data: { username: user.email, password: user.password }
             });
@@ -247,14 +247,14 @@ describe("ValidatePasswordHandler", () => {
 
             const user = mocks.getUserObject();
 
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
                 data: user
             });
 
             config.requireEmailVerification = true;
 
-            const response = await TestUtils.busRequest({
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
                 data: { username: user.email, password: user.password }
             });

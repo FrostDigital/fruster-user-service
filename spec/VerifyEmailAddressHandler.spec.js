@@ -9,7 +9,7 @@ const frusterTestUtils = require("fruster-test-utils");
 const constants = require("../lib/constants.js");
 const specConstants = require("./support/spec-constants");
 const MailServiceClient = require("../lib/clients/MailServiceClient");
-const TestUtils = require("./support/TestUtils");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("VerifyEmailAddressHandler", () => {
@@ -48,7 +48,7 @@ describe("VerifyEmailAddressHandler", () => {
 
             const createUserResponse = (await mocks.createUser(testUserData)).data;
             const testUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
-            const verificationResponse = await TestUtils.busRequest({
+            const verificationResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.http.VERIFY_EMAIL,
                 params: { tokenId: testUser.emailVerificationToken }
             });
@@ -69,7 +69,7 @@ describe("VerifyEmailAddressHandler", () => {
 
     it("should not be able to verify email with faulty token", async (done) => {
         try {
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.http.VERIFY_EMAIL,
                 params: { tokenId: "ram.jam" }
             });

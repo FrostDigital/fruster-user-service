@@ -1,8 +1,7 @@
 const log = require("fruster-log");
-const uuid = require("uuid");
 const config = require('../config');
 const mocks = require('./support/mocks.js');
-const TestUtils = require('./support/TestUtils');
+const SpecUtils = require('./support/SpecUtils');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
@@ -14,18 +13,18 @@ describe("UpdateProfileHandler", () => {
         .startBeforeEach(specConstants
             .testUtilsOptions());
 
-    afterEach(() => TestUtils.resetConfig());
+    afterEach(() => SpecUtils.resetConfig());
 
     it("should filter out user fields and only update profile fields when updating profile when configured to split user data", async done => {
         config.userFields = ["isRelatedToSlatan"];
 
         try {
             const user = mocks.getUserObject();
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
             const newFirstName = "Roland";
             const newLastName = "Svensson";
 
-            const updateResponse = await TestUtils.busRequest({
+            const updateResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_PROFILE,
                 data: {
                     id: createdUserResponse.data.id, firstName: newFirstName, lastName: newLastName,
@@ -51,9 +50,9 @@ describe("UpdateProfileHandler", () => {
 
         try {
             const user = mocks.getUserObject();
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
 
-            const updateResponse = await TestUtils.busRequest({
+            const updateResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_PROFILE,
                 data: { id: createdUserResponse.data.id, isRelatedToSlatan: "true_dat" }
             });

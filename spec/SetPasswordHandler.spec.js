@@ -1,6 +1,6 @@
 const log = require("fruster-log");
 const mocks = require('./support/mocks.js');
-const TestUtils = require('./support/TestUtils');
+const SpecUtils = require('./support/SpecUtils');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
@@ -17,12 +17,12 @@ describe("SetPasswordHandler", () => {
 	it("should be possible to set password", async done => {
 		try {
 			const user = mocks.getUserObject();
-			const createdUserResponse = await TestUtils.createUser(user);
+			const createdUserResponse = await SpecUtils.createUser(user);
 
 			const oldUser = await db.collection("users")
 				.findOne({ id: createdUserResponse.data.id });
 
-			await TestUtils.busRequest({
+			await SpecUtils.busRequest({
 				subject: constants.endpoints.service.SET_PASSWORD,
 				user: createdUserResponse.data,
 				data: {

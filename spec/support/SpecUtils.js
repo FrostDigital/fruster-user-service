@@ -6,10 +6,10 @@ const config = require("../../config");
 const configBackup = Object.assign({}, config);
 
 
-class TestUtils {
+class SpecUtils {
 
     static createUser(user) {
-        return TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+        return SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
     }
 
     /**
@@ -59,4 +59,4 @@ class TestUtils {
 
 }
 
-module.exports = TestUtils;
+module.exports = SpecUtils;

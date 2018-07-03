@@ -1,6 +1,6 @@
 const log = require("fruster-log");
 const mocks = require('./support/mocks.js');
-const TestUtils = require('./support/TestUtils.js');
+const SpecUtils = require('./support/SpecUtils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
@@ -17,14 +17,14 @@ describe("RemoveRolesHandler", () => {
             const user = mocks.getUserObject();
             user.roles = ["user", "admin"];
 
-            const createdUser = (await TestUtils.createUser(user)).data;
+            const createdUser = (await SpecUtils.createUser(user)).data;
 
-            await await TestUtils.busRequest({
+            await await SpecUtils.busRequest({
                 subject: constants.endpoints.service.REMOVE_ROLES,
                 data: { id: createdUser.id, roles: ["admin"] }
             });
 
-            const userResponse = await TestUtils.busRequest({
+            const userResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USER,
                 data: { id: createdUser.id }
             });
@@ -47,14 +47,14 @@ describe("RemoveRolesHandler", () => {
             const user = mocks.getUserObject();
             user.roles = ["user", "admin", "super-admin"];
 
-            const createdUser = (await TestUtils.createUser(user)).data;
+            const createdUser = (await SpecUtils.createUser(user)).data;
 
-            await await TestUtils.busRequest({
+            await await SpecUtils.busRequest({
                 subject: constants.endpoints.service.REMOVE_ROLES,
                 data: { id: createdUser.id, roles: ["admin", "super-admin"] }
             });
 
-            const userResponse = await TestUtils.busRequest({
+            const userResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USER,
                 data: { id: createdUser.id }
             });
@@ -76,10 +76,10 @@ describe("RemoveRolesHandler", () => {
     it("should not be possible to remove all from a user", async done => {
         try {
             const user = mocks.getUserObject();
-            const createdUser = (await TestUtils.createUser(user)).data;
+            const createdUser = (await SpecUtils.createUser(user)).data;
 
             try {
-                await TestUtils.busRequest({
+                await SpecUtils.busRequest({
                     subject: constants.endpoints.service.REMOVE_ROLES,
                     data: { id: createdUser.id, roles: ["admin"] }
                 });

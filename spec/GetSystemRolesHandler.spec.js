@@ -3,7 +3,7 @@ const frusterTestUtils = require("fruster-test-utils");
 const constants = require("../lib/constants");
 const config = require("../config");
 const specConstants = require("./support/spec-constants");
-const TestUtils = require("./support/TestUtils");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("GetSystemRolesHandler", () => {
@@ -27,14 +27,14 @@ describe("GetSystemRolesHandler", () => {
             const role = "padmin";
 
             await Promise.all(new Array(3).fill(null).map((x, i) =>
-                TestUtils.busRequest({
+                SpecUtils.busRequest({
                     subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
                     data: { role: role + i, scopes: [i.toString()] },
                     user: { scopes: ["system.add-role"] }
                 })
             ));
 
-            const rolesResponse = await TestUtils.busRequest({ subject: constants.endpoints.http.admin.GET_SYSTEM_ROLES, data: {}, user: { scopes: ["system.get-roles"] } })
+            const rolesResponse = await SpecUtils.busRequest({ subject: constants.endpoints.http.admin.GET_SYSTEM_ROLES, data: {}, user: { scopes: ["system.get-roles"] } })
             const roleNames = rolesResponse.data.map(roleObj => roleObj.role);
             const roleScopes = rolesResponse.data.map(roleObj => roleObj.scopes.toString());
 
@@ -58,10 +58,10 @@ describe("GetSystemRolesHandler", () => {
             const role = "padmin";
 
             await Promise.all(new Array(3).fill(null).map((x, i) =>
-                TestUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role: role + i, scopes: [i.toString()] }, user: { scopes: ["system.add-role"] } })
+                SpecUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role: role + i, scopes: [i.toString()] }, user: { scopes: ["system.add-role"] } })
             ));
 
-            const rolesResponse = await TestUtils.busRequest({
+            const rolesResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.http.admin.GET_SYSTEM_ROLES,
                 data: {},
                 user: { scopes: ["system.get-roles"] },

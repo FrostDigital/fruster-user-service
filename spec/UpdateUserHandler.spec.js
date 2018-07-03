@@ -2,7 +2,7 @@ const log = require("fruster-log");
 const uuid = require("uuid");
 const config = require('../config');
 const mocks = require('./support/mocks.js');
-const TestUtils = require('./support/TestUtils');
+const SpecUtils = require('./support/SpecUtils');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
@@ -19,15 +19,15 @@ describe("UpdateUserHandler", () => {
         .startBeforeEach(specConstants
             .testUtilsOptions((connection) => { db = connection.db; }));
 
-    afterEach(() => TestUtils.resetConfig());
+    afterEach(() => SpecUtils.resetConfig());
 
     it("should return updated user when updating user", async done => {
         try {
             const user = mocks.getUserObject();
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
             const newFirstName = "Roland";
             const newLastName = "Svensson";
-            const updateResponse = await TestUtils.busRequest({
+            const updateResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id: createdUserResponse.data.id, firstName: newFirstName, lastName: newLastName }
             });
@@ -54,11 +54,11 @@ describe("UpdateUserHandler", () => {
 
         try {
             const user = mocks.getUserObject();
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
             const newFirstName = "Roland";
             const newLastName = "Svensson";
 
-            const updateResponse = await TestUtils.busRequest({
+            const updateResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id: createdUserResponse.data.id, firstName: newFirstName, lastName: newLastName, isRelatedToSlatan: false }
             });
@@ -84,10 +84,10 @@ describe("UpdateUserHandler", () => {
     it("should return updated user when updating user via http", async done => {
         try {
             const user = mocks.getUserObject();
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
             const newFirstName = "Roland";
             const newLastName = "Svensson";
-            const updateResponse = await TestUtils.busRequest({
+            const updateResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.http.admin.UPDATE_USER,
                 user: { scopes: ["admin.*"] },
                 data: { firstName: newFirstName, lastName: newLastName },
@@ -113,7 +113,7 @@ describe("UpdateUserHandler", () => {
 
     it("should return error when user can't be updated", async done => {
         try {
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id: "ID_", email: "hello" }
             });
@@ -127,10 +127,10 @@ describe("UpdateUserHandler", () => {
 
     it("should return error when trying to update password", async done => {
         const user = mocks.getUserObject();
-        const createdUserResponse = await TestUtils.createUser(user);
+        const createdUserResponse = await SpecUtils.createUser(user);
 
         try {
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id: createdUserResponse.data.id, password: "new-password" }
             });
@@ -146,10 +146,10 @@ describe("UpdateUserHandler", () => {
 
     it("should return error when trying to update email with faulty email", async done => {
         const user = mocks.getUserObject();
-        const createdUserResponse = await TestUtils.createUser(user);
+        const createdUserResponse = await SpecUtils.createUser(user);
 
         try {
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id: createdUserResponse.data.id, email: "hello" }
             });
@@ -165,14 +165,14 @@ describe("UpdateUserHandler", () => {
         const user = mocks.getUserObject();
         const email = "new-email" + Math.random() + "@gotmail.com";
 
-        const createdUserResponse = await TestUtils.createUser(user);
+        const createdUserResponse = await SpecUtils.createUser(user);
         const id = createdUserResponse.data.id;
         user.email = email;
 
-        await TestUtils.createUser(user);
+        await SpecUtils.createUser(user);
 
         try {
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id: id, email: email }
             });
@@ -189,11 +189,11 @@ describe("UpdateUserHandler", () => {
             const user = mocks.getUserObject();
             const email = user.email;
 
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
             const id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await TestUtils.busRequest({
+            const updateResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id: id, email: email, firstName: "greg" }
             });
@@ -214,11 +214,11 @@ describe("UpdateUserHandler", () => {
             const user = mocks.getUserObject();
             const email = "rambo.dreadlock@fejkmejl.se";
 
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
             const id = createdUserResponse.data.id;
             user.email = email;
 
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id, email }
             });
@@ -239,11 +239,11 @@ describe("UpdateUserHandler", () => {
             const user = mocks.getUserObject();
             const email = "rambo.dreadlock@fejkmejl.se";
 
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
             const id = createdUserResponse.data.id;
             user.email = email;
 
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id, email, password: "This is incorrect" }
             });
@@ -263,11 +263,11 @@ describe("UpdateUserHandler", () => {
             const user = mocks.getUserObject();
             const email = "rambo.dreadlock@fejkmejl.se";
 
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
             const id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await TestUtils.busRequest({
+            const updateResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id, email, password: user.password }
             });
@@ -287,11 +287,11 @@ describe("UpdateUserHandler", () => {
             const user = mocks.getUserObject();
             const email = user.email;
 
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
             const id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await TestUtils.busRequest({
+            const updateResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id: id, email: email, firstName: user.firstName, lastName: user.lastName }
             });
@@ -313,11 +313,11 @@ describe("UpdateUserHandler", () => {
             const email = user.email;
             let id;
 
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
             id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await TestUtils.busRequest({
+            const updateResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id: id, email: email, firstName: user.firstName, lastName: user.lastName }
             });
@@ -358,8 +358,8 @@ describe("UpdateUserHandler", () => {
             });
 
             const user = mocks.getUserObject();
-            const createdUserResponse = await TestUtils.createUser(user);
-            const updateResponse = await TestUtils.busRequest({
+            const createdUserResponse = await SpecUtils.createUser(user);
+            const updateResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 skipOptionsRequest: true,
                 data: { id: createdUserResponse.data.id, email: newEmail, firstName: user.firstName, lastName: user.lastName, password: user.password }
@@ -389,11 +389,11 @@ describe("UpdateUserHandler", () => {
             const email = user.email;
             let id;
 
-            const createdUserResponse = await TestUtils.createUser(user);
+            const createdUserResponse = await SpecUtils.createUser(user);
             id = createdUserResponse.data.id;
             user.email = email;
 
-            const updateResponse = await TestUtils.busRequest({
+            const updateResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.UPDATE_USER,
                 data: { id: id, email: email, firstName: user.firstName, lastName: user.lastName }
             });

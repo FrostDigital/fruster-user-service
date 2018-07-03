@@ -6,7 +6,7 @@ const constants = require("../lib/constants");
 const config = require("../config");
 const specConstants = require("./support/spec-constants");
 const errors = require("../lib/errors");
-const TestUtils = require("./support/TestUtils");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("AddSystemRoleHandler", () => {
@@ -33,7 +33,7 @@ describe("AddSystemRoleHandler", () => {
         try {
             const role = "padmin";
 
-            await TestUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role }, user: { scopes: ["system.add-role"] } });
+            await SpecUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role }, user: { scopes: ["system.add-role"] } });
 
             const roles = await db.collection(constants.collections.ROLE_SCOPES).find({ role }).toArray();
 
@@ -52,7 +52,7 @@ describe("AddSystemRoleHandler", () => {
             const role = "padmin";
             const scopes = ["1", "2"];
 
-            await TestUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role, scopes }, user: { scopes: ["system.add-role"] } });
+            await SpecUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role, scopes }, user: { scopes: ["system.add-role"] } });
 
             const roles = await db.collection(constants.collections.ROLE_SCOPES).find({ role }).toArray();
 
@@ -83,7 +83,7 @@ describe("AddSystemRoleHandler", () => {
             }
 
             async function addRole() {
-                await TestUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role, scopes }, user: { scopes: ["system.add-role"] } });
+                await SpecUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role, scopes }, user: { scopes: ["system.add-role"] } });
             }
         } catch (err) {
             log.error(err);
@@ -100,7 +100,7 @@ describe("AddSystemRoleHandler", () => {
 
             for (let i = 0; i < 10; i++) {
                 try {
-                    await TestUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role, scopes }, user: { scopes: ["system.add-role"] } });
+                    await SpecUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role, scopes }, user: { scopes: ["system.add-role"] } });
                 } catch (err) {
                     errorsCount++;
                 }

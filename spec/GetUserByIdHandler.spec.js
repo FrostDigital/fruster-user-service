@@ -4,7 +4,7 @@ const constants = require("../lib/constants");
 const specConstants = require("./support/spec-constants");
 const Db = require("mongodb").Db;
 const config = require("../config");
-const TestUtils = require("./support/TestUtils");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("GetUserByIdHandler", () => {
@@ -16,7 +16,7 @@ describe("GetUserByIdHandler", () => {
 		.startBeforeEach(specConstants
 			.testUtilsOptions((connection) => { db = connection.db; }));
 
-	afterEach(() => TestUtils.resetConfig());
+	afterEach(() => SpecUtils.resetConfig());
 
 	async function setupTestUsers() {
 		await insertTestUsers(db);
@@ -26,7 +26,7 @@ describe("GetUserByIdHandler", () => {
 		try {
 			await setupTestUsers();
 
-			await TestUtils.busRequest({
+			await SpecUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
 				data: {},
 				user: { scopes: ["admin.*"] },
@@ -44,7 +44,7 @@ describe("GetUserByIdHandler", () => {
 		try {
 			await setupTestUsers();
 
-			const res = await TestUtils.busRequest({
+			const res = await SpecUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
 				data: {},
 				user: { scopes: ["admin.*"] },
@@ -68,7 +68,7 @@ describe("GetUserByIdHandler", () => {
 		try {
 			const createdUsers = await createTestUsers();
 
-			const res = await TestUtils.busRequest({
+			const res = await SpecUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
 				data: {},
 				user: { scopes: ["admin.*"] },
@@ -95,7 +95,7 @@ describe("GetUserByIdHandler", () => {
 			config.lowerCaseName = true;
 			await insertTestUserWithEmptyLastName(db);
 
-			const res = (await TestUtils.busRequest(constants.endpoints.service.GET_USER, { id: "user1337" })).data[0];
+			const res = (await SpecUtils.busRequest(constants.endpoints.service.GET_USER, { id: "user1337" })).data[0];
 
 			expect(res.id).toBe("user1337");
 			expect(res.lastName).toBe("");
@@ -129,7 +129,7 @@ function insertTestUsers(db) {
 
 function createTestUsers() {
 	return Promise.all(["user1", "user2"]
-		.map((username) => TestUtils.createUser({
+		.map((username) => SpecUtils.createUser({
 			id: username,
 			firstName: `${username}-firstName`,
 			lastName: `${username}-lastName`,

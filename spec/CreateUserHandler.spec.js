@@ -3,7 +3,7 @@ const Db = require("mongodb").Db;
 const config = require("../config");
 const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");
-const TestUtils = require("./support/TestUtils");
+const SpecUtils = require("./support/SpecUtils");
 const frusterTestUtils = require("fruster-test-utils");
 const RoleManager = require("../lib/managers/RoleManager");
 const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
@@ -28,7 +28,7 @@ describe("CreateUserHandler", () => {
             }));
 
     afterEach((done) => {
-        TestUtils.resetConfig();
+        SpecUtils.resetConfig();
         done();
     });
 
@@ -39,7 +39,7 @@ describe("CreateUserHandler", () => {
             const user = mocks.getUserObject();
             user.roles.push("super-admin");
 
-            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+            const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -82,7 +82,7 @@ describe("CreateUserHandler", () => {
             user.roles.push("super-admin");
             user.isRelatedToSlatan = true;
 
-            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+            const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -145,7 +145,7 @@ describe("CreateUserHandler", () => {
             const user = mocks.getUserObject();
             user.roles.push("super-admin");
 
-            const response = await TestUtils.busRequest({
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
                 data: user,
                 user: { scopes: ["admin.*"] }
@@ -191,7 +191,7 @@ describe("CreateUserHandler", () => {
             user.profileImage = "http://pipsum.com/435x310.jpg";
             user.custom = "field";
 
-            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+            const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -234,7 +234,7 @@ describe("CreateUserHandler", () => {
             user.roles.push("admin");
             user.roles.push("user");
 
-            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+            const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -256,7 +256,7 @@ describe("CreateUserHandler", () => {
         user.password = "hej";
 
         try {
-            await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+            await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             done.fail("should not be possible to create user with faulty password");
         } catch (err) {
@@ -274,7 +274,7 @@ describe("CreateUserHandler", () => {
         const user = mocks.getUserObject();
         user.email = "email";
         try {
-            await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+            await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             done.fail("should not be possible to create user with faulty email");
         } catch (err) {
@@ -318,7 +318,7 @@ describe("CreateUserHandler", () => {
 
         async function doRequest(userToCreate) {
             try {
-                await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, userToCreate);
+                await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, userToCreate);
             } catch (err) {
                 expect(err.status).toBe(400, "err.status");
                 expect(err.data).toBeUndefined("err.data");
@@ -336,7 +336,7 @@ describe("CreateUserHandler", () => {
             const user = mocks.getUserObject();
             delete user.password;
 
-            const savedUser = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+            const savedUser = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(savedUser.data.id).toBeDefined("savedUser.data.id");
 
@@ -353,7 +353,7 @@ describe("CreateUserHandler", () => {
             config.requireEmailVerification = true;
 
             const user = mocks.getUserObject();
-            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+            const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -392,7 +392,7 @@ describe("CreateUserHandler", () => {
             config.emailVerificationForRoles = ["admin"]
 
             const user = mocks.getUserObject();
-            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+            const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -431,7 +431,7 @@ describe("CreateUserHandler", () => {
             config.emailVerificationForRoles = ["user", "super-admin", "ramjam"]
 
             const user = mocks.getUserObject();
-            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+            const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -469,7 +469,7 @@ describe("CreateUserHandler", () => {
             config.optionalEmailVerification = true;
 
             const user = mocks.getUserObject();
-            const response = await TestUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+            const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -503,17 +503,17 @@ describe("CreateUserHandler", () => {
     it("should not allow multiple users with the same email to be created", async done => {
         mocks.mockMailService();
         const user = mocks.getUserObject();
-        await TestUtils.createUser(user);
+        await SpecUtils.createUser(user);
 
         try {
             await Promise.all([
-                TestUtils.createUser(user),
-                TestUtils.createUser(user),
-                TestUtils.createUser(user),
-                TestUtils.createUser(user),
-                TestUtils.createUser(user),
-                TestUtils.createUser(user),
-                TestUtils.createUser(user)
+                SpecUtils.createUser(user),
+                SpecUtils.createUser(user),
+                SpecUtils.createUser(user),
+                SpecUtils.createUser(user),
+                SpecUtils.createUser(user),
+                SpecUtils.createUser(user),
+                SpecUtils.createUser(user)
             ]);
 
             done.fail();

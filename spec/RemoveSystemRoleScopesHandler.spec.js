@@ -4,7 +4,7 @@ const frusterTestUtils = require("fruster-test-utils");
 const constants = require("../lib/constants");
 const config = require("../config");
 const specConstants = require("./support/spec-constants");
-const TestUtils = require("./support/TestUtils");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("RemoveSystemRoleScopesHandler", () => {
@@ -32,19 +32,19 @@ describe("RemoveSystemRoleScopesHandler", () => {
             const role = "padmin";
             const newScopes = ["hello.from.vienna", "bye.from.vienna", "ram"];
 
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
                 user: { scopes: ["system.add-role"] },
                 data: { role }
             });
 
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES,
                 user: { scopes: ["system.add-role-scopes"] },
                 data: { scopes: newScopes, role }
             });
 
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.http.admin.REMOVE_SYSTEM_ROLE_SCOPES,
                 user: { scopes: ["system.remove-role-scopes"] },
                 data: { scopes: [newScopes[0], newScopes[1]], role }

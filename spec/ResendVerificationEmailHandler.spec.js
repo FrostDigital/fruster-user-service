@@ -6,7 +6,7 @@ const mocks = require('./support/mocks.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
-const TestUtils = require("./support/TestUtils");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("ResendVerificationEmailHandler", () => {
@@ -55,7 +55,7 @@ describe("ResendVerificationEmailHandler", () => {
 
             verificationToken = testUser.emailVerificationToken;
 
-            await TestUtils.busRequest({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.http.RESEND_VERIFICATION_EMAIL,
                 data: {},
                 params: { email: createUserResponse.email }

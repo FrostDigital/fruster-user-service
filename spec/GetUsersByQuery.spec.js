@@ -3,7 +3,7 @@ const log = require("fruster-log");
 const constants = require("../lib/constants");
 const Db = require("mongodb").Db;
 const specConstants = require("./support/spec-constants");
-const TestUtils = require("./support/TestUtils");
+const SpecUtils = require("./support/SpecUtils");
 const config = require("../config");
 
 
@@ -16,13 +16,13 @@ describe("GetUsersByQueryHandler", () => {
         .startBeforeEach(specConstants
             .testUtilsOptions(connection => db = connection.db));
 
-    afterEach(() => { TestUtils.resetConfig(); });
+    afterEach(() => { SpecUtils.resetConfig(); });
 
     it("should be able to get users by a simple query", async done => {
         await insertTestUsers(10);
 
         try {
-            const res = await TestUtils.busRequest({
+            const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: { query: { roles: { $in: ["user"] } } }
             });
@@ -48,7 +48,7 @@ describe("GetUsersByQueryHandler", () => {
         await createTestUsers(10);
 
         try {
-            const res = await TestUtils.busRequest({
+            const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: { query: { roles: { $in: ["user"] } }, expand: "profile", sort: { firstName: 1 } }
             });
@@ -86,7 +86,7 @@ describe("GetUsersByQueryHandler", () => {
         await createTestUsers(5, 5);
 
         try {
-            const res = await TestUtils.busRequest({
+            const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: { query: { roles: { $in: ["user"] } }, expand: "profile", sort: { firstName: 1 } }
             });
@@ -108,7 +108,7 @@ describe("GetUsersByQueryHandler", () => {
         await insertTestUsers(10);
 
         try {
-            const res = await TestUtils.busRequest({
+            const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: { query: { roles: { $in: ["user"] } }, limit: 3 }
             });
@@ -133,7 +133,7 @@ describe("GetUsersByQueryHandler", () => {
         await insertTestUsers(10);
 
         try {
-            const res = await TestUtils.busRequest({
+            const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: { query: { roles: { $in: ["user"] } }, limit: 3, start: 3 }
             });
@@ -158,7 +158,7 @@ describe("GetUsersByQueryHandler", () => {
         await insertTestUsers(10);
 
         try {
-            const res = await TestUtils.busRequest({
+            const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: { query: { roles: { $in: ["user"] } }, limit: 3, start: 3, filter: { firstName: 1, lastName: 1 } }
             });
@@ -209,7 +209,7 @@ describe("GetUsersByQueryHandler", () => {
         }
 
         async function doRequest(sort) {
-            return await await TestUtils.busRequest({
+            return await await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: {
                     query: { roles: { $in: ["user"] } },
@@ -230,7 +230,7 @@ describe("GetUsersByQueryHandler", () => {
         await insertTestUsers(10);
 
         try {
-            const res = await TestUtils.busRequest({
+            const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: { query: { roles: { $in: ["no-one-can-have-this-role"] } }, limit: 3, start: 3, filter: { firstName: 1, lastName: 1 } }
             });
@@ -251,7 +251,7 @@ describe("GetUsersByQueryHandler", () => {
      */
     async function createTestUsers(number = 2, startAt = 0) {
         for (let i = startAt; i < startAt + number; i++) {
-            await TestUtils.createUser(getTestUserData(`user${i}`, i));
+            await SpecUtils.createUser(getTestUserData(`user${i}`, i));
         }
 
         function getTestUserData(username, i) {
