@@ -252,7 +252,9 @@ module.exports = {
 
 		bus.subscribe({
 			subject: constants.endpoints.service.UPDATE_PROFILE,
-
+			requestSchema: constants.schemas.request.UPDATE_PROFILE_REQUEST,
+			responseSchema: constants.schemas.request.USER_RESPONSE,
+			docs: docs.service.UPDATE_USER,
 			handle: (req) => updateProfileHandler.handle(req)
 		});
 
