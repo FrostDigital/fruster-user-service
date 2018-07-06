@@ -33,8 +33,11 @@ module.exports = {
 	requireEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === "true",
 
 	/** Wether or not to ask the users to verify their email address but not requiring it to signin. 
-	     If this is set to true a web server will run providing a simple request new token / verify       frontend @ /resend-verification & /verify-email:tokenId */
+	     If this is set to true a web server will run providing a simple request new token / verify  frontend @ /resend-verification & /verify-email:tokenId */
 	optionalEmailVerification: process.env.OPTIONAL_EMAIL_VERIFICATION === "true",
+
+	/** The roles email verification applies to, if set to * it applies to all roles. */
+	emailVerificationForRoles: parseArray(process.env.EMAIL_VERIFICATION_FOR_ROLES || "*"),
 
 	/** HTTP port where email verification web will run */
 	port: process.env.PORT || 3120,
@@ -81,7 +84,10 @@ module.exports = {
 	apiRoot: process.env.API_ROOT || "http://localhost:3000",
 
 	/** Whether or not to require password when updating email address */
-	requirePasswordOnEmailUpdate: process.env.REQUIRE_PASSWORD_ON_EMAIL_UPDATE === "true"
+	requirePasswordOnEmailUpdate: process.env.REQUIRE_PASSWORD_ON_EMAIL_UPDATE === "true",
+
+	/** Whether or not to require a new user to have firstName and lastName */
+	requireNames: parseBool(process.env.REQUIRE_NAMES || "true")
 
 };
 

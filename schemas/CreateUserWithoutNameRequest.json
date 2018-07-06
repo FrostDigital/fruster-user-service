@@ -1,0 +1,30 @@
+{
+    "id": "CreateUserWithoutNameRequest",
+    "description": "Request for creating a fruster user with the possibility of no names. Can include any number of custom fields.",
+    "additionalProperties": true,
+    "properties": {
+        "email": {
+            "type": "string",
+            "description": "The email of the user:"
+        },
+        "password": {
+            "type": "string",
+            "description": "the password of the user. Is required only if `config.requirePassword` is set to true."
+        },
+        "firstName": {
+            "type": "string",
+            "description": "The first name of the user:"
+        },
+        "middleName": {
+            "type": "string",
+            "description": "The middle name of the user :"
+        },
+        "lastName": {
+            "type": "string",
+            "description": "The last name of the user.:"
+        }
+    },
+    "required": [
+        "email"
+    ]
+}

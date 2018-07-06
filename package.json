@@ -37,6 +37,7 @@
         "exclude": [
             "lib/deprecatedErrors.js",
             "lib/repos/AbstractRoleScopesRepo.js",
+            "lib/repos/RoleScopesConfigRepo.js",
             "web",
             "spec"
         ]

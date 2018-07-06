@@ -36,6 +36,7 @@ describe("CreateUserHandler", () => {
         conf.requireEmailVerification = false;
         conf.optionalEmailVerification = false;
         conf.requirePassword = true;
+        conf.emailVerificationForRoles = ["*"];
 
         done();
     });
@@ -89,6 +90,7 @@ describe("CreateUserHandler", () => {
 
     it("should be possible to create user via http", async done => {
         mocks.mockMailService();
+
         try {
             const user = mocks.getUserObject();
             user.roles.push("super-admin");
@@ -381,6 +383,101 @@ describe("CreateUserHandler", () => {
             const userFromDatabase = await (db.collection(conf.userCollection).findOne({ id: response.data.id }));
             expect(userFromDatabase.emailVerified).toBe(false, "userFromDatabase.emailVerified");
             expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
+
+            const roles = await roleManager.getRoles();
+
+            user.roles.forEach(role => {
+                expect(response.data.scopes.length).toBe(Object.keys(roles[role.toLowerCase()]).length);
+            });
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
+    it("should generate email verification token when config requireEmailVerification is true and emailVerificationForRoles has role admin", async done => {
+        mocks.mockMailService();
+
+        try {
+            conf.requireEmailVerification = true;
+            conf.emailVerificationForRoles = ["admin"]
+
+            const user = mocks.getUserObject();
+            const response = await bus.request({
+                subject: constants.endpoints.service.CREATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: user
+                }
+            });
+
+            expect(response.status).toBe(201, "response.status");
+
+            expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
+            expect(response.error).toBeUndefined("response.error");
+
+            expect(response.data.firstName).toBe(user.firstName, "response.data.firstName");
+            expect(response.data.middleName).toBe(user.middleName, "response.data.middleName");
+            expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
+            expect(response.data.email).toBe(user.email, "response.data.email");
+            expect(response.data.emailVerified).toBe(false, "response.data.emailVerified");
+            expect(response.data.emailVerificationToken).toBeUndefined("response.data.emailVerificationToken");
+
+            const userFromDatabase = await (db.collection(conf.userCollection).findOne({ id: response.data.id }));
+            expect(userFromDatabase.emailVerified).toBe(false, "userFromDatabase.emailVerified");
+            expect(userFromDatabase.emailVerificationToken).toBeDefined("userFromDatabase.emailVerificationToken");
+
+            const roles = await roleManager.getRoles();
+
+            user.roles.forEach(role => {
+                expect(response.data.scopes.length).toBe(Object.keys(roles[role.toLowerCase()]).length);
+            });
+
+            done();
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
+        }
+    });
+
+    it("should not generate email verification token when config requireEmailVerification is true and emailVerificationForRoles does not have role admin", async done => {
+        mocks.mockMailService();
+
+        try {
+            conf.requireEmailVerification = true;
+            conf.emailVerificationForRoles = ["user", "super-admin", "ramjam"]
+
+            const user = mocks.getUserObject();
+            const response = await bus.request({
+                subject: constants.endpoints.service.CREATE_USER,
+                timeout: 1000,
+                skipOptionsRequest: true,
+                message: {
+                    reqId: uuid.v4(),
+                    data: user
+                }
+            });
+
+            expect(response.status).toBe(201, "response.status");
+
+            expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
+            expect(response.error).toBeUndefined("response.error");
+
+            expect(response.data.firstName).toBe(user.firstName, "response.data.firstName");
+            expect(response.data.middleName).toBe(user.middleName, "response.data.middleName");
+            expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
+            expect(response.data.email).toBe(user.email, "response.data.email");
+            expect(response.data.emailVerified).toBeTruthy("response.data.emailVerified");
+            expect(response.data.emailVerificationToken).toBeUndefined("response.data.emailVerificationToken");
+
+            const userFromDatabase = await (db.collection(conf.userCollection).findOne({ id: response.data.id }));
+
+            expect(userFromDatabase.emailVerified).toBeTruthy("userFromDatabase.emailVerified");
+            expect(userFromDatabase.emailVerificationToken).toBeUndefined("userFromDatabase.emailVerificationToken");
 
             const roles = await roleManager.getRoles();
 
