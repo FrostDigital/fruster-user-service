@@ -87,7 +87,10 @@ module.exports = {
 	requirePasswordOnEmailUpdate: process.env.REQUIRE_PASSWORD_ON_EMAIL_UPDATE === "true",
 
 	/** Whether or not to require a new user to have firstName and lastName */
-	requireNames: parseBool(process.env.REQUIRE_NAMES || "true")
+	requireNames: parseBool(process.env.REQUIRE_NAMES || "true"),
+
+	/** Treshold for what is considered to be a slow query. If slow, this will be logged */
+	slowQueryTresholdMs: parseInt(process.env.SLOW_QUERY_TRESHOLD_MS || "250")
 
 };
 
