@@ -20,7 +20,9 @@ describe("GetProfilesByQueryHandler", () => {
         config.userFields = constants.dataset.REQUIRED_ONLY;
     });
 
-    afterEach(() => { TestUtils.resetConfig(); });
+    afterEach(() => {
+        TestUtils.resetConfig();
+    });
 
     it("should be able to get profiles by a simple query", async done => {
         try {
@@ -28,7 +30,13 @@ describe("GetProfilesByQueryHandler", () => {
 
             const res = await TestUtils.busRequest({
                 subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
-                data: { query: { id: { $in: testUsers.map((u) => u.id).filter((u, i) => i % 2 !== 0) } } }
+                data: {
+                    query: {
+                        id: {
+                            $in: testUsers.map((u) => u.id).filter((u, i) => i % 2 !== 0)
+                        }
+                    }
+                }
             });
 
             expect(res.data.profiles.length).toBe(5, "res.data.profiles.length");
@@ -57,7 +65,14 @@ describe("GetProfilesByQueryHandler", () => {
 
             const res = await TestUtils.busRequest({
                 subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
-                data: { query: { id: { $in: testUsers.map((u) => u.id) } }, limit: 3 }
+                data: {
+                    query: {
+                        id: {
+                            $in: testUsers.map((u) => u.id)
+                        }
+                    },
+                    limit: 3
+                }
             });
 
             expect(res.data.profiles.length).toBe(3, "res.data.length");
@@ -84,7 +99,15 @@ describe("GetProfilesByQueryHandler", () => {
 
             const res = await TestUtils.busRequest({
                 subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
-                data: { query: { id: { $in: testUsers.map((u) => u.id) } }, limit: 3, start: 3 }
+                data: {
+                    query: {
+                        id: {
+                            $in: testUsers.map((u) => u.id)
+                        }
+                    },
+                    limit: 3,
+                    start: 3
+                }
             });
 
             expect(res.data.profiles.length).toBe(3, "res.data.length");
@@ -111,7 +134,19 @@ describe("GetProfilesByQueryHandler", () => {
 
             const res = await TestUtils.busRequest({
                 subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
-                data: { query: { id: { $in: testUsers.map((u) => u.id) } }, limit: 3, start: 3, filter: { firstName: 1, lastName: 1 } }
+                data: {
+                    query: {
+                        id: {
+                            $in: testUsers.map((u) => u.id)
+                        }
+                    },
+                    limit: 3,
+                    start: 3,
+                    filter: {
+                        firstName: 1,
+                        lastName: 1
+                    }
+                }
             });
 
             expect(res.data.profiles.length).toBe(3, "res.data.length");
@@ -166,7 +201,11 @@ describe("GetProfilesByQueryHandler", () => {
             return await TestUtils.busRequest({
                 subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
                 data: {
-                    query: { id: { $in: ids } },
+                    query: {
+                        id: {
+                            $in: ids
+                        }
+                    },
                     limit: 3,
                     start: 3,
                     filter: {
@@ -174,7 +213,9 @@ describe("GetProfilesByQueryHandler", () => {
                         lastName: 1,
                         customField: 1
                     },
-                    sort: { customField: sort }
+                    sort: {
+                        customField: sort
+                    }
                 }
             });
         }
@@ -186,7 +227,19 @@ describe("GetProfilesByQueryHandler", () => {
 
             const res = await TestUtils.busRequest({
                 subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
-                data: { query: { roles: { $in: ["no-one-can-have-this-role"] } }, limit: 3, start: 3, filter: { firstName: 1, lastName: 1 } }
+                data: {
+                    query: {
+                        roles: {
+                            $in: ["no-one-can-have-this-role"]
+                        }
+                    },
+                    limit: 3,
+                    start: 3,
+                    filter: {
+                        firstName: 1,
+                        lastName: 1
+                    }
+                }
             });
 
             expect(res.data.profiles.length).toBe(0, "res.data.profiles.length");

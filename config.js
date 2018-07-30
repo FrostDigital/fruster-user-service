@@ -109,6 +109,9 @@ module.exports = {
 	 */
 	profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL"),
 
+	/** Treshold for what is considered to be a slow query. If slow, this will be logged */
+	slowQueryTresholdMs: parseInt(process.env.SLOW_QUERY_TRESHOLD_MS || "250")
+
 };
 
 function parseArray(str) {

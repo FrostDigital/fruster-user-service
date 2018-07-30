@@ -16,7 +16,9 @@ describe("GetUsersByQueryHandler", () => {
         .startBeforeEach(specConstants
             .testUtilsOptions(connection => db = connection.db));
 
-    afterEach(() => { SpecUtils.resetConfig(); });
+    afterEach(() => {
+        SpecUtils.resetConfig();
+    });
 
     it("should be able to get users by a simple query", async done => {
         await insertTestUsers(10);
@@ -24,7 +26,13 @@ describe("GetUsersByQueryHandler", () => {
         try {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
-                data: { query: { roles: { $in: ["user"] } } }
+                data: {
+                    query: {
+                        roles: {
+                            $in: ["user"]
+                        }
+                    }
+                }
             });
 
             expect(res.data.users.length).toBe(10, "res.data.users.length");
@@ -50,7 +58,17 @@ describe("GetUsersByQueryHandler", () => {
         try {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
-                data: { query: { roles: { $in: ["user"] } }, expand: "profile", sort: { firstName: 1 } }
+                data: {
+                    query: {
+                        roles: {
+                            $in: ["user"]
+                        }
+                    },
+                    expand: "profile",
+                    sort: {
+                        firstName: 1
+                    }
+                }
             });
 
             expect(res.data.users.length).toBe(10, "res.data.users.length");
@@ -88,7 +106,17 @@ describe("GetUsersByQueryHandler", () => {
         try {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
-                data: { query: { roles: { $in: ["user"] } }, expand: "profile", sort: { firstName: 1 } }
+                data: {
+                    query: {
+                        roles: {
+                            $in: ["user"]
+                        }
+                    },
+                    expand: "profile",
+                    sort: {
+                        firstName: 1
+                    }
+                }
             });
 
             expect(res.data.users.length).toBe(10, "res.data.users.length");
@@ -110,7 +138,14 @@ describe("GetUsersByQueryHandler", () => {
         try {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
-                data: { query: { roles: { $in: ["user"] } }, limit: 3 }
+                data: {
+                    query: {
+                        roles: {
+                            $in: ["user"]
+                        }
+                    },
+                    limit: 3
+                }
             });
 
             expect(res.data.users.length).toBe(3, "res.data.length");
@@ -135,7 +170,15 @@ describe("GetUsersByQueryHandler", () => {
         try {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
-                data: { query: { roles: { $in: ["user"] } }, limit: 3, start: 3 }
+                data: {
+                    query: {
+                        roles: {
+                            $in: ["user"]
+                        }
+                    },
+                    limit: 3,
+                    start: 3
+                }
             });
 
             expect(res.data.users.length).toBe(3, "res.data.length");
@@ -160,7 +203,19 @@ describe("GetUsersByQueryHandler", () => {
         try {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
-                data: { query: { roles: { $in: ["user"] } }, limit: 3, start: 3, filter: { firstName: 1, lastName: 1 } }
+                data: {
+                    query: {
+                        roles: {
+                            $in: ["user"]
+                        }
+                    },
+                    limit: 3,
+                    start: 3,
+                    filter: {
+                        firstName: 1,
+                        lastName: 1
+                    }
+                }
             });
 
             expect(res.data.users.length).toBe(3, "res.data.length");
@@ -212,7 +267,11 @@ describe("GetUsersByQueryHandler", () => {
             return await await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: {
-                    query: { roles: { $in: ["user"] } },
+                    query: {
+                        roles: {
+                            $in: ["user"]
+                        }
+                    },
                     limit: 3,
                     start: 3,
                     filter: {
@@ -220,7 +279,9 @@ describe("GetUsersByQueryHandler", () => {
                         lastName: 1,
                         customField: 1
                     },
-                    sort: { customField: sort }
+                    sort: {
+                        customField: sort
+                    }
                 }
             });
         }
@@ -232,7 +293,19 @@ describe("GetUsersByQueryHandler", () => {
         try {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
-                data: { query: { roles: { $in: ["no-one-can-have-this-role"] } }, limit: 3, start: 3, filter: { firstName: 1, lastName: 1 } }
+                data: {
+                    query: {
+                        roles: {
+                            $in: ["no-one-can-have-this-role"]
+                        }
+                    },
+                    limit: 3,
+                    start: 3,
+                    filter: {
+                        firstName: 1,
+                        lastName: 1
+                    }
+                }
             });
 
             expect(res.data.users.length).toBe(0, "res.data.length");

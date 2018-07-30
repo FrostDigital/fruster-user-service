@@ -14,7 +14,9 @@ describe("GetUserByIdHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => { db = connection.db; }));
+			.testUtilsOptions((connection) => {
+				db = connection.db;
+			}));
 
 	afterEach(() => SpecUtils.resetConfig());
 
@@ -29,8 +31,12 @@ describe("GetUserByIdHandler", () => {
 			await SpecUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
 				data: {},
-				user: { scopes: ["admin.*"] },
-				params: { id: "non-existing-user-id" }
+				user: {
+					scopes: ["admin.*"]
+				},
+				params: {
+					id: "non-existing-user-id"
+				}
 			});
 
 			done.fail();
@@ -47,8 +53,12 @@ describe("GetUserByIdHandler", () => {
 			const res = await SpecUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
 				data: {},
-				user: { scopes: ["admin.*"] },
-				params: { id: "user1" }
+				user: {
+					scopes: ["admin.*"]
+				},
+				params: {
+					id: "user1"
+				}
 			});
 
 			expect(res.status).toBe(200);
@@ -71,9 +81,15 @@ describe("GetUserByIdHandler", () => {
 			const res = await SpecUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
 				data: {},
-				user: { scopes: ["admin.*"] },
-				params: { id: createdUsers[0].data.id },
-				query: { expand: "profile" }
+				user: {
+					scopes: ["admin.*"]
+				},
+				params: {
+					id: createdUsers[0].data.id
+				},
+				query: {
+					expand: "profile"
+				}
 			});
 
 			expect(res.status).toBe(200);
@@ -95,7 +111,9 @@ describe("GetUserByIdHandler", () => {
 			config.lowerCaseName = true;
 			await insertTestUserWithEmptyLastName(db);
 
-			const res = (await SpecUtils.busRequest(constants.endpoints.service.GET_USER, { id: "user1337" })).data[0];
+			const res = (await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
+				id: "user1337"
+			})).data[0];
 
 			expect(res.id).toBe("user1337");
 			expect(res.lastName).toBe("");

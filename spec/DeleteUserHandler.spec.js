@@ -16,7 +16,9 @@ describe("DeleteUserHandler", () => {
 
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => { db = connection.db; }));
+            .testUtilsOptions((connection) => {
+                db = connection.db;
+            }));
 
     afterEach(() => SpecUtils.resetConfig());
 
@@ -24,7 +26,9 @@ describe("DeleteUserHandler", () => {
         try {
             const user = mocks.getUserObject();
             const createdUserResponse = await SpecUtils.createUser(user);
-            const reqData = { id: createdUserResponse.data.id };
+            const reqData = {
+                id: createdUserResponse.data.id
+            };
             const deleteResponse = await SpecUtils.busRequest(constants.endpoints.service.DELETE_USER, reqData);
 
             expect(deleteResponse.status).toBe(200, "deleteResponse.status");
@@ -45,9 +49,13 @@ describe("DeleteUserHandler", () => {
 
             const user = mocks.getUserObject();
             const createdUserResponse = await SpecUtils.createUser(user);
-            const reqData = { id: createdUserResponse.data.id };
+            const reqData = {
+                id: createdUserResponse.data.id
+            };
 
-            const profileBeforeDelete = (await db.collection(constants.collections.PROFILES).findOne({ id: createdUserResponse.data.id }));
+            const profileBeforeDelete = (await db.collection(constants.collections.PROFILES).findOne({
+                id: createdUserResponse.data.id
+            }));
 
             expect(profileBeforeDelete.firstName).toBeDefined("profile.firstName");
             expect(profileBeforeDelete.lastName).toBeDefined("profile.lastName");
@@ -60,7 +68,9 @@ describe("DeleteUserHandler", () => {
             const userInDatabase = await db.collection(constants.collections.USERS).findOne(reqData);
             expect(userInDatabase).toBe(null, "userInDatabase");
 
-            const profileAfterDelete = (await db.collection(constants.collections.PROFILES).findOne({ id: createdUserResponse.data.id }));
+            const profileAfterDelete = (await db.collection(constants.collections.PROFILES).findOne({
+                id: createdUserResponse.data.id
+            }));
             expect(profileAfterDelete).toBe(null, "userInDatabase");
 
             done();
@@ -76,7 +86,9 @@ describe("DeleteUserHandler", () => {
             user.scopes = ["admin.*"];
 
             const createdUserResponse = await SpecUtils.createUser(user);
-            const reqData = { id: createdUserResponse.data.id };
+            const reqData = {
+                id: createdUserResponse.data.id
+            };
             const deleteResponse = await SpecUtils.busRequest(constants.endpoints.service.DELETE_USER, reqData);
 
             expect(deleteResponse.status).toBe(200, "deleteResponse.status");
@@ -94,7 +106,9 @@ describe("DeleteUserHandler", () => {
     it("should return 404 when trying to remove non-existent user", async done => {
         try {
             try {
-                await SpecUtils.busRequest(constants.endpoints.service.DELETE_USER, { id: uuid.v4() });
+                await SpecUtils.busRequest(constants.endpoints.service.DELETE_USER, {
+                    id: uuid.v4()
+                });
 
                 done.fail();
             } catch (err) {
@@ -114,7 +128,16 @@ describe("DeleteUserHandler", () => {
             user.scopes = ["admin.*"];
 
             try {
-                await SpecUtils.busRequest({ subject: constants.endpoints.http.admin.DELETE_USER, data: { id: uuid.v4() }, user, params: { id: uuid.v4() } });
+                await SpecUtils.busRequest({
+                    subject: constants.endpoints.http.admin.DELETE_USER,
+                    data: {
+                        id: uuid.v4()
+                    },
+                    user,
+                    params: {
+                        id: uuid.v4()
+                    }
+                });
 
                 done.fail();
             } catch (err) {

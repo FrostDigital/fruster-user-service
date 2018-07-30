@@ -7,7 +7,6 @@ const config = require("../config");
 const specConstants = require("./support/spec-constants");
 const SpecUtils = require("./support/SpecUtils");
 
-
 describe("AddSystemRoleScopesHandler", () => {
 
     /** @type {Db} */
@@ -26,17 +25,38 @@ describe("AddSystemRoleScopesHandler", () => {
         config.useDbRolesAndScopes = true;
     });
 
-    afterAll(() => { config.useDbRolesAndScopes = useDbRolesAndScopesDefaultValue; });
+    afterAll(() => {
+        config.useDbRolesAndScopes = useDbRolesAndScopesDefaultValue;
+    });
 
     it("should be possible to add scopes to a role", async done => {
         try {
             const role = "padmin";
             const newScopes = ["hello.from.vienna", "bye.from.vienna"];
 
-            await SpecUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role }, user: { scopes: ["system.add-role"] } });
-            await SpecUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES, data: { scopes: newScopes, role }, user: { scopes: ["system.add-role-scopes"] } });
+            await SpecUtils.busRequest({
+                subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
+                data: {
+                    role
+                },
+                user: {
+                    scopes: ["system.add-role"]
+                }
+            });
+            await SpecUtils.busRequest({
+                subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES,
+                data: {
+                    scopes: newScopes,
+                    role
+                },
+                user: {
+                    scopes: ["system.add-role-scopes"]
+                }
+            });
 
-            const roles = await db.collection(constants.collections.ROLE_SCOPES).find({ role }).toArray();
+            const roles = await db.collection(constants.collections.ROLE_SCOPES).find({
+                role
+            }).toArray();
 
             expect(roles[0].role).toBe(role, "roles[0].role");
             expect(roles[0].scopes.length).toBe(2, "roles[0].scopes.length");
@@ -55,17 +75,32 @@ describe("AddSystemRoleScopesHandler", () => {
             const role = "padmin";
             const newScopes = ["hello.from.vienna", "bye.from.vienna"];
 
-            await SpecUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role }, user: { scopes: ["system.add-role"] } });
+            await SpecUtils.busRequest({
+                subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
+                data: {
+                    role
+                },
+                user: {
+                    scopes: ["system.add-role"]
+                }
+            });
             await Promise.all(
                 new Array(10).fill(null)
-                    .map(() => SpecUtils.busRequest({
-                        subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES,
-                        data: { scopes: newScopes, role },
-                        user: { scopes: ["system.add-role-scopes"] }
-                    }))
+                .map(() => SpecUtils.busRequest({
+                    subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE_SCOPES,
+                    data: {
+                        scopes: newScopes,
+                        role
+                    },
+                    user: {
+                        scopes: ["system.add-role-scopes"]
+                    }
+                }))
             );
 
-            const roles = await db.collection(constants.collections.ROLE_SCOPES).find({ role }).toArray();
+            const roles = await db.collection(constants.collections.ROLE_SCOPES).find({
+                role
+            }).toArray();
 
             expect(roles[0].role).toBe(role, "roles[0].role");
             expect(roles[0].scopes.length).toBe(2, "roles[0].scopes.length");

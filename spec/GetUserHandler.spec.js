@@ -12,7 +12,9 @@ describe("GetUserHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => { return insertTestUsers(connection.db); }));
+			.testUtilsOptions((connection) => {
+				return insertTestUsers(connection.db);
+			}));
 
 	it("should fail to get ALL users when passing in empty object as query", async done => {
 		try {
@@ -39,7 +41,9 @@ describe("GetUserHandler", () => {
 
 	it("should fail to query by password", async done => {
 		try {
-			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, { password: "foo" });
+			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
+				password: "foo"
+			});
 
 			done.fail();
 		} catch (err) {
@@ -50,7 +54,9 @@ describe("GetUserHandler", () => {
 
 	it("should fail to query by salt", async done => {
 		try {
-			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, { salt: "foo" });
+			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
+				salt: "foo"
+			});
 
 			done.fail();
 		} catch (err) {
@@ -61,7 +67,9 @@ describe("GetUserHandler", () => {
 
 	it("should get users by email", async done => {
 		try {
-			const res = await SpecUtils.busRequest(constants.endpoints.service.GET_USER, { email: "user1@example.com" });
+			const res = await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
+				email: "user1@example.com"
+			});
 
 			expect(res.data.length).toBe(1, "res.data.length");
 			expect(res.data[0].id).toBe("user1", "res.data[0].id");
@@ -76,10 +84,15 @@ describe("GetUserHandler", () => {
 
 	it("should get users as admin using HTTP endpoint", async done => {
 		try {
-			const res = await SpecUtils.busRequest({ 
-				subject: constants.endpoints.http.admin.GET_USERS, 
-				user: { scopes: ["admin.*"] }, 
-			query: { email: "user1@example.com" } });
+			const res = await SpecUtils.busRequest({
+				subject: constants.endpoints.http.admin.GET_USERS,
+				user: {
+					scopes: ["admin.*"]
+				},
+				query: {
+					email: "user1@example.com"
+				}
+			});
 
 			expect(res.data.length).toBe(1, "res.data.length");
 			expect(res.data[0].id).toBe("user1", "res.data[0].id");
@@ -103,7 +116,9 @@ describe("GetUserHandler", () => {
 						start: 1,
 						limit: 2
 					},
-					user: { scopes: ["admin.*"] }
+					user: {
+						scopes: ["admin.*"]
+					}
 				}
 			});
 
@@ -125,8 +140,12 @@ describe("GetUserHandler", () => {
 				skipOptionsRequest: true,
 				message: {
 					reqId: "reqId",
-					query: { $$$$: "$$$$" },
-					user: { scopes: ["admin.*"] }
+					query: {
+						$$$$: "$$$$"
+					},
+					user: {
+						scopes: ["admin.*"]
+					}
 				}
 			});
 
@@ -144,7 +163,9 @@ describe("GetUserHandler", () => {
 				skipOptionsRequest: true,
 				message: {
 					reqId: uuid.v4(),
-					data: { $or: [] }
+					data: {
+						$or: []
+					}
 				}
 			});
 
