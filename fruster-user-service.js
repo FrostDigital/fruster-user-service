@@ -1,10 +1,45 @@
+const UserRepo = require("./lib/repos/UserRepo");
+const ProfileRepo = require("./lib/repos/ProfileRepo");
+const InitialUserRepo = require("./lib/repos/InitialUserRepo");
+const RoleScopesDbRepo = require("./lib/repos/RoleScopesDbRepo");
+const RoleScopesConfigRepo = require("./lib/repos/RoleScopesConfigRepo");
+
+const PasswordManager = require("./lib/managers/PasswordManager");
+const RoleManager = require("./lib/managers/RoleManager");
+const ProfileManager = require("./lib/managers/ProfileManager");
+const UserManager = require("./lib/managers/UserManager");
+
+const CreateInitialUserHandler = require("./lib/handlers/CreateInitialUserHandler");
+const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
+const GetUserHandler = require("./lib/handlers/GetUserHandler"); /** DEPRECATED */
+const GetUsersByQueryHandler = require("./lib/handlers/GetUsersByQueryHandler");
+const GetUserByIdHandler = require("./lib/handlers/GetUserByIdHandler");
+const GetScopesForRolesHandler = require("./lib/handlers/GetScopesForRolesHandler");
+const UpdateUserHandler = require("./lib/handlers/UpdateUserHandler");
+const DeleteUserHandler = require("./lib/handlers/DeleteUserHandler");
+const ValidatePasswordHandler = require("./lib/handlers/ValidatePasswordHandler");
+const UpdatePasswordHandler = require("./lib/handlers/UpdatePasswordHandler");
+const SetPasswordHandler = require("./lib/handlers/SetPasswordHandler");
+const AddRolesHandler = require("./lib/handlers/AddRolesHandler");
+const RemoveRolesHandler = require("./lib/handlers/RemoveRolesHandler");
+const VerifyEmailAddressHandler = require("./lib/handlers/email-verification/VerifyEmailAddressHandler.js");
+const ResendVerificationEmailHandler = require("./lib/handlers/email-verification/ResendVerificationEmailHandler.js");
+const AddSystemRoleHandler = require("./lib/handlers/system/AddSystemRoleHandler");
+const AddSystemRoleScopesHandler = require("./lib/handlers/system/AddSystemRoleScopesHandler");
+const GetSystemRolesHandler = require("./lib/handlers/system/GetSystemRolesHandler");
+const RemoveSystemRoleHandler = require("./lib/handlers/system/RemoveSystemRoleHandler");
+const RemoveSystemRoleScopesHandler = require("./lib/handlers/system/RemoveSystemRoleScopesHandler");
+
+const GetProfilesByQueryHandler = require("./lib/handlers/GetProfilesByQueryHandler");
+const UpdateProfileHandler = require("./lib/handlers/UpdateProfileHandler");
+
 const bus = require("fruster-bus");
 const mongo = require("mongodb");
 const Db = mongo.Db;
 const config = require("./config");
 const constants = require("./lib/constants.js");
 const expressApp = require("./web/express-app");
-
+const docs = require("./lib/docs");
 
 module.exports = {
 
@@ -16,104 +51,51 @@ module.exports = {
 		createIndexes(db);
 
 		// REPOS
-		const UserRepo = require("./lib/repos/UserRepo");
 		const userRepo = new UserRepo(db);
-
-		const InitialUserRepo = require("./lib/repos/InitialUserRepo");
+		const profileRepo = new ProfileRepo(db);
 		const initialUserRepo = new InitialUserRepo(db);
-
-		const RoleScopesDbRepo = require("./lib/repos/RoleScopesDbRepo");
 		const roleScopesDbRepo = new RoleScopesDbRepo(db);
 
-		const RoleScopesConfigRepo = require("./lib/repos/RoleScopesConfigRepo");
 		const roleScopesConfigRepo = new RoleScopesConfigRepo();
 		await roleScopesConfigRepo.prepareRoles();
 
-		// SERVICES
-		const PasswordManager = require("./lib/managers/PasswordManager");
+		// MANAGERS
 		const passwordManager = new PasswordManager(userRepo);
-
-		const RoleManager = require("./lib/managers/RoleManager");
 		const roleManager = new RoleManager(config.useDbRolesAndScopes ? roleScopesDbRepo : roleScopesConfigRepo);
+		const profileManager = new ProfileManager(profileRepo);
+		const userManager = new UserManager();
 
 		// HANDLERS
-		const CreateInitialUserHandler = require("./lib/handlers/CreateInitialUserHandler");
 		const createInitialUserHandler = new CreateInitialUserHandler(userRepo, initialUserRepo, passwordManager);
 		await createInitialUserHandler.handle();
-
-		// CREATE
-		const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
-		const createUserHandler = new CreateUserHandler(userRepo, passwordManager, roleManager);
-
-		// READ
-		/** DEPRECATED */ const GetUserHandler = require("./lib/handlers/GetUserHandler");
-		/** DEPRECATED */ const getUserHandler = new GetUserHandler(userRepo, roleManager);
-
-		const GetUsersByQueryHandler = require("./lib/handlers/GetUsersByQueryHandler");
-		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleManager);
-
-		const GetUserByIdHandler = require("./lib/handlers/GetUserByIdHandler");
-		const getUserByIdHandler = new GetUserByIdHandler(userRepo, roleManager);
-
-		const GetScopesForRolesHandler = require("./lib/handlers/GetScopesForRolesHandler");
+		const createUserHandler = new CreateUserHandler(userRepo, passwordManager, roleManager, profileManager);
+		const getUserHandler = new GetUserHandler(userRepo, roleManager); /** DEPRECATED */
+		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleManager, profileManager);
+		const getUserByIdHandler = new GetUserByIdHandler(userRepo, roleManager, profileManager);
 		const getScopesForRolesHandler = new GetScopesForRolesHandler(roleManager);
-
-		// UPDATE
-		const UpdateUserHandler = require("./lib/handlers/UpdateUserHandler");
-		const updateUserHandler = new UpdateUserHandler(userRepo, passwordManager, roleManager);
-
-		// DELETE
-		const DeleteUserHandler = require("./lib/handlers/DeleteUserHandler");
-		const deleteUserHandler = new DeleteUserHandler(userRepo);
-
-		// PASSWORD
-		const ValidatePasswordHandler = require("./lib/handlers/ValidatePasswordHandler");
+		const updateUserHandler = new UpdateUserHandler(userRepo, passwordManager, roleManager, profileManager, userManager);
+		const deleteUserHandler = new DeleteUserHandler(userRepo, profileRepo);
 		const validatePasswordHandler = new ValidatePasswordHandler(userRepo, passwordManager, roleManager);
-
-		const UpdatePasswordHandler = require("./lib/handlers/UpdatePasswordHandler");
 		const updatePasswordHandler = new UpdatePasswordHandler(userRepo, passwordManager);
-
-		const SetPasswordHandler = require("./lib/handlers/SetPasswordHandler");
 		const setPasswordHandler = new SetPasswordHandler(userRepo, passwordManager);
-
-		// ROLES
-		const AddRolesHandler = require("./lib/handlers/AddRolesHandler");
 		const addRolesHandler = new AddRolesHandler(userRepo, roleManager);
-
-		const RemoveRolesHandler = require("./lib/handlers/RemoveRolesHandler");
 		const removeRolesHandler = new RemoveRolesHandler(userRepo, roleManager);
-
-		// EMAIL VERIFICATION
-		const VerifyEmailAddressHandler = require("./lib/handlers/email-verification/VerifyEmailAddressHandler.js");
 		const verifyEmailAddressHandler = new VerifyEmailAddressHandler(userRepo);
-
-		const ResendVerificationEmailHandler = require("./lib/handlers/email-verification/ResendVerificationEmailHandler.js");
 		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(userRepo, roleManager);
 
-		// ENDPOINTS ///////////////////////////////////////////////////////////////////////////////
-
-		const docs = require("./lib/docs");
+		const getProfilesByQueryHandler = new GetProfilesByQueryHandler(roleManager, profileManager);
+		const updateProfileHandler = new UpdateProfileHandler(profileRepo, userManager, profileManager);
 
 		// ROLES & SCOPES, if configured
 		if (config.useDbRolesAndScopes) {
 			await roleScopesDbRepo.prepareRoles();
 
 			// SYSTEM ROLES
-			const AddSystemRoleHandler = require("./lib/handlers/system/AddSystemRoleHandler");
 			const addSystemRoleHandler = new AddSystemRoleHandler(roleScopesDbRepo);
-
-			const AddSystemRoleScopesHandler = require("./lib/handlers/system/AddSystemRoleScopesHandler");
 			const addSystemRoleScopesHandler = new AddSystemRoleScopesHandler(roleScopesDbRepo);
-
-			const GetSystemRolesHandler = require("./lib/handlers/system/GetSystemRolesHandler");
 			const getSystemRolesHandler = new GetSystemRolesHandler(roleScopesDbRepo);
-
-			const RemoveSystemRoleHandler = require("./lib/handlers/system/RemoveSystemRoleHandler");
 			const removeSystemRoleHandler = new RemoveSystemRoleHandler(roleScopesDbRepo);
-
-			const RemoveSystemRoleScopesHandler = require("./lib/handlers/system/RemoveSystemRoleScopesHandler");
 			const removeSystemRoleScopesHandler = new RemoveSystemRoleScopesHandler(roleScopesDbRepo);
-
 
 			bus.subscribe({
 				subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
@@ -227,7 +209,6 @@ module.exports = {
 			handle: (req) => updatePasswordHandler.handleHttp(req)
 		});
 
-
 		// SERVICE
 		bus.subscribe({
 			subject: constants.endpoints.service.CREATE_USER,
@@ -237,7 +218,7 @@ module.exports = {
 			handle: (req) => createUserHandler.handle(req)
 		});
 
-		/** DEPRECATED */ bus.subscribe({
+		bus.subscribe({ /** DEPRECATED */
 			deprecated: docs.deprecated.GET_USER,
 			subject: constants.endpoints.service.GET_USER,
 			responseSchema: constants.schemas.response.USER_LIST_RESPONSE,
@@ -254,11 +235,27 @@ module.exports = {
 		});
 
 		bus.subscribe({
+			subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
+			requestSchema: constants.schemas.request.GET_PROFILES_BY_QUERY,
+			responseSchema: constants.schemas.response.GET_PROFILES_BY_QUERY,
+			docs: docs.service.GET_PROFILES_BY_QUERY,
+			handle: (req) => getProfilesByQueryHandler.handle(req)
+		});
+
+		bus.subscribe({
 			subject: constants.endpoints.service.UPDATE_USER,
 			requestSchema: constants.schemas.request.UPDATE_USER_REQUEST,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
 			docs: docs.service.UPDATE_USER,
 			handle: (req) => updateUserHandler.handle(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.service.UPDATE_PROFILE,
+			requestSchema: constants.schemas.request.UPDATE_PROFILE_REQUEST,
+			responseSchema: constants.schemas.request.USER_RESPONSE,
+			docs: docs.service.UPDATE_USER,
+			handle: (req) => updateProfileHandler.handle(req)
 		});
 
 		bus.subscribe({
@@ -332,9 +329,8 @@ module.exports = {
 	},
 
 	stop: () => {
-		if (config.requireEmailVerification || config.optionalEmailVerification || config.useDbRolesAndScopes) {
+		if (config.requireEmailVerification || config.optionalEmailVerification || config.useDbRolesAndScopes)
 			expressApp.stop();
-		}
 	}
 
 };
@@ -343,25 +339,14 @@ module.exports = {
  * @param {Db} db 
  */
 function createIndexes(db) {
-	db.collection(config.userCollection)
-		.createIndex({
-			email: 1
-		}, {
-				unique: true,
-				partialFilterExpression: {
-					email: {
-						$exists: true
-					}
-				}
-			});
+	db.collection(constants.collections.USERS)
+		.createIndex({ email: 1 }, { unique: true, partialFilterExpression: { email: { $exists: true } } });
 
 	config.uniqueIndexes.forEach(index => {
-		const indexObj = {};
+		const indexObj={};
 		indexObj[index] = 1;
-		db.collection(config.userCollection)
-			.createIndex(indexObj, {
-				unique: true
-			});
+			db.collection(constants.collections.USERS)
+			.createIndex(indexObj, { unique: true });
 	});
 
 	return db;

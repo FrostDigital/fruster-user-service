@@ -31,8 +31,9 @@ function createExpressApp() {
     routes(app);
 
     // Error handling (must be after routing above)
-    app.use(function (req, res, next) {
+    app.use((req, res, next) => {
         const err = new Error("Not Found");
+        // @ts-ignore
         err.status = 404;
         next(err);
     });

@@ -1,6 +1,6 @@
 {
-    "id": "UserResponse",
-    "description": "Single user response. Response data may vary depending on configuration.",
+    "id": "UpdateProfileRequest",
+    "description": "Request for updating a profile via service call. What can be updated may vary.",
     "additionalProperties": true,
     "properties": {
         "id": {
@@ -17,12 +17,9 @@
         },
         "email": {
             "$ref": "User#/properties/email"
-        },
-        "roles": {
-            "$ref": "User#/properties/roles"
-        },
-        "scopes": {
-            "$ref": "User#/properties/scopes"
         }
-    }
+    },
+    "required": [
+        "id"
+    ]
 }

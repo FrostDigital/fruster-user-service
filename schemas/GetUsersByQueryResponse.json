@@ -1,6 +1,6 @@
 {
     "id": "GetUsersByQueryResponse",
-    "description": "Response from get users by query",
+    "description": "Response from get users by query. Response data may vary depending on configuration.",
     "additionalProperties": false,
     "properties": {
         "totalCount": {

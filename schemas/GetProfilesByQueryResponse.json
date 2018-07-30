@@ -1,0 +1,15 @@
+{
+    "id": "GetProfilesByQueryResponse",
+    "description": "Response from get profiles by query. Response data may vary depending on configuration.",
+    "additionalProperties": false,
+    "properties": {
+        "totalCount": {
+            "type": "number",
+            "description": "The total count of results in the databse found with provided query",
+            "minimum": 0
+        },
+        "profiles": {
+            "$ref": "UserListResponse"
+        }
+    }
+}

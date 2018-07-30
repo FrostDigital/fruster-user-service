@@ -1,15 +1,12 @@
 const bus = require("fruster-bus");
 const log = require("fruster-log");
 const Db = require("mongodb").Db;
-const uuid = require("uuid");
-
-const userService = require('../fruster-user-service');
 const conf = require('../config');
 const mocks = require('./support/mocks.js');
-const testUtils = require('./support/test-utils.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("ResendVerificationEmailHandler", () => {
@@ -54,16 +51,14 @@ describe("ResendVerificationEmailHandler", () => {
             });
 
             const createUserResponse = (await mocks.createUser(testUserData)).data;
-            const testUser = await db.collection(conf.userCollection).findOne({ id: createUserResponse.id });
+            const testUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
 
             verificationToken = testUser.emailVerificationToken;
 
-            await bus.request({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.http.RESEND_VERIFICATION_EMAIL,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(), data: {}, params: { email: createUserResponse.email }
-                }
+                data: {},
+                params: { email: createUserResponse.email }
             });
         } catch (err) {
             log.error(err);

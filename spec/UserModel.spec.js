@@ -3,8 +3,8 @@ const RoleManager = require("../lib/managers/RoleManager");
 const config = require("../config");
 const mocks = require("./support/mocks");
 const Utils = require("../lib/utils/Utils");
-const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
 const log = require("fruster-log");
+
 
 describe("UserModel", () => {
 

@@ -2,13 +2,12 @@ const conf = require('../config');
 const mocks = require('./support/mocks');
 const constants = require('../lib/constants');
 const RoleManager = require('../lib/managers/RoleManager');
-const Db = require("mongodb").Db;
 const specConstants = require('./support/spec-constants');
 const frusterTestUtils = require("fruster-test-utils");
 const RoleScopesConfigRepo = require('../lib/repos/RoleScopesConfigRepo');
 const log = require("fruster-log");
-const bus = require("fruster-bus");
-const uuid = require("uuid");
+const SpecUtils = require("./support/SpecUtils");
+
 
 /** This is a seperate test because we need to set the config before  frusterTestUtils.startBeforeEach which means all other tests fail if set in the other test file 🤔 */
 describe("CreateUserHandler w/ requireNames set to false", () => {
@@ -16,15 +15,11 @@ describe("CreateUserHandler w/ requireNames set to false", () => {
     /** @type {RoleManager} */
     let roleManager;
 
-    /** @type {Boolean} */
-    let requireNamesConfigDefaultValue;
-
     beforeAll(() => {
-        requireNamesConfigDefaultValue = conf.requireNames;
         conf.requireNames = false;
     });
 
-    afterAll(() => { conf.requireNames = requireNamesConfigDefaultValue; });
+    afterAll(() => { SpecUtils.resetConfig(); });
 
     frusterTestUtils
         .startBeforeEach(specConstants
@@ -46,15 +41,7 @@ describe("CreateUserHandler w/ requireNames set to false", () => {
             delete user.middleName;
             delete user.lastName;
 
-            const response = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 
@@ -94,15 +81,7 @@ describe("CreateUserHandler w/ requireNames set to false", () => {
             const user = mocks.getUserObject();
             user.roles.push("super-admin");
 
-            const response = await bus.request({
-                subject: constants.endpoints.service.CREATE_USER,
-                timeout: 1000,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
-            });
+            const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
             expect(response.status).toBe(201, "response.status");
 

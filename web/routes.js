@@ -11,10 +11,7 @@ module.exports = (app) => {
     app.get("/resend-verification", resendVerificationEmail.get);
     app.post("/resend-verification", resendVerificationEmail.post);
 
-    if (config.useDbRolesAndScopes) {
-        if (!config.optOutOfRoleAdminWeb) {
+    if (config.useDbRolesAndScopes)
+        if (!config.optOutOfRoleAdminWeb)
             app.get("/admin", roleAdminWeb.get);
-        }
-    }
-
 };

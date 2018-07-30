@@ -1,16 +1,12 @@
-const bus = require("fruster-bus");
 const log = require("fruster-log");
 const Db = require("mongodb").Db;
-const uuid = require("uuid");
-
-const userService = require('../fruster-user-service');
 const config = require('../config');
 const mocks = require('./support/mocks.js');
-const testUtils = require('./support/test-utils.js');
 const errors = require('../lib/errors.js');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("ValidatePasswordHandler", () => {
@@ -31,25 +27,15 @@ describe("ValidatePasswordHandler", () => {
         try {
             const user = mocks.getUserObject();
             //@ts-ignore
-            await db.dropDatabase(config.userCollection);
-            await bus.request({
+            await db.dropDatabase(constants.collections.USERS);
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
+                data: user
             });
-            const response = await bus.request({
+
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        username: user.email,
-                        password: user.password
-                    }
-                }
+                data: { username: user.email, password: user.password }
             });
 
             expect(response.status).toBe(200, "response.status");
@@ -66,23 +52,16 @@ describe("ValidatePasswordHandler", () => {
         try {
             const user = mocks.getOldUserObject();
             //@ts-ignore
-            await db.dropDatabase(config.userCollection);
-            await db.collection(config.userCollection).update({
+            await db.dropDatabase(constants.collections.USERS);
+            await db.collection(constants.collections.USERS).update({
                 id: user.id
             }, user, {
                     upsert: true
                 })
 
-            const response = await bus.request({
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        username: user.email,
-                        password: config.initialUserPassword
-                    }
-                }
+                data: { username: user.email, password: config.initialUserPassword }
             });
 
             expect(response.status).toBe(200, "response.status");
@@ -100,23 +79,16 @@ describe("ValidatePasswordHandler", () => {
             const user = mocks.getOldUserObject();
             user.hashDate = new Date("1970");
             //@ts-ignore
-            await db.dropDatabase(config.userCollection);
-            await db.collection(config.userCollection).update({
+            await db.dropDatabase(constants.collections.USERS);
+            await db.collection(constants.collections.USERS).update({
                 id: user.id
             }, user, {
                     upsert: true
                 })
 
-            const response = await bus.request({
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        username: user.email,
-                        password: config.initialUserPassword
-                    }
-                }
+                data: { username: user.email, password: config.initialUserPassword }
             });
 
             expect(response.status).toBe(200, "response.status");
@@ -135,24 +107,14 @@ describe("ValidatePasswordHandler", () => {
             const user = mocks.getUserObject();
             user.email = "urban@hello.se";
 
-            await bus.request({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
+                data: user
             });
-            const response = await bus.request({
+
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        username: "UrbAn@HeLlO.se",
-                        password: user.password
-                    }
-                }
+                data: { username: "UrbAn@HeLlO.se", password: user.password }
             });
 
             expect(response.status).toBe(200, "response.status");
@@ -169,26 +131,15 @@ describe("ValidatePasswordHandler", () => {
         try {
             mocks.mockMailService();
             const user = mocks.getUserObject();
-            await bus.request({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
+                data: user
             });
 
             try {
-                await bus.request({
+                await SpecUtils.busRequest({
                     subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                    skipOptionsRequest: true,
-                    message: {
-                        reqId: uuid.v4(),
-                        data: {
-                            username: user.email,
-                            password: "yoyoyo"
-                        }
-                    }
+                    data: { username: user.email, password: "yoyoyo" }
                 });
             } catch (err) {
                 expect(err.status).toBe(401, "err.status");
@@ -206,29 +157,18 @@ describe("ValidatePasswordHandler", () => {
         try {
             mocks.mockMailService();
             const user = mocks.getUserObject();
-            await bus.request({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
+                data: user
             });
 
             let email = user.email;
             email = email.substring(0, email.indexOf("@"));
 
             try {
-                await bus.request({
+                await SpecUtils.busRequest({
                     subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                    skipOptionsRequest: true,
-                    message: {
-                        reqId: uuid.v4(),
-                        data: {
-                            username: email,
-                            password: user.password
-                        }
-                    }
+                    data: { username: email, password: user.password }
                 });
 
                 done.fail();
@@ -251,25 +191,14 @@ describe("ValidatePasswordHandler", () => {
 
             const user = mocks.getUserObject();
 
-            await bus.request({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
+                data: user
             });
 
-            const response = await bus.request({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        username: user.email,
-                        password: user.password
-                    }
-                }
+                data: { username: user.email, password: user.password }
             });
 
             done.fail();
@@ -289,27 +218,16 @@ describe("ValidatePasswordHandler", () => {
 
             const user = mocks.getUserObject();
 
-            await bus.request({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
+                data: user
             });
 
             config.optionalEmailVerification = true;
 
-            const response = await bus.request({
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        username: user.email,
-                        password: user.password
-                    }
-                }
+                data: { username: user.email, password: user.password }
             });
 
             expect(response.status).toBe(200, "response.status");
@@ -329,27 +247,16 @@ describe("ValidatePasswordHandler", () => {
 
             const user = mocks.getUserObject();
 
-            await bus.request({
+            await SpecUtils.busRequest({
                 subject: constants.endpoints.service.CREATE_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: user
-                }
+                data: user
             });
 
             config.requireEmailVerification = true;
 
-            const response = await bus.request({
+            const response = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        username: user.email,
-                        password: user.password
-                    }
-                }
+                data: { username: user.email, password: user.password }
             });
 
             expect(response.status).toBe(200, "response.status");

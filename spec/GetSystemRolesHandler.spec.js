@@ -1,28 +1,19 @@
-const bus = require("fruster-bus");
 const log = require("fruster-log");
-const Db = require("mongodb").Db;
 const frusterTestUtils = require("fruster-test-utils");
-const RoleScopesDbRepo = require("../lib/repos/RoleScopesDbRepo");
-const RoleManager = require("../lib/managers/RoleManager");
 const constants = require("../lib/constants");
 const config = require("../config");
-const RoleModel = require("../lib/models/RoleModel");
 const specConstants = require("./support/spec-constants");
-const errors = require("../lib/errors");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("GetSystemRolesHandler", () => {
 
-    /** @type {Db} */
-    let db;
     /** @type {Boolean} */
     let useDbRolesAndScopesDefaultValue;
 
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => {
-                db = connection.db;
-            }));
+            .testUtilsOptions());
 
     beforeAll(() => {
         useDbRolesAndScopesDefaultValue = config.useDbRolesAndScopes;
@@ -35,28 +26,15 @@ describe("GetSystemRolesHandler", () => {
         try {
             const role = "padmin";
 
-            for (let i = 0; i < 3; i++) {
-                await bus.request({
+            await Promise.all(new Array(3).fill(null).map((x, i) =>
+                SpecUtils.busRequest({
                     subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
-                    skipOptionsRequest: true,
-                    message: {
-                        reqId: "reqId",
-                        user: { scopes: ["system.add-role"] },
-                        data: { role: role + i, scopes: [i.toString()] }
-                    }
-                });
-            }
+                    data: { role: role + i, scopes: [i.toString()] },
+                    user: { scopes: ["system.add-role"] }
+                })
+            ));
 
-            const rolesResponse = await bus.request({
-                subject: constants.endpoints.http.admin.GET_SYSTEM_ROLES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: "reqId",
-                    user: { scopes: ["system.get-roles"] },
-                    data: {}
-                }
-            });
-
+            const rolesResponse = await SpecUtils.busRequest({ subject: constants.endpoints.http.admin.GET_SYSTEM_ROLES, data: {}, user: { scopes: ["system.get-roles"] } })
             const roleNames = rolesResponse.data.map(roleObj => roleObj.role);
             const roleScopes = rolesResponse.data.map(roleObj => roleObj.scopes.toString());
 
@@ -79,31 +57,16 @@ describe("GetSystemRolesHandler", () => {
         try {
             const role = "padmin";
 
-            for (let i = 0; i < 3; i++) {
-                await bus.request({
-                    subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE,
-                    skipOptionsRequest: true,
-                    message: {
-                        reqId: "reqId",
-                        user: { scopes: ["system.add-role"] },
-                        data: { role: role + i, scopes: [i.toString()] }
-                    }
-                });
-            }
+            await Promise.all(new Array(3).fill(null).map((x, i) =>
+                SpecUtils.busRequest({ subject: constants.endpoints.http.admin.ADD_SYSTEM_ROLE, data: { role: role + i, scopes: [i.toString()] }, user: { scopes: ["system.add-role"] } })
+            ));
 
-            'padmin0:0;padmin1:1;super-admin:*;admin:profile.get,user.*;user:profile.get;padmin2:2;'
-            'super-admin:*;admin:profile.get,user.*;user:profile.get;padmin0:0;padmin1:1;padmin2:2;'
-
-            const rolesResponse = await bus.request({
+            const rolesResponse = await SpecUtils.busRequest({
                 subject: constants.endpoints.http.admin.GET_SYSTEM_ROLES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: "reqId",
-                    user: { scopes: ["system.get-roles"] },
-                    query: { format: "config" },
-                    data: {}
-                }
-            });
+                data: {},
+                user: { scopes: ["system.get-roles"] },
+                query: { format: "config" }
+            })
 
             /** Order of the roles in the config may vary */
             const pt1 = "super-admin:*;";

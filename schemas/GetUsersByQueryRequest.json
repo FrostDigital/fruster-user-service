@@ -17,6 +17,9 @@
         },
         "sort": {
             "$ref": "GenericAttrs#/definitions/sort"
+        },
+        "expand": {
+            "$ref": "GenericAttrs#/definitions/expand"
         }
     },
     "required": [

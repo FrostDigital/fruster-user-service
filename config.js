@@ -1,7 +1,9 @@
 module.exports = {
 
+	/** Nats bus address to connect to */
 	bus: process.env.BUS || "nats://localhost:4222",
 
+	/** Url to database */
 	mongoUrl: process.env.MONGO_URL || "mongodb://localhost:27017/user-service",
 
 	/** Predefined permissions for roles*/
@@ -16,16 +18,19 @@ module.exports = {
 	/** Regex used for validating ids in requests, checks for UUID v4 */
 	idValidationRegex: process.env.ID_VALIDATION_REGEX || /[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}/,
 
+	/** Unique indexes set in the database for users, sets id as default */
 	uniqueIndexes: parseArray(process.env.UNIQUE_INDEXES) || [],
 
+	/** The email of the initial account being created upon first run */
 	initialUserEmail: process.env.INITIAL_USER_EMAIL || "admin@frost.se",
 
+	/** The password of the initial account being created upon first run. Should be changed in prod! */
 	initialUserPassword: process.env.INITIAL_USER_PASSWORD || "FrusterR0ckS",
 
+	/** The roles of the initial account being created upon first run */
 	initialUserRole: process.env.INITIAL_USER_ROLE || "super-admin",
 
-	userCollection: "users",
-
+	/** Wether or not to require users to have a password. Typically used with some external login method such as BankID or facebook. */
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
 	/** Wether or not to require the users to verify their email address before being able to signin. 
@@ -44,7 +49,7 @@ module.exports = {
 
 	/** :user-{field}: can be used to display user information in the email. e.g. :user-firstName:
 	     :token is the email verification token to be used to validate the email address. */
-	emailVerificationMessage: process.env.EMAIL_VERIFICATION_MESSAGE || "Hello :user-firstName: :user-lastName:, \nVisit http://localhost:3120/verify-email?token=:token: to validate your email.",
+	emailVerificationMessage: process.env.EMAIL_VERIFICATION_MESSAGE || "Hello :user-firstName: :user-lastName:, \nVisit http://localhost:3120/verify-email?token=:token: to verify your email.",
 
 	emailVerificationSubject: process.env.EMAIL_VERIFICATION_SUBJECT || "Verify email",
 
@@ -80,7 +85,7 @@ module.exports = {
 	/** Whether or not to opt out of the admin web for handling roles and scopes.  */
 	optOutOfRoleAdminWeb: process.env.OPT_OUT_OF_ROLE_ADMIN_WEB === "true",
 
-	/** Base URL to API (the api gateway) */
+	/** Base URL to API (the api gateway) used by the frontend code served by the web server to make requests */
 	apiRoot: process.env.API_ROOT || "http://localhost:3000",
 
 	/** Whether or not to require password when updating email address */
@@ -89,16 +94,28 @@ module.exports = {
 	/** Whether or not to require a new user to have firstName and lastName */
 	requireNames: parseBool(process.env.REQUIRE_NAMES || "true"),
 
+	/** 
+	 * The fields to be saved in the user dataset. If `ALL` is defined in both userFields and profileFields; userFields is dominant. 
+	 * If only fields are defined in userFields; those fields are saved in the user dataset and the rest in the profile dataset. 
+	 * In order to split between user and profile dataset with only the required fields stored in the user dataset `REQUIRED_ONLY` can be used.
+	 * See the required fields array in `constants.dataset.USER_REQUIRED_FIELDS`
+	 */
+	userFields: parseArray(process.env.USER_FIELDS || "ALL"),
+
+	/** 
+	 * The fields to be saved in the user dataset. If `ALL` is defined in both userFields and profileFields; userFields is dominant. 
+	 * If only fields are defined in profileFields; those fields are saved in the user dataset and the rest in the profile dataset. 
+	 * Typically this doesn't need to be configured.
+	 */
+	profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL"),
+
 	/** Treshold for what is considered to be a slow query. If slow, this will be logged */
 	slowQueryTresholdMs: parseInt(process.env.SLOW_QUERY_TRESHOLD_MS || "250")
 
 };
 
 function parseArray(str) {
-	if (str) {
-		return str.split(",");
-	}
-
+	if (str) return str.split(",");
 	return null;
 }
 

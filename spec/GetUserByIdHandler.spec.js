@@ -1,11 +1,10 @@
 const frusterTestUtils = require("fruster-test-utils");
-const userService = require("../fruster-user-service");
-const bus = require("fruster-bus");
 const log = require("fruster-log");
 const constants = require("../lib/constants");
 const specConstants = require("./support/spec-constants");
 const Db = require("mongodb").Db;
 const config = require("../config");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("GetUserByIdHandler", () => {
@@ -15,20 +14,28 @@ describe("GetUserByIdHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => { db = connection.db; return insertTestUsers(connection.db); }));
+			.testUtilsOptions((connection) => {
+				db = connection.db;
+			}));
 
-	afterEach(() => config.lowerCaseName = false);
+	afterEach(() => SpecUtils.resetConfig());
+
+	async function setupTestUsers() {
+		await insertTestUsers(db);
+	}
 
 	it("should get 404 if user does not exist", async done => {
 		try {
-			await bus.request({
+			await setupTestUsers();
+
+			await SpecUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: {},
-					user: { scopes: ["admin.*"] },
-					params: { id: "non-existing-user-id" }
+				data: {},
+				user: {
+					scopes: ["admin.*"]
+				},
+				params: {
+					id: "non-existing-user-id"
 				}
 			});
 
@@ -41,14 +48,16 @@ describe("GetUserByIdHandler", () => {
 
 	it("should get user by id", async done => {
 		try {
-			const res = await bus.request({
+			await setupTestUsers();
+
+			const res = await SpecUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: {},
-					user: { scopes: ["admin.*"] },
-					params: { id: "user1" }
+				data: {},
+				user: {
+					scopes: ["admin.*"]
+				},
+				params: {
+					id: "user1"
 				}
 			});
 
@@ -63,21 +72,47 @@ describe("GetUserByIdHandler", () => {
 		}
 	});
 
+	it("should expand user if expand query is provided", async done => {
+		config.userFields = ["isRelatedToSlatan"];
+
+		try {
+			const createdUsers = await createTestUsers();
+
+			const res = await SpecUtils.busRequest({
+				subject: constants.endpoints.http.admin.GET_USER,
+				data: {},
+				user: {
+					scopes: ["admin.*"]
+				},
+				params: {
+					id: createdUsers[0].data.id
+				},
+				query: {
+					expand: "profile"
+				}
+			});
+
+			expect(res.status).toBe(200);
+			expect(res.data.id).toBe(createdUsers[0].data.id);
+			expect(res.data.profile.id).toBe(createdUsers[0].data.id);
+			expect(res.data.password).toBeUndefined();
+
+			done();
+		} catch (err) {
+			log.error(err);
+			done.fail(err);
+		}
+	});
+
 	it("should not remove empty fields", async done => {
 		try {
+			await setupTestUsers();
+
 			config.lowerCaseName = true;
 			await insertTestUserWithEmptyLastName(db);
 
-			const userFromDb = await db.collection(constants.collections.USERS).findOne({ id: "user1337" });
-
-			const res = (await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					user: { scopes: ["admin.*"] },
-					data: { id: "user1337" }
-				}
+			const res = (await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
+				id: "user1337"
 			})).data[0];
 
 			expect(res.id).toBe("user1337");
@@ -94,7 +129,7 @@ describe("GetUserByIdHandler", () => {
 });
 
 function insertTestUsers(db) {
-	let users = ["user1", "user2"]
+	const users = ["user1", "user2"]
 		.map((username) => {
 			return {
 				id: username,
@@ -108,6 +143,19 @@ function insertTestUsers(db) {
 		});
 
 	return db.collection("users").insert(users);
+}
+
+function createTestUsers() {
+	return Promise.all(["user1", "user2"]
+		.map((username) => SpecUtils.createUser({
+			id: username,
+			firstName: `${username}-firstName`,
+			lastName: `${username}-lastName`,
+			email: `${username}@example.com`,
+			salt: `${username}-salt`,
+			roles: ["user"],
+			password: "Localhost:8080"
+		})));
 }
 
 function insertTestUserWithEmptyLastName(db) {

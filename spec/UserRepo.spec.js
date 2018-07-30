@@ -1,6 +1,4 @@
 const frusterTestUtils = require("fruster-test-utils");
-const userService = require("../fruster-user-service");
-const bus = require("fruster-bus");
 const log = require("fruster-log");
 const UserRepo = require("../lib/repos/UserRepo");
 const Db = require("mongodb").Db;
@@ -24,6 +22,7 @@ describe("UserRepo", () => {
 			const user = await userRepo.getById("user1");
 
 			expect(user.id).toBe("user1");
+			// @ts-ignore
 			expect(user._id).toBeUndefined();
 			expect(user.firstName).toBe("user1-firstName");
 			expect(user.lastName).toBe("user1-lastName");

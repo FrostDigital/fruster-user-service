@@ -45,6 +45,14 @@
                     "description": "Just an example property."
                 }
             }
+        },
+        "expand": {
+            "type": "string",
+            "enum": [
+                "profile",
+                "true"
+            ],
+            "description": "Whether or not to expand user object with its profile."
         }
     }
 }

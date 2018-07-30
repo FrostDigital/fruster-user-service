@@ -1,5 +1,7 @@
-# Fruster User Service
+# NOTE: this readme is out of date by a few years!
+Please se the api doc and/or [docs.js](https://github.com/FrostDigital/fruster-user-service/blob/develop/lib/docs.js) for up to date documentation 
 
+# Fruster User Service
 Service for handling creation, fetching, updating and deletion of users and validation of users' passwords. 
 
 ## Exposed actions

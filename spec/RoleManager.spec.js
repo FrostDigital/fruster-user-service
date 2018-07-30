@@ -9,6 +9,7 @@ const specConstants = require("./support/spec-constants");
 const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
 const log = require("fruster-log");
 
+
 describe("RoleManager", () => {
 
     const defaults = {
