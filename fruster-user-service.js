@@ -340,13 +340,27 @@ module.exports = {
  */
 function createIndexes(db) {
 	db.collection(constants.collections.USERS)
-		.createIndex({ email: 1 }, { unique: true, partialFilterExpression: { email: { $exists: true } } });
+		.createIndex({
+			email: 1
+		}, {
+			unique: true,
+			partialFilterExpression: {
+				email: {
+					$exists: true
+				}
+			}
+		});
+
+	if (!config.uniqueIndexes.includes("id"))
+		config.uniqueIndexes.push("id");
 
 	config.uniqueIndexes.forEach(index => {
-		const indexObj={};
+		const indexObj = {};
 		indexObj[index] = 1;
-			db.collection(constants.collections.USERS)
-			.createIndex(indexObj, { unique: true });
+		db.collection(constants.collections.USERS)
+			.createIndex(indexObj, {
+				unique: true
+			});
 	});
 
 	return db;
