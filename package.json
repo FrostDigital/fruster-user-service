@@ -7,25 +7,23 @@
         "test": "nyc --reporter=html --check-coverage --lines 90 node ./spec/support/jasmine-runner.js"
     },
     "dependencies": {
-        "body-parser": "^1.17.2",
+        "body-parser": "^1.18.3",
         "cookie-parser": "^1.4.3",
-        "crypto-js": "^3.1.9-1",
-        "csprng": "^0.1.1",
-        "express": "^4.15.3",
-        "fruster-bus": "^0.2.26",
+        "csprng": "^0.1.2",
+        "express": "^4.16.3",
+        "fruster-bus": "^0.3.0",
         "fruster-errors": "0.0.7",
-        "fruster-health": "0.0.12",
+        "fruster-health": "0.0.13",
         "fruster-log": "0.0.18",
         "mongodb": "^2.2.34",
-        "request": "^2.81.0",
-        "uuid": "^3.2.1"
+        "request": "^2.88.0",
+        "uuid": "^3.3.2"
     },
     "devDependencies": {
         "@types/jasmine": "^2.8.6",
         "fruster-test-utils": "^0.3.22",
         "jasmine": "2.8.0",
         "jasmine-spec-reporter": "^4.2.1",
-        "nats-server-control": "0.0.1",
         "nyc": "^11.4.1"
     },
     "engines": {
