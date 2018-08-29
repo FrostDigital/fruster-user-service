@@ -27,11 +27,7 @@ describe("GetUsersByQueryHandler", () => {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: {
-                    query: {
-                        roles: {
-                            $in: ["user"]
-                        }
-                    }
+                    query: { roles: { $in: ["user"] } }
                 }
             });
 
@@ -59,13 +55,9 @@ describe("GetUsersByQueryHandler", () => {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: {
-                    query: {
-                        roles: {
-                            $in: ["user"]
-                        }
-                    },
+                    query: { roles: { $in: ["user"] } },
                     expand: "profile",
-                    sort: { firstName: 1 }
+                    sort: { "profile.firstName": 1 }
                 }
             });
 
@@ -105,13 +97,11 @@ describe("GetUsersByQueryHandler", () => {
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: {
                     query: {
-                        roles: {
-                            $in: ["user"]
-                        },
+                        roles: { $in: ["user"] },
                         "profile.firstName": "user7-firstName"
                     },
                     expand: "profile",
-                    sort: { firstName: 1 }
+                    sort: { "profile.firstName": 1 }
                 }
             });
 
@@ -149,14 +139,12 @@ describe("GetUsersByQueryHandler", () => {
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: {
                     query: {
-                        roles: {
-                            $in: ["user"]
-                        },
+                        roles: { $in: ["user"] },
                         "profile.firstName": "user7-firstName"
                     },
                     expand: "profile",
                     sort: {
-                        firstName: 1
+                        "profile.firstName": 1
                     },
                     filter: {
                         id: 1,
@@ -199,7 +187,7 @@ describe("GetUsersByQueryHandler", () => {
                         "profile.firstName": { $exists: true }
                     },
                     expand: "profile",
-                    sort: { firstName: 1 },
+                    sort: { "profile.firstName": 1 },
                     limit: 2
                 }
             });
@@ -242,7 +230,7 @@ describe("GetUsersByQueryHandler", () => {
                 data: {
                     query: { roles: { $in: ["user"] } },
                     expand: "profile",
-                    sort: { firstName: 1 }
+                    sort: { "profile.firstName": 1 }
                 }
             });
 
@@ -266,11 +254,7 @@ describe("GetUsersByQueryHandler", () => {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: {
-                    query: {
-                        roles: {
-                            $in: ["user"]
-                        }
-                    },
+                    query: { roles: { $in: ["user"] } },
                     limit: 3
                 }
             });
@@ -298,11 +282,7 @@ describe("GetUsersByQueryHandler", () => {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: {
-                    query: {
-                        roles: {
-                            $in: ["user"]
-                        }
-                    },
+                    query: { roles: { $in: ["user"] } },
                     limit: 3,
                     start: 3
                 }
@@ -331,11 +311,7 @@ describe("GetUsersByQueryHandler", () => {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: {
-                    query: {
-                        roles: {
-                            $in: ["user"]
-                        }
-                    },
+                    query: { roles: { $in: ["user"] } },
                     limit: 3,
                     start: 3,
                     filter: {
@@ -394,11 +370,7 @@ describe("GetUsersByQueryHandler", () => {
             return await await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: {
-                    query: {
-                        roles: {
-                            $in: ["user"]
-                        }
-                    },
+                    query: { roles: { $in: ["user"] } },
                     limit: 3,
                     start: 3,
                     filter: {
@@ -421,11 +393,7 @@ describe("GetUsersByQueryHandler", () => {
             const res = await SpecUtils.busRequest({
                 subject: constants.endpoints.service.GET_USERS_BY_QUERY,
                 data: {
-                    query: {
-                        roles: {
-                            $in: ["no-one-can-have-this-role"]
-                        }
-                    },
+                    query: { roles: { $in: ["no-one-can-have-this-role"] } },
                     limit: 3,
                     start: 3,
                     filter: {
