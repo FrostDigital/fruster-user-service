@@ -73,6 +73,9 @@ describe("CreateUserHandler", () => {
 
     it("should be possible to create user split into user and profile datasets", async done => {
         const testBegan = new Date();
+
+        await SpecUtils.delay(200);
+
         mocks.mockMailService();
 
         config.userFields = ["isRelatedToSlatan"];
@@ -284,6 +287,42 @@ describe("CreateUserHandler", () => {
             expect(Object.keys(err.error).length).not.toBe(0);
 
             done();
+        }
+    });
+
+    it("should validate indexed duplicates email when creating user", async done => {
+        try {
+            await db.collection(constants.collections.USERS)
+                .createIndex({ firstName: 1 }, {
+                    unique: true,
+                    partialFilterExpression: { firstName: { $exists: true } }
+                });
+
+            mocks.mockMailService();
+
+            const user = mocks.getUserObject();
+            user.email = "email@email.com";
+
+            try {
+                await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+                const user2 = mocks.getUserObject();
+                user2.email = "email2@email.com";
+
+                await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user2);
+
+                done.fail("should not be possible to create user with faulty email");
+            } catch (err) {
+                expect(err.status).toBe(400, "err.status");
+
+                expect(err.data).toBeUndefined("err.data");
+                expect(Object.keys(err.error).length).not.toBe(0);
+
+                done();
+            }
+        } catch (err) {
+            log.error(err);
+            done.fail(err);
         }
     });
 

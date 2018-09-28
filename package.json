@@ -20,6 +20,7 @@
         "uuid": "^3.3.2"
     },
     "devDependencies": {
+        "@types/mongodb": "2.2.19",
         "@types/jasmine": "^2.8.6",
         "fruster-test-utils": "^0.3.22",
         "jasmine": "2.8.0",
