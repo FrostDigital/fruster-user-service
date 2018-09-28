@@ -57,6 +57,12 @@ class SpecUtils {
             .forEach(conf => config[conf] = configBackup[conf]);
     }
 
+    static delay(milliseconds) {
+        return new Promise(resolve => {
+            setTimeout(() => { resolve(); }, milliseconds);
+        });
+    }
+
 }
 
 module.exports = SpecUtils;

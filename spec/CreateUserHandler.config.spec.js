@@ -15,15 +15,13 @@ describe("CreateUserHandler w/ requireNames set to false", () => {
     /** @type {RoleManager} */
     let roleManager;
 
-    beforeAll(() => {
-        conf.requireNames = false;
-    });
+    beforeAll(() => conf.requireNames = false);
 
-    afterAll(() => { SpecUtils.resetConfig(); });
+    afterAll(() => SpecUtils.resetConfig());
 
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions(async connection => {
+            .testUtilsOptions(async () => {
                 const roleScopesConfigRepo = new RoleScopesConfigRepo();
                 await roleScopesConfigRepo.prepareRoles();
                 roleManager = new RoleManager(roleScopesConfigRepo);

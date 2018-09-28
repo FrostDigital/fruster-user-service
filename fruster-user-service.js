@@ -63,12 +63,12 @@ module.exports = {
 		const passwordManager = new PasswordManager(userRepo);
 		const roleManager = new RoleManager(config.useDbRolesAndScopes ? roleScopesDbRepo : roleScopesConfigRepo);
 		const profileManager = new ProfileManager(profileRepo);
-		const userManager = new UserManager();
+		const userManager = new UserManager(passwordManager, roleManager, userRepo);
 
 		// HANDLERS
 		const createInitialUserHandler = new CreateInitialUserHandler(userRepo, initialUserRepo, passwordManager);
 		await createInitialUserHandler.handle();
-		const createUserHandler = new CreateUserHandler(userRepo, passwordManager, roleManager, profileManager);
+		const createUserHandler = new CreateUserHandler(userRepo, passwordManager, roleManager, profileManager, userManager);
 		const getUserHandler = new GetUserHandler(userRepo, roleManager); /** DEPRECATED */
 		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleManager, profileManager);
 		const getUserByIdHandler = new GetUserByIdHandler(userRepo, roleManager, profileManager);
@@ -343,13 +343,13 @@ function createIndexes(db) {
 		.createIndex({
 			email: 1
 		}, {
-			unique: true,
-			partialFilterExpression: {
-				email: {
-					$exists: true
+				unique: true,
+				partialFilterExpression: {
+					email: {
+						$exists: true
+					}
 				}
-			}
-		});
+			});
 
 	if (!config.uniqueIndexes.includes("id"))
 		config.uniqueIndexes.push("id");
