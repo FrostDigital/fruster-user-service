@@ -15,16 +15,12 @@ describe("VerifyEmailAddressHandler", () => {
 
     /** @type {Db} */
     let db;
-    let defaultRequireEmailVerification;
 
     frusterTestUtils
         .startBeforeEach(specConstants
             .testUtilsOptions((connection) => db = connection.db));
 
-    beforeAll(() => {
-        defaultRequireEmailVerification = config.requireEmailVerification;
-        config.requireEmailVerification = true;
-    });
+    beforeAll(() => config.requireEmailVerification = true);
 
     afterAll(() => SpecUtils.resetConfig());
 

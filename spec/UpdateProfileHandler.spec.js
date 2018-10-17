@@ -9,14 +9,14 @@ const specConstants = require("./support/spec-constants");
 describe("UpdateProfileHandler", () => {
 
     frusterTestUtils
-        .startBeforeEach(specConstants
-            .testUtilsOptions());
+        .startBeforeEach({
+            beforeStart: () => config.userFields = ["isRelatedToSlatan"],
+            ...specConstants.testUtilsOptions()
+        });
 
     afterEach(() => SpecUtils.resetConfig());
 
     it("should filter out user fields and only update profile fields when updating profile when configured to split user data", async () => {
-        config.userFields = ["isRelatedToSlatan"];
-
         const user = mocks.getUserObject();
         const createdUserResponse = await SpecUtils.createUser(user);
         const newFirstName = "Roland";
@@ -38,8 +38,6 @@ describe("UpdateProfileHandler", () => {
     });
 
     it("should return 200 if nothing was updated", async () => {
-        config.userFields = ["isRelatedToSlatan"];
-
         const user = mocks.getUserObject();
         const createdUserResponse = await SpecUtils.createUser(user);
 

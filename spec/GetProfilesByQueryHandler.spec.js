@@ -8,10 +8,10 @@ const config = require("../config");
 describe("GetProfilesByQueryHandler", () => {
 
     frusterTestUtils
-        .startBeforeEach(specConstants
-            .testUtilsOptions());
-
-    beforeEach(() => config.userFields = constants.dataset.REQUIRED_ONLY);
+        .startBeforeEach({
+            beforeStart: () => config.userFields = constants.dataset.REQUIRED_ONLY,
+            ...specConstants.testUtilsOptions()
+        });
 
     afterEach(() => TestUtils.resetConfig());
 

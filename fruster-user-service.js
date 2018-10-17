@@ -237,14 +237,6 @@ module.exports = {
 		});
 
 		bus.subscribe({
-			subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
-			requestSchema: constants.schemas.request.GET_PROFILES_BY_QUERY,
-			responseSchema: constants.schemas.response.GET_PROFILES_BY_QUERY,
-			docs: docs.service.GET_PROFILES_BY_QUERY,
-			handle: (req) => getProfilesByQueryHandler.handle(req)
-		});
-
-		bus.subscribe({
 			subject: constants.endpoints.service.UPDATE_USER,
 			requestSchema: constants.schemas.request.UPDATE_USER_REQUEST,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
@@ -252,13 +244,29 @@ module.exports = {
 			handle: (req) => updateUserHandler.handle(req)
 		});
 
-		bus.subscribe({
-			subject: constants.endpoints.service.UPDATE_PROFILE,
-			requestSchema: constants.schemas.request.UPDATE_PROFILE_REQUEST,
-			responseSchema: constants.schemas.request.USER_RESPONSE,
-			docs: docs.service.UPDATE_USER,
-			handle: (req) => updateProfileHandler.handle(req)
-		});
+		if (!(config.profileFields.includes(constants.dataset.ALL_FIELDS) && config.userFields.includes(constants.dataset.ALL_FIELDS))) {
+			/**
+			 * We only register these endpoints if configured to split user into user and profile.
+			 * Default config is config.profileFields = ALL & config.userFields = ALL ( Which means no splitting will be done ).
+			 */
+
+			bus.subscribe({
+				subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
+				requestSchema: constants.schemas.request.GET_PROFILES_BY_QUERY,
+				responseSchema: constants.schemas.response.GET_PROFILES_BY_QUERY,
+				docs: docs.service.GET_PROFILES_BY_QUERY,
+				handle: (req) => getProfilesByQueryHandler.handle(req)
+			});
+
+			bus.subscribe({
+				subject: constants.endpoints.service.UPDATE_PROFILE,
+				requestSchema: constants.schemas.request.UPDATE_PROFILE_REQUEST,
+				responseSchema: constants.schemas.request.USER_RESPONSE,
+				docs: docs.service.UPDATE_USER,
+				handle: (req) => updateProfileHandler.handle(req)
+			});
+
+		}
 
 		bus.subscribe({
 			subject: constants.endpoints.service.VALIDATE_PASSWORD,
@@ -284,6 +292,7 @@ module.exports = {
 
 		bus.subscribe({
 			subject: constants.endpoints.service.DELETE_USERS_BY_QUERY,
+			requestSchema: constants.schemas.request.DELETE_USERS_BY_QUERY,
 			docs: docs.service.DELETE_USERS_BY_QUERY,
 			handle: (req) => deleteUsersByQueryHandler.handle(req),
 		});
