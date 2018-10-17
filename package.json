@@ -22,8 +22,8 @@
     "devDependencies": {
         "@types/mongodb": "2.2.19",
         "@types/jasmine": "^2.8.6",
-        "fruster-test-utils": "^0.3.22",
-        "jasmine": "2.8.0",
+        "fruster-test-utils": "^0.4.0",
+        "jasmine": "3.2.0",
         "jasmine-spec-reporter": "^4.2.1",
         "nyc": "^11.4.1"
     },
