@@ -17,6 +17,7 @@ const GetUserByIdHandler = require("./lib/handlers/GetUserByIdHandler");
 const GetScopesForRolesHandler = require("./lib/handlers/GetScopesForRolesHandler");
 const UpdateUserHandler = require("./lib/handlers/UpdateUserHandler");
 const DeleteUserHandler = require("./lib/handlers/DeleteUserHandler");
+const DeleteUsersByQueryHandler = require("./lib/handlers/DeleteUsersByQueryHandler");
 const ValidatePasswordHandler = require("./lib/handlers/ValidatePasswordHandler");
 const UpdatePasswordHandler = require("./lib/handlers/UpdatePasswordHandler");
 const SetPasswordHandler = require("./lib/handlers/SetPasswordHandler");
@@ -75,6 +76,7 @@ module.exports = {
 		const getScopesForRolesHandler = new GetScopesForRolesHandler(roleManager);
 		const updateUserHandler = new UpdateUserHandler(userRepo, passwordManager, roleManager, profileManager, userManager);
 		const deleteUserHandler = new DeleteUserHandler(userRepo, profileRepo);
+		const deleteUsersByQueryHandler = new DeleteUsersByQueryHandler(userRepo, profileRepo);
 		const validatePasswordHandler = new ValidatePasswordHandler(userRepo, passwordManager, roleManager);
 		const updatePasswordHandler = new UpdatePasswordHandler(userRepo, passwordManager);
 		const setPasswordHandler = new SetPasswordHandler(userRepo, passwordManager);
@@ -235,14 +237,6 @@ module.exports = {
 		});
 
 		bus.subscribe({
-			subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
-			requestSchema: constants.schemas.request.GET_PROFILES_BY_QUERY,
-			responseSchema: constants.schemas.response.GET_PROFILES_BY_QUERY,
-			docs: docs.service.GET_PROFILES_BY_QUERY,
-			handle: (req) => getProfilesByQueryHandler.handle(req)
-		});
-
-		bus.subscribe({
 			subject: constants.endpoints.service.UPDATE_USER,
 			requestSchema: constants.schemas.request.UPDATE_USER_REQUEST,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
@@ -250,13 +244,29 @@ module.exports = {
 			handle: (req) => updateUserHandler.handle(req)
 		});
 
-		bus.subscribe({
-			subject: constants.endpoints.service.UPDATE_PROFILE,
-			requestSchema: constants.schemas.request.UPDATE_PROFILE_REQUEST,
-			responseSchema: constants.schemas.request.USER_RESPONSE,
-			docs: docs.service.UPDATE_USER,
-			handle: (req) => updateProfileHandler.handle(req)
-		});
+		if (!(config.profileFields.includes(constants.dataset.ALL_FIELDS) && config.userFields.includes(constants.dataset.ALL_FIELDS))) {
+			/**
+			 * We only register these endpoints if configured to split user into user and profile.
+			 * Default config is config.profileFields = ALL & config.userFields = ALL ( Which means no splitting will be done ).
+			 */
+
+			bus.subscribe({
+				subject: constants.endpoints.service.GET_PROFILES_BY_QUERY,
+				requestSchema: constants.schemas.request.GET_PROFILES_BY_QUERY,
+				responseSchema: constants.schemas.response.GET_PROFILES_BY_QUERY,
+				docs: docs.service.GET_PROFILES_BY_QUERY,
+				handle: (req) => getProfilesByQueryHandler.handle(req)
+			});
+
+			bus.subscribe({
+				subject: constants.endpoints.service.UPDATE_PROFILE,
+				requestSchema: constants.schemas.request.UPDATE_PROFILE_REQUEST,
+				responseSchema: constants.schemas.request.USER_RESPONSE,
+				docs: docs.service.UPDATE_USER,
+				handle: (req) => updateProfileHandler.handle(req)
+			});
+
+		}
 
 		bus.subscribe({
 			subject: constants.endpoints.service.VALIDATE_PASSWORD,
@@ -278,6 +288,13 @@ module.exports = {
 			requestSchema: constants.schemas.request.DELETE_USER_REQUEST,
 			docs: docs.service.DELETE_USER,
 			handle: (req) => deleteUserHandler.handle(req),
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.service.DELETE_USERS_BY_QUERY,
+			requestSchema: constants.schemas.request.DELETE_USERS_BY_QUERY,
+			docs: docs.service.DELETE_USERS_BY_QUERY,
+			handle: (req) => deleteUsersByQueryHandler.handle(req),
 		});
 
 		bus.subscribe({
@@ -340,16 +357,12 @@ module.exports = {
  */
 function createIndexes(db) {
 	db.collection(constants.collections.USERS)
-		.createIndex({
-			email: 1
-		}, {
-				unique: true,
-				partialFilterExpression: {
-					email: {
-						$exists: true
-					}
-				}
-			});
+		.createIndex({ email: 1 }, {
+			unique: true,
+			partialFilterExpression: {
+				email: { $exists: true }
+			}
+		});
 
 	if (!config.uniqueIndexes.includes("id"))
 		config.uniqueIndexes.push("id");
@@ -357,10 +370,7 @@ function createIndexes(db) {
 	config.uniqueIndexes.forEach(index => {
 		const indexObj = {};
 		indexObj[index] = 1;
-		db.collection(constants.collections.USERS)
-			.createIndex(indexObj, {
-				unique: true
-			});
+		db.collection(constants.collections.USERS).createIndex(indexObj, { unique: true });
 	});
 
 	return db;

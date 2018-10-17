@@ -1,4 +1,3 @@
-const log = require("fruster-log");
 const mongo = require("mongodb");
 const Db = mongo.Db;
 const mocks = require('./support/mocks.js');
@@ -16,134 +15,100 @@ describe("UpdatePasswordHandler", () => {
 
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => {
-                db = connection.db;
-            }));
+            .testUtilsOptions((connection) => db = connection.db));
 
-    it("should be possible to update password", async done => {
-        try {
-            const user = mocks.getUserObject();
-            const createdUser = await SpecUtils.createUser(user);
-            const updatePassword = {
-                newPassword: "Localhost:8081",
-                oldPassword: user.password,
-                id: createdUser.data.id
-            };
-            const startUser = await db.collection("users")
-                .findOne({
-                    id: createdUser.data.id
-                });
+    it("should be possible to update password", async () => {
+        const user = mocks.getUserObject();
+        const createdUser = await SpecUtils.createUser(user);
+        const updatePassword = {
+            newPassword: "Localhost:8081",
+            oldPassword: user.password,
+            id: createdUser.data.id
+        };
+        const startUser = await db.collection("users")
+            .findOne({ id: createdUser.data.id });
 
-            await SpecUtils.busRequest({
-                subject: constants.endpoints.service.UPDATE_PASSWORD,
-                user: createdUser.data,
-                data: updatePassword
-            });
+        await SpecUtils.busRequest({
+            subject: constants.endpoints.service.UPDATE_PASSWORD,
+            user: createdUser.data,
+            data: updatePassword
+        });
 
-            const updatedUser = await db.collection("users")
-                .findOne({
-                    id: createdUser.data.id
-                });
+        const updatedUser = await db.collection("users")
+            .findOne({ id: createdUser.data.id });
 
-            expect(updatedUser.password).not.toBe(startUser.password, "updatedUser.password");
-            expect(updatedUser.salt).not.toBe(startUser.salt, "updatedUser.salt");
-            expect(updatedUser.hashDate).not.toBe(startUser.hashDate, "updatedUser.hashDate");
-
-            done();
-        } catch (err) {
-            log.error(err);
-            done.fail(err);
-        }
+        expect(updatedUser.password).not.toBe(startUser.password, "updatedUser.password");
+        expect(updatedUser.salt).not.toBe(startUser.salt, "updatedUser.salt");
+        expect(updatedUser.hashDate).not.toBe(startUser.hashDate, "updatedUser.hashDate");
     });
 
-    it("should be possible to update password via http", async done => {
-        try {
-            const user = mocks.getUserObject();
-            const createdUser = await SpecUtils.createUser(user);
-            const updatePassword = {
-                newPassword: "Localhost:8081",
-                oldPassword: user.password
-            };
-            const startUser = await db.collection("users")
-                .findOne({
-                    id: createdUser.data.id
-                });
+    it("should be possible to update password via http", async () => {
+        const user = mocks.getUserObject();
+        const createdUser = await SpecUtils.createUser(user);
+        const updatePassword = {
+            newPassword: "Localhost:8081",
+            oldPassword: user.password
+        };
+        const startUser = await db.collection("users")
+            .findOne({ id: createdUser.data.id });
 
-            await SpecUtils.busRequest({
-                subject: constants.endpoints.http.UPDATE_PASSWORD,
-                user: createdUser.data,
-                data: updatePassword
-            });
+        await SpecUtils.busRequest({
+            subject: constants.endpoints.http.UPDATE_PASSWORD,
+            user: createdUser.data,
+            data: updatePassword
+        });
 
-            const updatedUser = await db.collection("users")
-                .findOne({
-                    id: createdUser.data.id
-                });
+        const updatedUser = await db.collection("users")
+            .findOne({ id: createdUser.data.id });
 
-            expect(updatedUser.password).not.toBe(startUser.password, "updatedUser.password");
-            expect(updatedUser.salt).not.toBe(startUser.salt, "updatedUser.salt");
-            expect(updatedUser.hashDate).not.toBe(startUser.hashDate, "updatedUser.hashDate");
-
-            done();
-        } catch (err) {
-            log.error(err);
-            done.fail(err);
-        }
+        expect(updatedUser.password).not.toBe(startUser.password, "updatedUser.password");
+        expect(updatedUser.salt).not.toBe(startUser.salt, "updatedUser.salt");
+        expect(updatedUser.hashDate).not.toBe(startUser.hashDate, "updatedUser.hashDate");
     });
 
     it("should not be possible to update someone else's password", async done => {
+        const user = mocks.getUserObject();
+        const response = await SpecUtils.createUser(user);
+        const updatePassword = {
+            newPassword: "Localhost:8081",
+            oldPassword: user.password,
+            id: "someone else's id"
+        };
+
         try {
-            const user = mocks.getUserObject();
-            const response = await SpecUtils.createUser(user);
-            const updatePassword = {
-                newPassword: "Localhost:8081",
-                oldPassword: user.password,
-                id: "someone else's id"
-            };
+            await SpecUtils.busRequest({
+                subject: constants.endpoints.service.UPDATE_PASSWORD,
+                user: response.data,
+                data: updatePassword
+            });
 
-            try {
-                await SpecUtils.busRequest({
-                    subject: constants.endpoints.service.UPDATE_PASSWORD,
-                    user: response.data,
-                    data: updatePassword
-                });
-
-                done.fail();
-            } catch (err) {
-                expect(err.error.code).toBe(deprecatedErrors.errorCodes.forbidden, "err.error.code");
-                done();
-            };
+            done.fail();
         } catch (err) {
-            log.error(err);
-            done.fail(err);
-        }
+            expect(err.error.code).toBe(deprecatedErrors.errorCodes.forbidden, "err.error.code");
+            done();
+        };
     });
 
     it("should not be possible to update password without validating the old password", async done => {
+        const user = mocks.getUserObject();
+        const response = await SpecUtils.createUser(user);
+        const updatePassword = {
+            newPassword: "Localhost:8081",
+            oldPassword: "nothing",
+            id: response.data.id
+        };
+
         try {
-            const user = mocks.getUserObject();
-            const response = await SpecUtils.createUser(user);
-            const updatePassword = {
-                newPassword: "Localhost:8081",
-                oldPassword: "nothing",
-                id: response.data.id
-            };
+            await SpecUtils.busRequest({
+                subject: constants.endpoints.service.UPDATE_PASSWORD,
+                user: response.data,
+                data: updatePassword
+            });
 
-            try {
-                await SpecUtils.busRequest({
-                    subject: constants.endpoints.service.UPDATE_PASSWORD,
-                    user: response.data,
-                    data: updatePassword
-                });
-
-                done.fail();
-            } catch (err) {
-                expect(err.error.code).toBe(deprecatedErrors.errorCodes.invalidUsernameOrPassword, "err.error.code");
-                done();
-            }
+            done.fail();
         } catch (err) {
-            log.error(err);
-            done.fail(err);
+            expect(err.error.code).toBe(deprecatedErrors.errorCodes.invalidUsernameOrPassword, "err.error.code");
+            done();
         }
     });
 
