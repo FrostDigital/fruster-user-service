@@ -1,5 +1,4 @@
 const bus = require("fruster-bus");
-const log = require("fruster-log");
 const Db = require("mongodb").Db;
 const conf = require('../config');
 const mocks = require('./support/mocks.js');
@@ -16,7 +15,7 @@ describe("ResendVerificationEmailHandler", () => {
 
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => { db = connection.db; }));
+            .testUtilsOptions((connection) => db = connection.db));
 
     afterEach((done) => {
         conf.requireEmailVerification = false;
@@ -24,46 +23,40 @@ describe("ResendVerificationEmailHandler", () => {
     });
 
     it("should resend email", async (done) => {
-        try {
-            conf.requireEmailVerification = true;
+        conf.requireEmailVerification = true;
 
-            const testUserData = mocks.getUserWithUnverifiedEmailObject();
-            let verificationToken;
-            let initialUserCreated = false;
+        const testUserData = mocks.getUserWithUnverifiedEmailObject();
+        let verificationToken;
+        let initialUserCreated = false;
 
-            bus.subscribe({
-                subject: "mail-service.send",
-                handle: (req) => {
-                    if (initialUserCreated) {
-                        expect(req.data.message.includes(verificationToken)).toBe(false, "req.data.message.includes(verificationToken)");
-                        expect(req.data.from).toBe(conf.emailVerificationFrom, "req.data.from");
-                        expect(req.data.to[0]).toBe(testUserData.email, "req.data.to[0]");
+        bus.subscribe({
+            subject: "mail-service.send",
+            handle: (req) => {
+                if (initialUserCreated) {
+                    expect(req.data.message.includes(verificationToken)).toBe(false, "req.data.message.includes(verificationToken)");
+                    expect(req.data.from).toBe(conf.emailVerificationFrom, "req.data.from");
+                    expect(req.data.to[0]).toBe(testUserData.email, "req.data.to[0]");
 
-                        done();
-                    } else {
-                        initialUserCreated = true;
-                    }
+                    done();
+                } else
+                    initialUserCreated = true;
 
-                    conf.requireEmailVerification = false;
+                conf.requireEmailVerification = false;
 
-                    return { reqId: req.reqId, status: 200 };
-                }
-            });
+                return { reqId: req.reqId, status: 200 };
+            }
+        });
 
-            const createUserResponse = (await mocks.createUser(testUserData)).data;
-            const testUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
+        const createUserResponse = (await mocks.createUser(testUserData)).data;
+        const testUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
 
-            verificationToken = testUser.emailVerificationToken;
+        verificationToken = testUser.emailVerificationToken;
 
-            await SpecUtils.busRequest({
-                subject: constants.endpoints.http.RESEND_VERIFICATION_EMAIL,
-                data: {},
-                params: { email: createUserResponse.email }
-            });
-        } catch (err) {
-            log.error(err);
-            done.fail();
-        }
+        await SpecUtils.busRequest({
+            subject: constants.endpoints.http.RESEND_VERIFICATION_EMAIL,
+            data: {},
+            params: { email: createUserResponse.email }
+        });
     });
 
 });

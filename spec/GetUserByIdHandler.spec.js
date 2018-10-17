@@ -1,5 +1,4 @@
 const frusterTestUtils = require("fruster-test-utils");
-const log = require("fruster-log");
 const constants = require("../lib/constants");
 const specConstants = require("./support/spec-constants");
 const Db = require("mongodb").Db;
@@ -14,9 +13,7 @@ describe("GetUserByIdHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => {
-				db = connection.db;
-			}));
+			.testUtilsOptions((connection) => db = connection.db));
 
 	afterEach(() => SpecUtils.resetConfig());
 
@@ -31,12 +28,8 @@ describe("GetUserByIdHandler", () => {
 			await SpecUtils.busRequest({
 				subject: constants.endpoints.http.admin.GET_USER,
 				data: {},
-				user: {
-					scopes: ["admin.*"]
-				},
-				params: {
-					id: "non-existing-user-id"
-				}
+				user: { scopes: ["admin.*"] },
+				params: { id: "non-existing-user-id" }
 			});
 
 			done.fail();
@@ -46,84 +39,53 @@ describe("GetUserByIdHandler", () => {
 		}
 	});
 
-	it("should get user by id", async done => {
-		try {
-			await setupTestUsers();
+	it("should get user by id", async () => {
+		await setupTestUsers();
 
-			const res = await SpecUtils.busRequest({
-				subject: constants.endpoints.http.admin.GET_USER,
-				data: {},
-				user: {
-					scopes: ["admin.*"]
-				},
-				params: {
-					id: "user1"
-				}
-			});
+		const res = await SpecUtils.busRequest({
+			subject: constants.endpoints.http.admin.GET_USER,
+			data: {},
+			user: { scopes: ["admin.*"] },
+			params: { id: "user1" }
+		});
 
-			expect(res.status).toBe(200);
-			expect(res.data.id).toBe("user1");
-			expect(res.data.password).toBeUndefined();
-
-			done();
-		} catch (err) {
-			log.error(err);
-			done.fail(err);
-		}
+		expect(res.status).toBe(200);
+		expect(res.data.id).toBe("user1");
+		expect(res.data.password).toBeUndefined();
 	});
 
-	it("should expand user if expand query is provided", async done => {
+	it("should expand user if expand query is provided", async () => {
 		config.userFields = ["isRelatedToSlatan"];
 
-		try {
-			const createdUsers = await createTestUsers();
+		const createdUsers = await createTestUsers();
 
-			const res = await SpecUtils.busRequest({
-				subject: constants.endpoints.http.admin.GET_USER,
-				data: {},
-				user: {
-					scopes: ["admin.*"]
-				},
-				params: {
-					id: createdUsers[0].data.id
-				},
-				query: {
-					expand: "profile"
-				}
-			});
+		const res = await SpecUtils.busRequest({
+			subject: constants.endpoints.http.admin.GET_USER,
+			data: {},
+			user: { scopes: ["admin.*"] },
+			params: { id: createdUsers[0].data.id },
+			query: { expand: "profile" }
+		});
 
-			expect(res.status).toBe(200);
-			expect(res.data.id).toBe(createdUsers[0].data.id);
-			expect(res.data.profile.id).toBe(createdUsers[0].data.id);
-			expect(res.data.password).toBeUndefined();
-
-			done();
-		} catch (err) {
-			log.error(err);
-			done.fail(err);
-		}
+		expect(res.status).toBe(200);
+		expect(res.data.id).toBe(createdUsers[0].data.id);
+		expect(res.data.profile.id).toBe(createdUsers[0].data.id);
+		expect(res.data.password).toBeUndefined();
 	});
 
-	it("should not remove empty fields", async done => {
-		try {
-			await setupTestUsers();
+	it("should not remove empty fields", async () => {
+		await setupTestUsers();
 
-			config.lowerCaseName = true;
-			await insertTestUserWithEmptyLastName(db);
+		config.lowerCaseName = true;
+		await insertTestUserWithEmptyLastName(db);
 
-			const res = (await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
-				id: "user1337"
-			})).data[0];
+		const res = (await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
+			id: "user1337"
+		})).data[0];
 
-			expect(res.id).toBe("user1337");
-			expect(res.lastName).toBe("");
-			expect(res.password).toBeUndefined();
-
-			done();
-		} catch (err) {
-			log.error(err);
-			done.fail(err);
-		}
+		expect(res.id).toBe("user1337");
+		expect(res.lastName).toBe("");
+		expect(res.password).toBeUndefined();
 	});
 
 });

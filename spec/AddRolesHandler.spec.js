@@ -1,4 +1,3 @@
-const log = require("fruster-log");
 const mocks = require('./support/mocks.js');
 const SpecUtils = require('./support/SpecUtils');
 const constants = require('../lib/constants.js');

@@ -1,4 +1,3 @@
-const log = require("fruster-log");
 const Db = require("mongodb").Db;
 const uuid = require("uuid");
 const SpecUtils = require('./support/SpecUtils');

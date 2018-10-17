@@ -1,6 +1,5 @@
 const frusterTestUtils = require("fruster-test-utils");
 const bus = require("fruster-bus");
-const log = require("fruster-log");
 const constants = require("../lib/constants");
 const uuid = require("uuid");
 const Db = require("mongodb").Db;
@@ -65,72 +64,49 @@ describe("GetUserHandler", () => {
 		}
 	});
 
-	it("should get users by email", async done => {
-		try {
-			const res = await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
+	it("should get users by email", async () => {
+		const res = await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
+			email: "user1@example.com"
+		});
+
+		expect(res.data.length).toBe(1, "res.data.length");
+		expect(res.data[0].id).toBe("user1", "res.data[0].id");
+		expect(res.data[0].password).toBeUndefined("res.data[0].password");
+	});
+
+	it("should get users as admin using HTTP endpoint", async () => {
+		const res = await SpecUtils.busRequest({
+			subject: constants.endpoints.http.admin.GET_USERS,
+			user: {
+				scopes: ["admin.*"]
+			},
+			query: {
 				email: "user1@example.com"
-			});
+			}
+		});
 
-			expect(res.data.length).toBe(1, "res.data.length");
-			expect(res.data[0].id).toBe("user1", "res.data[0].id");
-			expect(res.data[0].password).toBeUndefined("res.data[0].password");
-
-			done();
-		} catch (err) {
-			log.error(err);
-			done.fail(err);
-		}
+		expect(res.data.length).toBe(1, "res.data.length");
+		expect(res.data[0].id).toBe("user1", "res.data[0].id");
+		expect(res.data[0].password).toBeUndefined("res.data[0].password");
 	});
 
-	it("should get users as admin using HTTP endpoint", async done => {
-		try {
-			const res = await SpecUtils.busRequest({
-				subject: constants.endpoints.http.admin.GET_USERS,
-				user: {
-					scopes: ["admin.*"]
-				},
+	it("should get paginated users as admin using HTTP endpoint", async () => {
+		const res = await bus.request({
+			subject: constants.endpoints.http.admin.GET_USERS,
+			skipOptionsRequest: true,
+			message: {
+				reqId: "reqId",
 				query: {
-					email: "user1@example.com"
-				}
-			});
+					start: 1,
+					limit: 2
+				},
+				user: { scopes: ["admin.*"] }
+			}
+		});
 
-			expect(res.data.length).toBe(1, "res.data.length");
-			expect(res.data[0].id).toBe("user1", "res.data[0].id");
-			expect(res.data[0].password).toBeUndefined("res.data[0].password");
-
-			done();
-		} catch (err) {
-			log.error(err);
-			done.fail(err);
-		}
-	});
-
-	it("should get paginated users as admin using HTTP endpoint", async done => {
-		try {
-			const res = await bus.request({
-				subject: constants.endpoints.http.admin.GET_USERS,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					query: {
-						start: 1,
-						limit: 2
-					},
-					user: {
-						scopes: ["admin.*"]
-					}
-				}
-			});
-
-			expect(res.data.length).toBe(2, "res.data.length");
-			expect(res.data[0].id).toBe("user1", "res.data[0].id");
-			expect(res.data[1].id).toBe("user2", "res.data[1].id");
-
-			done();
-		} catch (err) {
-			log.error(err);
-			done.fail(err);
-		}
+		expect(res.data.length).toBe(2, "res.data.length");
+		expect(res.data[0].id).toBe("user1", "res.data[0].id");
+		expect(res.data[1].id).toBe("user2", "res.data[1].id");
 	});
 
 	it("should get internal server error if passing an invalid query", async done => {
@@ -140,12 +116,8 @@ describe("GetUserHandler", () => {
 				skipOptionsRequest: true,
 				message: {
 					reqId: "reqId",
-					query: {
-						$$$$: "$$$$"
-					},
-					user: {
-						scopes: ["admin.*"]
-					}
+					query: { $$$$: "$$$$" },
+					user: { scopes: ["admin.*"] }
 				}
 			});
 
@@ -156,25 +128,17 @@ describe("GetUserHandler", () => {
 		}
 	});
 
-	it("should return empty array when sending in faulty query/query without result", async done => {
-		try {
-			const res = await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: uuid.v4(),
-					data: {
-						$or: []
-					}
-				}
-			});
+	it("should return empty array when sending in faulty query/query without result", async () => {
+		const res = await bus.request({
+			subject: constants.endpoints.service.GET_USER,
+			skipOptionsRequest: true,
+			message: {
+				reqId: uuid.v4(),
+				data: { $or: [] }
+			}
+		});
 
-			expect(res.data.length).toBe(0, "res.data.length");
-
-			done();
-		} catch (err) {
-			done.fail();
-		}
+		expect(res.data.length).toBe(0, "res.data.length");
 	});
 
 });
