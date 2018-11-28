@@ -1,15 +1,11 @@
-const bus = require("fruster-bus");
-const log = require("fruster-log");
 const Db = require("mongodb").Db;
 const uuid = require("uuid");
-const config = require("../config");
-
-const userService = require('../fruster-user-service');
-const testUtils = require('./support/test-utils.js');
+const SpecUtils = require('./support/SpecUtils');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const mocks = require("./support/mocks");
 const specConstants = require("./support/spec-constants");
+const config = require("../config");
 
 
 describe("DeleteUserHandler", () => {
@@ -19,116 +15,88 @@ describe("DeleteUserHandler", () => {
 
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => { db = connection.db; }));
+            .testUtilsOptions((connection) => {
+                db = connection.db;
+            }));
 
-    it("should return 200 when user is successfully removed", async done => {
-        try {
-            const user = mocks.getUserObject();
-            const createdUserResponse = await testUtils.createUser(user);
-            const deleteResponse = await bus.request({
-                subject: constants.endpoints.service.DELETE_USER,
-                skipOptionsRequest: true,
-                timeout: 1000,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUserResponse.data.id }
-                }
-            });
+    afterEach(() => SpecUtils.resetConfig());
 
+    it("should return 200 when user is successfully removed", async () => {
+        const user = mocks.getUserObject();
+        const createdUserResponse = await SpecUtils.createUser(user);
+        const reqData = { id: createdUserResponse.data.id };
+        const deleteResponse = await SpecUtils.busRequest(constants.endpoints.service.DELETE_USER, reqData);
 
-            expect(deleteResponse.status).toBe(200, "deleteResponse.status");
+        expect(deleteResponse.status).toBe(200, "deleteResponse.status");
 
-            const userInDatabase = await db.collection(config.userCollection).findOne({ id: createdUserResponse.data.id });
-            expect(userInDatabase).toBe(null, "userInDatabase");
-
-            done();
-        } catch (err) {
-            log.error(err);
-            done.fail(err);
-        }
+        const userInDatabase = await db.collection(constants.collections.USERS).findOne(reqData);
+        expect(userInDatabase).toBe(null, "userInDatabase");
     });
 
-    it("should return 200 when user is successfully removed via http", async done => {
-        try {
-            const user = mocks.getUserObject();
-            user.scopes = ["admin.*"];
+    it("should return 200 when user is successfully removed with split datasets", async () => {
+        config.userFields = constants.dataset.REQUIRED_ONLY;
 
-            const createdUserResponse = await testUtils.createUser(user);
-            const deleteResponse = await bus.request({
-                subject: constants.endpoints.http.admin.DELETE_USER,
-                skipOptionsRequest: true,
-                timeout: 1000,
-                message: {
-                    reqId: uuid.v4(),
-                    user: user,
-                    params: { id: createdUserResponse.data.id }
-                }
-            });
+        const user = mocks.getUserObject();
+        const createdUserResponse = await SpecUtils.createUser(user);
+        const reqData = { id: createdUserResponse.data.id };
+        const profileBeforeDelete = (await db.collection(constants.collections.PROFILES).findOne(reqData));
 
-            expect(deleteResponse.status).toBe(200, "deleteResponse.status");
+        expect(profileBeforeDelete.firstName).toBeDefined("profile.firstName");
+        expect(profileBeforeDelete.lastName).toBeDefined("profile.lastName");
+        expect(profileBeforeDelete.id).toBeDefined("profile.id");
 
-            const userInDatabase = await db.collection(config.userCollection).findOne({ id: createdUserResponse.data.id });
-            expect(userInDatabase).toBe(null, "userInDatabase");
+        const deleteResponse = await SpecUtils.busRequest(constants.endpoints.service.DELETE_USER, reqData);
 
-            done();
-        } catch (err) {
-            log.error(err);
-            done.fail(err);
-        }
+        expect(deleteResponse.status).toBe(200, "deleteResponse.status");
+
+        const userInDatabase = await db.collection(constants.collections.USERS).findOne(reqData);
+        expect(userInDatabase).toBe(null, "userInDatabase");
+
+        const profileAfterDelete = (await db.collection(constants.collections.PROFILES).findOne(reqData));
+        expect(profileAfterDelete).toBe(null, "userInDatabase");
+    });
+
+    it("should return 200 when user is successfully removed via http", async () => {
+        const user = mocks.getUserObject();
+        user.scopes = ["admin.*"];
+
+        const createdUserResponse = await SpecUtils.createUser(user);
+        const reqData = { id: createdUserResponse.data.id };
+        const deleteResponse = await SpecUtils.busRequest(constants.endpoints.service.DELETE_USER, reqData);
+
+        expect(deleteResponse.status).toBe(200, "deleteResponse.status");
+
+        const userInDatabase = await db.collection(constants.collections.USERS).findOne(reqData);
+        expect(userInDatabase).toBe(null, "userInDatabase");
     });
 
     it("should return 404 when trying to remove non-existent user", async done => {
         try {
-            const user = mocks.getUserObject();
+            await SpecUtils.busRequest(constants.endpoints.service.DELETE_USER, { id: uuid.v4() });
 
-            try {
-                await bus.request({
-                    subject: constants.endpoints.service.DELETE_USER,
-                    timeout: 1000,
-                    skipOptionsRequest: true,
-                    message: {
-                        reqId: uuid.v4(),
-                        data: { id: uuid.v4() }
-                    }
-                });
-
-                done.fail();
-            } catch (err) {
-                expect(err.status).toBe(404, "deleteResponse.status");
-                done();
-            }
+            done.fail();
         } catch (err) {
-            log.error(err);
-            done.fail(err);
+            expect(err.status).toBe(404, "deleteResponse.status");
+            done();
         }
-
     });
 
     it("should return 404 when trying to remove non-existent user via http", async done => {
+        const user = mocks.getUserObject();
+        user.scopes = ["admin.*"];
+
         try {
-            const user = mocks.getUserObject();
-            user.scopes = ["admin.*"];
+            await SpecUtils.busRequest({
+                subject: constants.endpoints.http.admin.DELETE_USER,
+                data: { id: uuid.v4() },
+                user,
+                params: { id: uuid.v4() }
+            });
 
-            try {
-                await bus.request({
-                    subject: constants.endpoints.http.admin.DELETE_USER,
-                    timeout: 1000,
-                    skipOptionsRequest: true,
-                    message: {
-                        user: user,
-                        reqId: uuid.v4(),
-                        params: { id: uuid.v4() }
-                    }
-                });
-
-                done.fail();
-            } catch (err) {
-                expect(err.status).toBe(404, "deleteResponse.status");
-                done();
-            }
-        } catch (err) {
-            log.error(err);
             done.fail();
+        } catch (err) {
+            expect(err.status).toBe(404, "deleteResponse.status");
+            done();
         }
     });
 

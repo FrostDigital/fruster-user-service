@@ -57,7 +57,6 @@
             cursor: pointer;
             font-size: 15px;
             border-top-right-radius: 0 !important;
-            /* opacity: 0; */
             background-color: inherit !important;
         }
 
@@ -179,11 +178,10 @@
 
             $("#close-error-btn").click(() => { $("#error-box").hide() });
 
-            if (window.isLoggedIn) {
+            if (window.isLoggedIn)
                 userLoggedIn();
-            } else {
+            else
                 userNotLoggedIn();
-            }
         });
 
         async function userLoggedIn() {
@@ -351,6 +349,7 @@
 
         async function userNotLoggedIn() {
             console.log("userNotLoggedIn");
+
             $("#login").show();
             $("#submit-login").click(login);
 
@@ -443,6 +442,7 @@
 
         async function removeScope(e) {
             console.log(e.currentTarget);
+
             const currentTarget = $(e.currentTarget).parent().parent();
             const scopeToRemove = $(currentTarget).attr("scope");
             const roleToRemoveFrom = $(currentTarget).attr("role");

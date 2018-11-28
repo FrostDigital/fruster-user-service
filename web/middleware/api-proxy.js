@@ -1,6 +1,5 @@
 const conf = require("../../config");
 const request = require("request");
-const log = require("fruster-log");
 
 module.exports = () => apiProxyMiddleware;
 

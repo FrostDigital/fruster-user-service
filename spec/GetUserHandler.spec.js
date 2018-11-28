@@ -1,29 +1,23 @@
 const frusterTestUtils = require("fruster-test-utils");
-const userService = require("../fruster-user-service");
 const bus = require("fruster-bus");
-const log = require("fruster-log");
 const constants = require("../lib/constants");
 const uuid = require("uuid");
 const Db = require("mongodb").Db;
 const specConstants = require("./support/spec-constants");
+const SpecUtils = require("./support/SpecUtils");
 
 
 describe("GetUserHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => { return insertTestUsers(connection.db); }));
+			.testUtilsOptions((connection) => {
+				return insertTestUsers(connection.db);
+			}));
 
 	it("should fail to get ALL users when passing in empty object as query", async done => {
 		try {
-			await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: {}
-				}
-			});
+			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {});
 
 			done.fail();
 		} catch (err) {
@@ -34,13 +28,8 @@ describe("GetUserHandler", () => {
 
 	it("should fail to get ALL users when query is empty", async done => {
 		try {
-			await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId"
-				}
-			});
+			// @ts-ignore
+			await SpecUtils.busRequest(constants.endpoints.service.GET_USER);
 
 			done.fail();
 		} catch (err) {
@@ -51,13 +40,8 @@ describe("GetUserHandler", () => {
 
 	it("should fail to query by password", async done => {
 		try {
-			await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: { password: "foo" }
-				}
+			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
+				password: "foo"
 			});
 
 			done.fail();
@@ -69,13 +53,8 @@ describe("GetUserHandler", () => {
 
 	it("should fail to query by salt", async done => {
 		try {
-			await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: { salt: "foo" }
-				}
+			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
+				salt: "foo"
 			});
 
 			done.fail();
@@ -85,75 +64,49 @@ describe("GetUserHandler", () => {
 		}
 	});
 
-	it("should get users by email", async done => {
-		try {
-			const res = await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					data: { email: "user1@example.com" }
-				}
-			});
+	it("should get users by email", async () => {
+		const res = await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
+			email: "user1@example.com"
+		});
 
-			expect(res.data.length).toBe(1, "res.data.length");
-			expect(res.data[0].id).toBe("user1", "res.data[0].id");
-			expect(res.data[0].password).toBeUndefined("res.data[0].password");
-
-			done();
-		} catch (err) {
-			log.error(err);
-			done.fail(err);
-		}
+		expect(res.data.length).toBe(1, "res.data.length");
+		expect(res.data[0].id).toBe("user1", "res.data[0].id");
+		expect(res.data[0].password).toBeUndefined("res.data[0].password");
 	});
 
-	it("should get users as admin using HTTP endpoint", async done => {
-		try {
-			const res = await bus.request({
-				subject: constants.endpoints.http.admin.GET_USERS,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					query: { email: "user1@example.com" },
-					user: { scopes: ["admin.*"] }
-				}
-			});
+	it("should get users as admin using HTTP endpoint", async () => {
+		const res = await SpecUtils.busRequest({
+			subject: constants.endpoints.http.admin.GET_USERS,
+			user: {
+				scopes: ["admin.*"]
+			},
+			query: {
+				email: "user1@example.com"
+			}
+		});
 
-			expect(res.data.length).toBe(1, "res.data.length");
-			expect(res.data[0].id).toBe("user1", "res.data[0].id");
-			expect(res.data[0].password).toBeUndefined("res.data[0].password");
-
-			done();
-		} catch (err) {
-			log.error(err);
-			done.fail(err);
-		}
+		expect(res.data.length).toBe(1, "res.data.length");
+		expect(res.data[0].id).toBe("user1", "res.data[0].id");
+		expect(res.data[0].password).toBeUndefined("res.data[0].password");
 	});
 
-	it("should get paginated users as admin using HTTP endpoint", async done => {
-		try {
-			const res = await bus.request({
-				subject: constants.endpoints.http.admin.GET_USERS,
-				skipOptionsRequest: true,
-				message: {
-					reqId: "reqId",
-					query: {
-						start: 1,
-						limit: 2
-					},
-					user: { scopes: ["admin.*"] }
-				}
-			});
+	it("should get paginated users as admin using HTTP endpoint", async () => {
+		const res = await bus.request({
+			subject: constants.endpoints.http.admin.GET_USERS,
+			skipOptionsRequest: true,
+			message: {
+				reqId: "reqId",
+				query: {
+					start: 1,
+					limit: 2
+				},
+				user: { scopes: ["admin.*"] }
+			}
+		});
 
-			expect(res.data.length).toBe(2, "res.data.length");
-			expect(res.data[0].id).toBe("user1", "res.data[0].id");
-			expect(res.data[1].id).toBe("user2", "res.data[1].id");
-
-			done();
-		} catch (err) {
-			log.error(err);
-			done.fail(err);
-		}
+		expect(res.data.length).toBe(2, "res.data.length");
+		expect(res.data[0].id).toBe("user1", "res.data[0].id");
+		expect(res.data[1].id).toBe("user2", "res.data[1].id");
 	});
 
 	it("should get internal server error if passing an invalid query", async done => {
@@ -175,23 +128,17 @@ describe("GetUserHandler", () => {
 		}
 	});
 
-	it("should return empty array when sending in faulty query/query without result", async done => {
-		try {
-			const res = await bus.request({
-				subject: constants.endpoints.service.GET_USER,
-				skipOptionsRequest: true,
-				message: {
-					reqId: uuid.v4(),
-					data: { $or: [] }
-				}
-			});
+	it("should return empty array when sending in faulty query/query without result", async () => {
+		const res = await bus.request({
+			subject: constants.endpoints.service.GET_USER,
+			skipOptionsRequest: true,
+			message: {
+				reqId: uuid.v4(),
+				data: { $or: [] }
+			}
+		});
 
-			expect(res.data.length).toBe(0, "res.data.length");
-
-			done();
-		} catch (err) {
-			done.fail();
-		}
+		expect(res.data.length).toBe(0, "res.data.length");
 	});
 
 });

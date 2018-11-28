@@ -1,128 +1,60 @@
-const bus = require("fruster-bus");
-const log = require("fruster-log");
-const Db = require("mongodb").Db;
-const uuid = require("uuid");
-
-const userService = require('../fruster-user-service');
 const mocks = require('./support/mocks.js');
-const testUtils = require('./support/test-utils.js');
+const SpecUtils = require('./support/SpecUtils');
 const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
 
-
 describe("AddRolesHandler", () => {
-
-    /** @type {Db} */
-    let db;
 
     frusterTestUtils
         .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => { db = connection.db; }));
+            .testUtilsOptions());
 
-    it("should be possible to add a role to a user", async done => {
-        try {
-            const createdUser = (await testUtils.createUser(mocks.getUserObject())).data;
-            await bus.request({
-                subject: constants.endpoints.service.ADD_ROLES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        id: createdUser.id,
-                        roles: ["user"]
-                    }
-                }
-            });
+    it("should be possible to add a role to a user", async () => {
+        const createdUser = (await SpecUtils.createUser(mocks.getUserObject())).data;
+        await SpecUtils.busRequest(constants.endpoints.service.ADD_ROLES, {
+            id: createdUser.id,
+            roles: ["user"]
+        });
+        const userResponse = await SpecUtils.busRequest(constants.endpoints.service.GET_USER, { id: createdUser.id });
 
-            const userResponse = (await bus.request({
-                subject: constants.endpoints.service.GET_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUser.id }
-                }
-            }));
+        expect(userResponse.data[0].roles.includes("admin")).toBe(true, `userResponse.data[0].roles.includes("admin")`);
+        expect(userResponse.data[0].roles.includes("user")).toBe(true, `userResponse.data[0].roles.includes("user")`);
 
-            expect(userResponse.data[0].roles.includes("admin")).toBe(true, `userResponse.data[0].roles.includes("admin")`);
-            expect(userResponse.data[0].roles.includes("user")).toBe(true, `userResponse.data[0].roles.includes("user")`);
-
-            done();
-        } catch (err) {
-            log.error(err);
-            done.fail(err);
-        }
+        expect(new Date(userResponse.data[0].metadata.updated).getTime())
+            .toBeGreaterThan(new Date(createdUser.metadata.updated).getTime(), "userResponse.data.metadata.updated")
     });
 
-    it("should be possible to add multiple roles to a user", async done => {
-        try {
-            const createdUser = (await testUtils.createUser(mocks.getUserObject())).data;
+    it("should be possible to add multiple roles to a user", async () => {
+        const createdUser = (await SpecUtils.createUser(mocks.getUserObject())).data;
+        await SpecUtils.busRequest(constants.endpoints.service.ADD_ROLES, {
+            id: createdUser.id,
+            roles: ["user", "super-admin"]
+        });
+        const userResponse = await SpecUtils.busRequest(constants.endpoints.service.GET_USER, { id: createdUser.id });
 
-            await bus.request({
-                subject: constants.endpoints.service.ADD_ROLES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        id: createdUser.id,
-                        roles: ["user", "super-admin"]
-                    }
-                }
-            });
+        expect(userResponse.data[0].roles.includes("admin")).toBe(true, `userResponse.data[0].roles.includes("admin")`);
+        expect(userResponse.data[0].roles.includes("user")).toBe(true, `userResponse.data[0].roles.includes("user")`);
+        expect(userResponse.data[0].roles.includes("super-admin")).toBe(true, `userResponse.data[0].roles.includes("super-admin")`);
 
-            const userResponse = await bus.request({
-                subject: constants.endpoints.service.GET_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUser.id }
-                }
-            });
-
-            expect(userResponse.data[0].roles.includes("admin")).toBe(true, `userResponse.data[0].roles.includes("admin")`);
-            expect(userResponse.data[0].roles.includes("user")).toBe(true, `userResponse.data[0].roles.includes("user")`);
-            expect(userResponse.data[0].roles.includes("super-admin")).toBe(true, `userResponse.data[0].roles.includes("super-admin")`);
-
-            done();
-        } catch (err) {
-            log.error(err);
-            done.fail(err);
-        }
+        expect(new Date(userResponse.data[0].metadata.updated).getTime())
+            .toBeGreaterThan(new Date(createdUser.metadata.updated).getTime(), "userResponse.data.metadata.updated")
     });
 
-    it("should not be possible to add multiples of same role", async done => {
-        try {
-            const createdUser = (await testUtils.createUser(mocks.getUserObject())).data;
+    it("should not be possible to add multiples of same role", async () => {
+        const createdUser = (await SpecUtils.createUser(mocks.getUserObject())).data;
 
-            await bus.request({
-                subject: constants.endpoints.service.ADD_ROLES,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: {
-                        id: createdUser.id,
-                        roles: ["admin"]
-                    }
-                }
-            });
+        await SpecUtils.busRequest(constants.endpoints.service.ADD_ROLES, {
+            id: createdUser.id,
+            roles: ["admin"]
+        });
 
-            const userResponse = await bus.request({
-                subject: constants.endpoints.service.GET_USER,
-                skipOptionsRequest: true,
-                message: {
-                    reqId: uuid.v4(),
-                    data: { id: createdUser.id }
-                }
-            });
+        const userResponse = await SpecUtils.busRequest(constants.endpoints.service.GET_USER, { id: createdUser.id });
 
-            expect(userResponse.data[0].roles.length).toBe(1, "userResponse.data[0].roles.length");
+        expect(userResponse.data[0].roles.length).toBe(1, "userResponse.data[0].roles.length");
 
-            done();
-
-        } catch (err) {
-            log.error(err);
-            done.fail(err);
-        }
+        expect(new Date(userResponse.data[0].metadata.updated).getTime())
+            .toBeGreaterThan(new Date(createdUser.metadata.updated).getTime(), "userResponse.data.metadata.updated")
     });
 
 });

@@ -1,0 +1,6 @@
+{
+    "id": "DeleteUsersByQueryRequest",
+    "description": "Request for deleting users by query. Request data should be query.",
+    "additionalProperties": true,
+    "$ref": "GenericAttrs#/definitions/query"
+}

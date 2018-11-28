@@ -1,0 +1,25 @@
+{
+    "id": "UpdateProfileRequest",
+    "description": "Request for updating a profile via service call. What can be updated may vary.",
+    "additionalProperties": true,
+    "properties": {
+        "id": {
+            "$ref": "User#/properties/id"
+        },
+        "firstName": {
+            "$ref": "User#/properties/firstName"
+        },
+        "lastName": {
+            "$ref": "User#/properties/lastName"
+        },
+        "middleName": {
+            "$ref": "User#/properties/middleName"
+        },
+        "email": {
+            "$ref": "User#/properties/email"
+        }
+    },
+    "required": [
+        "id"
+    ]
+}

@@ -1,6 +1,6 @@
 {
     "id": "GetUsersByQueryRequest",
-    "description": "Request getting users by query.",
+    "description": "Request for getting users by query.",
     "additionalProperties": true,
     "properties": {
         "query": {
@@ -17,6 +17,9 @@
         },
         "sort": {
             "$ref": "GenericAttrs#/definitions/sort"
+        },
+        "expand": {
+            "$ref": "GenericAttrs#/definitions/expand"
         }
     },
     "required": [
