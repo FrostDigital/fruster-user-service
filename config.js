@@ -18,7 +18,7 @@ module.exports = {
 	/** Regex used for validating ids in requests, checks for UUID v4 */
 	idValidationRegex: process.env.ID_VALIDATION_REGEX || /[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}/,
 
-	/** Unique indexes set in the database for users, sets id as default */
+	/** Unique indexes set in the database for users, sets id as default. Use `profile.` for profile indexes. eg: `profile.name` */
 	uniqueIndexes: parseArray(process.env.UNIQUE_INDEXES) || [],
 
 	/** The email of the initial account being created upon first run */
