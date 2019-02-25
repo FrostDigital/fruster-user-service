@@ -60,6 +60,8 @@ describe("RoleManager", () => {
         const roleManager = new RoleManager(roleScopesDbRepo);
         const roles = await roleManager.getRoles();
 
+        console.log(roles);
+
         expect(roles["super-admin"][0]).toBe("*", "roles[\"super-admin\"][0]");
         expect(roles.admin[0]).toBe("profile.get", "roles.admin[0]");
         expect(roles.admin[1]).toBe("user.*", "roles.admin[1]");
