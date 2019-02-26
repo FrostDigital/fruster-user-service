@@ -371,7 +371,7 @@ async function createIndexes(db) {
 		const indexObj = {};
 		if (index.includes("profile")) {
 			indexObj[index.replace("profile.", "")] = 1;
-			await db.collection(constants.collections.PROFILES).createIndex({ index: 1 }, { unique: true });
+			await db.collection(constants.collections.PROFILES).createIndex(indexObj, { unique: true });
 		} else {
 			indexObj[index] = 1;
 			await db.collection(constants.collections.USERS).createIndex(indexObj, { unique: true });
