@@ -16,11 +16,11 @@
         "fruster-health": "0.0.13",
         "fruster-log": "0.0.18",
         "mongodb": "2.2.36",
-        "@types/mongodb": "2.2.19",
         "request": "^2.88.0",
         "uuid": "^3.3.2"
     },
     "devDependencies": {
+        "@types/mongodb": "2.2.19",
         "fruster-test-utils": "^0.4.0",
         "jasmine": "3.3.1",
         "jasmine-spec-reporter": "^4.2.1",
