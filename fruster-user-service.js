@@ -49,8 +49,7 @@ module.exports = {
 		await bus.connect(busAddress);
 		const db = await mongo.connect(mongoUrl);
 
-		if (!process.env.CI) // TODO: remove this as there are tests in need of the indexes. Still makes testing locally faster atm!
-			await createIndexes(db);
+		await createIndexes(db);
 
 		// REPOS
 		const userRepo = new UserRepo(db);

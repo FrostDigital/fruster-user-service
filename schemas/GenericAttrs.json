@@ -53,6 +53,10 @@
                 "true"
             ],
             "description": "Whether or not to expand user object with its profile."
+        },
+        "caseInsensitiveSort": {
+            "type": "boolean",
+            "description": "Whether or not to use case insensitive sorting. This only works with sorting on string values. E.g. sort = { firstName: 1 }"
         }
     }
 }

@@ -219,10 +219,6 @@ describe("GetUsersByQueryHandler", () => {
 		config.userFields = [constants.dataset.REQUIRED_ONLY];
 		await createTestUsers(5, 5);
 
-		const user = await db.collection(constants.collections.PROFILES).findOne({});
-		user.firstName = "Z" + user.firstName.toUpperCase(); // If this was sorted case sensitive, "Z" would be less than "a"
-		await db.collection(constants.collections.PROFILES).update({ id: user.id }, user);
-
 		const { data: { users, totalCount }, status } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
 			data: {
@@ -239,6 +235,67 @@ describe("GetUsersByQueryHandler", () => {
 
 		expect(users.filter(u => !!u.profile).length).toBe(5, "users without profile");
 		expect(users.filter(u => !u.profile).length).toBe(5, "users with profile");
+
+		users.forEach((u, i) => {
+			if (i > 0 && u.profile && users[i - 1].profile)
+				expect(u.profile.firstName.toLowerCase()).toBeGreaterThan(users[i - 1].profile.firstName.toLowerCase());
+		});
+	});
+
+	it("should be possible to get users by a query and sort case insensitive", async () => {
+		await createTestUsers(10);
+
+		const user = await db.collection(constants.collections.USERS).findOne({ firstName: "user0-firstName" });
+		user.firstName = "Z" + user.firstName.toUpperCase(); // If this was sorted case sensitive, "Z" would be less than "a", thus be the first entry
+		await db.collection(constants.collections.USERS).update({ id: user.id }, user);
+
+		const { data: { users, totalCount }, status } = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
+			data: {
+				query: { roles: { $in: ["user"] } },
+				sort: { firstName: 1 },
+				filter: { firstName: 1, lastName: 1, id: 1 },
+				caseInsensitiveSort: true
+			}
+		});
+
+		expect(status).toBe(200);
+
+		expect(users.length).toBe(10, "users.length");
+		expect(totalCount).toBe(10, "totalCount");
+
+		expect(users[9].firstName[0]).toBe("Z", "last entry should start with Z");
+
+		users.forEach((u, i) => {
+			expect(Object.keys(u).length).toBe(3);
+
+			if (i > 0 && u && users[i - 1])
+				expect(u.firstName.toLowerCase()).toBeGreaterThan(users[i - 1].firstName.toLowerCase());
+		});
+	});
+
+	it("should be possible to get users by a query with expanded profile and sort case insensitive", async () => {
+		config.userFields = [constants.dataset.REQUIRED_ONLY];
+		await createTestUsers(10);
+
+		const user = await db.collection(constants.collections.PROFILES).findOne({});
+		user.firstName = "Z" + user.firstName.toUpperCase(); // If this was sorted case sensitive, "Z" would be less than "a"
+		await db.collection(constants.collections.PROFILES).update({ id: user.id }, user);
+
+		const { data: { users, totalCount }, status } = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
+			data: {
+				query: { roles: { $in: ["user"] } },
+				expand: "profile",
+				sort: { "profile.firstName": 1 },
+				caseInsensitiveSort: true
+			}
+		});
+
+		expect(status).toBe(200);
+
+		expect(users.length).toBe(10, "users.length");
+		expect(totalCount).toBe(10, "totalCount");
 
 		users.forEach((u, i) => {
 			if (i > 0 && u.profile && users[i - 1].profile)
@@ -315,7 +372,7 @@ describe("GetUsersByQueryHandler", () => {
 		}
 	});
 
-	fit("should be possible to sort result with `sort`", async () => {
+	it("should be possible to sort result with `sort`", async () => {
 		await insertTestUsers(10);
 
 		const { data: { users: usersRequest1, totalCount: totalCountRequest1 } } = await doRequest(1);
@@ -328,13 +385,10 @@ describe("GetUsersByQueryHandler", () => {
 		expect(totalCountRequest2).toBe(10, "totalCountRequest2");
 
 		for (let i = 0; i < 3; i++) {
-			if (i > 0)
+			if (i > 0) {
 				expect(usersRequest1[i].customField).toBeGreaterThan(usersRequest1[i - 1].customField, "res.data.users[i].customField");
-		}
-
-		for (let i = 0; i < 3; i++) {
-			if (i > 0)
 				expect(usersRequest2[i].customField).toBeLessThan(usersRequest2[i - 1].customField, "usersRequest2[i].customField");
+			}
 		}
 
 		async function doRequest(sort) {
