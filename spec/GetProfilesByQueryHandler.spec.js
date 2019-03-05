@@ -190,7 +190,12 @@ describe("GetProfilesByQueryHandler", () => {
                         lastName: 1,
                         customField: 1
                     },
-                    sort: { customField: sort },
+                    sort: {
+                        customField: sort,
+                        firstName: 1,
+                        lastName: 1,
+                        "ramjam.tjoho": 1
+                    },
                     caseInsensitiveSort: true
                 }
             });

@@ -49,7 +49,7 @@ module.exports = {
 		await bus.connect(busAddress);
 		const db = await mongo.connect(mongoUrl);
 
-		await createIndexes(db);
+		// await createIndexes(db);
 
 		// REPOS
 		const userRepo = new UserRepo(db);
