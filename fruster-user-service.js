@@ -353,7 +353,7 @@ module.exports = {
 };
 
 /**
- * @param {Db} db 
+ * @param {Db} db
  */
 async function createIndexes(db) {
 	await db.collection(constants.collections.USERS)
