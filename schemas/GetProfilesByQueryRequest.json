@@ -17,6 +17,9 @@
         },
         "sort": {
             "$ref": "GenericAttrs#/definitions/sort"
+        },
+        "caseInsensitiveSort": {
+            "$ref": "GenericAttrs#/definitions/caseInsensitiveSort"
         }
     },
     "required": [
