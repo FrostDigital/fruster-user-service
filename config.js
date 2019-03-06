@@ -33,11 +33,11 @@ module.exports = {
 	/** Wether or not to require users to have a password. Typically used with some external login method such as BankID or facebook. */
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
-	/** Wether or not to require the users to verify their email address before being able to signin. 
+	/** Wether or not to require the users to verify their email address before being able to signin.
 	     If this is set to true a web server will run providing a simple request new token / verify frontend @ /resend-verification & /verify-email:tokenId */
 	requireEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === "true",
 
-	/** Wether or not to ask the users to verify their email address but not requiring it to signin. 
+	/** Wether or not to ask the users to verify their email address but not requiring it to signin.
 	     If this is set to true a web server will run providing a simple request new token / verify  frontend @ /resend-verification & /verify-email:tokenId */
 	optionalEmailVerification: process.env.OPTIONAL_EMAIL_VERIFICATION === "true",
 
@@ -58,8 +58,8 @@ module.exports = {
 	/** Template to use for emails about verifying email. If not set, the standard inline email will be used. */
 	emailVerificationEmailTempate: process.env.EMAIL_VERIFICATION_TEMPLATE || undefined,
 
-	/** 
-	 * If set, after an email has been verified the web redirects to this url. The verified email, or error, will be added to the url as query params: 
+	/**
+	 * If set, after an email has been verified the web redirects to this url. The verified email, or error, will be added to the url as query params:
 	 * Example w/ verified email http://flamingo.education  > http://flamingo.education/?verified={email}
 	 * Example w/ error http://flamingo.education  > http://flamingo.education/?error={error} e.g. "INVALID_TOKEN"
 	 */
@@ -72,10 +72,10 @@ module.exports = {
 	     This is disabled by default for security reasons. */
 	allowGetAll: process.env.ALLOW_GET_ALL === "true",
 
-	/** Database field used to validate password (e.g. login or updating password) with  */
-	usernameValidationDbField: process.env.USERNAME_VALIDATION_DB_FIELD || "email",
+	/** Database field used to validate password (e.g. login or updating password) with, can be CSV for multiple fields  */
+	usernameValidationDbField: parseArray(process.env.USERNAME_VALIDATION_DB_FIELD || "email"),
 
-	/** Which hashing algorithm to use for hashing passwords, supports whatever cryptojs supports. 
+	/** Which hashing algorithm to use for hashing passwords, supports whatever cryptojs supports.
          NOTE: changing this will make it impossible to login with any accounts created with another hashing teqnique prior. */
 	hashingAlgorithm: process.env.HASHING_ALGORITHM || "sha512",
 
@@ -94,17 +94,17 @@ module.exports = {
 	/** Whether or not to require a new user to have firstName and lastName */
 	requireNames: parseBool(process.env.REQUIRE_NAMES || "true"),
 
-	/** 
-	 * The fields to be saved in the user dataset. If `ALL` is defined in both userFields and profileFields; userFields is dominant. 
-	 * If only fields are defined in userFields; those fields are saved in the user dataset and the rest in the profile dataset. 
+	/**
+	 * The fields to be saved in the user dataset. If `ALL` is defined in both userFields and profileFields; userFields is dominant.
+	 * If only fields are defined in userFields; those fields are saved in the user dataset and the rest in the profile dataset.
 	 * In order to split between user and profile dataset with only the required fields stored in the user dataset `REQUIRED_ONLY` can be used.
 	 * See the required fields array in `constants.dataset.USER_REQUIRED_FIELDS`
 	 */
 	userFields: parseArray(process.env.USER_FIELDS || "ALL"),
 
-	/** 
-	 * The fields to be saved in the user dataset. If `ALL` is defined in both userFields and profileFields; userFields is dominant. 
-	 * If only fields are defined in profileFields; those fields are saved in the user dataset and the rest in the profile dataset. 
+	/**
+	 * The fields to be saved in the user dataset. If `ALL` is defined in both userFields and profileFields; userFields is dominant.
+	 * If only fields are defined in profileFields; those fields are saved in the user dataset and the rest in the profile dataset.
 	 * Typically this doesn't need to be configured.
 	 */
 	profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL"),
