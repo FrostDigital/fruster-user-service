@@ -41,6 +41,7 @@ const config = require("./config");
 const constants = require("./lib/constants.js");
 const expressApp = require("./web/express-app");
 const docs = require("./lib/docs");
+const log = require("fruster-log");
 
 module.exports = {
 
@@ -49,7 +50,11 @@ module.exports = {
 		await bus.connect(busAddress);
 		const db = await mongo.connect(mongoUrl);
 
-		await createIndexes(db);
+		try {
+			await createIndexes(db);
+		} catch (err) {
+			log.warn("Mongodb error", err);
+		}
 
 		// REPOS
 		const userRepo = new UserRepo(db);
@@ -359,9 +364,7 @@ async function createIndexes(db) {
 	await db.collection(constants.collections.USERS)
 		.createIndex({ email: 1 }, {
 			unique: true,
-			partialFilterExpression: {
-				email: { $exists: true }
-			}
+			partialFilterExpression: { email: { $exists: true } }
 		});
 
 	if (!config.uniqueIndexes.includes("id"))
