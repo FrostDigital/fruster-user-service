@@ -6,209 +6,301 @@ const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
 const SpecUtils = require("./support/SpecUtils");
+const deprecatedErrors = require("../lib/deprecatedErrors");
 
 
 describe("ValidatePasswordHandler", () => {
 
-    /** @type {Db} */
-    let db;
+	/** @type {Db} */
+	let db;
 
-    frusterTestUtils
-        .startBeforeEach(specConstants
-            .testUtilsOptions((connection) => db = connection.db));
+	frusterTestUtils
+		.startBeforeEach(specConstants
+			.testUtilsOptions((connection) => db = connection.db));
 
-    afterEach(() => SpecUtils.resetConfig());
+	afterEach(() => SpecUtils.resetConfig());
 
-    it("should return 200 when validating correct password", async () => {
-        const user = mocks.getUserObject();
-        //@ts-ignore
-        await db.dropDatabase(constants.collections.USERS);
-        await SpecUtils.busRequest({
-            subject: constants.endpoints.service.CREATE_USER,
-            data: user
-        });
+	it("should return 200 when validating correct password", async () => {
+		const user = mocks.getUserObject();
 
-        const response = await SpecUtils.busRequest({
-            subject: constants.endpoints.service.VALIDATE_PASSWORD,
-            data: { username: user.email, password: user.password }
-        });
+		//@ts-ignore
+		await db.dropDatabase(constants.collections.USERS);
 
-        expect(response.status).toBe(200, "response.status");
-        expect(response.error).toBeUndefined("response.error");
-    });
+		await SpecUtils.busRequest({
+			subject: constants.endpoints.service.CREATE_USER,
+			data: user
+		});
 
-    it("should return 200 when validating correct password without hashDate", async () => {
-        const user = mocks.getOldUserObject();
-        //@ts-ignore
-        await db.dropDatabase(constants.collections.USERS);
-        await db.collection(constants.collections.USERS).update({ id: user.id }, user, { upsert: true })
+		const response = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: user.email, password: user.password }
+		});
 
-        const response = await SpecUtils.busRequest({
-            subject: constants.endpoints.service.VALIDATE_PASSWORD,
-            data: { username: user.email, password: config.initialUserPassword }
-        });
+		expect(response.status).toBe(200, "response.status");
+		expect(response.error).toBeUndefined("response.error");
+	});
 
-        expect(response.status).toBe(200, "response.status");
-        expect(response.error).toBeUndefined("response.error");
-    });
+	it("should be possible to login using different `usernameValidationDbField`", async () => {
+		/** NOTE: never use firstName as usernameValidationDbField in a live scenario, it's a really bad idea! 😅*/
+		config.usernameValidationDbField = ["username", "email", "firstName"];
 
-    it("should return 200 when validating correct password old hashDate", async () => {
-        const user = mocks.getOldUserObject();
-        user.hashDate = new Date("1970");
-        //@ts-ignore
-        await db.dropDatabase(constants.collections.USERS);
-        await db.collection(constants.collections.USERS).update({ id: user.id }, user, { upsert: true })
+		const user = { ...mocks.getUserObject(), username: "1337" };
 
-        const response = await SpecUtils.busRequest({
-            subject: constants.endpoints.service.VALIDATE_PASSWORD,
-            data: { username: user.email, password: config.initialUserPassword }
-        });
+		//@ts-ignore
+		await db.dropDatabase(constants.collections.USERS);
 
-        expect(response.status).toBe(200, "response.status");
-        expect(response.error).toBeUndefined("response.error");
-    });
+		await SpecUtils.busRequest({
+			subject: constants.endpoints.service.CREATE_USER,
+			data: user
+		});
 
-    it("should be possible to login with non case sensitive username", async () => {
-        mocks.mockMailService();
+		const { status: usernameResp } = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: user.email, password: user.password }
+		});
 
-        const user = mocks.getUserObject();
-        user.email = "urban@hello.se";
+		expect(usernameResp).toBe(200, "email login status");
 
-        await SpecUtils.busRequest({
-            subject: constants.endpoints.service.CREATE_USER,
-            data: user
-        });
+		const { status: emailResp } = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: user.username, password: user.password }
+		});
 
-        const response = await SpecUtils.busRequest({
-            subject: constants.endpoints.service.VALIDATE_PASSWORD,
-            data: { username: "UrbAn@HeLlO.se", password: user.password }
-        });
+		expect(emailResp).toBe(200, "firstName login status");
 
-        expect(response.status).toBe(200, "response.status");
-        expect(response.error).toBeUndefined("response.error");
-    });
+		const { status: firstNameResp } = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: user.firstName, password: user.password }
+		});
 
-    it("should return 401 when validating incorrect password", async done => {
-        mocks.mockMailService();
+		expect(firstNameResp).toBe(200, "username login status");
+	});
 
-        const user = mocks.getUserObject();
-        await SpecUtils.busRequest({
-            subject: constants.endpoints.service.CREATE_USER,
-            data: user
-        });
+	it("should not be possible to login using incorrect login details with multiple `usernameValidationDbField`", async () => {
+		/** NOTE: never use firstName as usernameValidationDbField in a live scenario, it's a really bad idea! 😅*/
+		config.usernameValidationDbField = ["username", "email", "firstName"];
 
-        try {
-            await SpecUtils.busRequest({
-                subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                data: { username: user.email, password: "yoyoyo" }
-            });
-        } catch (err) {
-            expect(err.status).toBe(401, "err.status");
-            expect(err.data).toBeUndefined("err.data");
+		const user = { ...mocks.getUserObject(), username: "1337" };
 
-            done();
-        }
-    });
+		//@ts-ignore
+		await db.dropDatabase(constants.collections.USERS);
 
-    it("should not be possible to login using an incomplete email", async done => {
-        mocks.mockMailService();
+		await SpecUtils.busRequest({
+			subject: constants.endpoints.service.CREATE_USER,
+			data: user
+		});
 
-        const user = mocks.getUserObject();
-        await SpecUtils.busRequest({
-            subject: constants.endpoints.service.CREATE_USER,
-            data: user
-        });
+		try {
+			await SpecUtils.busRequest({
+				subject: constants.endpoints.service.VALIDATE_PASSWORD,
+				data: { username: user.email, password: "NEI" }
+			});
+		} catch ({ status, error: { code } }) {
+			expect(status).toBe(401, "email login status");
+			expect(code).toBe(deprecatedErrors.errorCodes.invalidUsernameOrPassword);
+		}
 
-        let email = user.email;
-        email = email.substring(0, email.indexOf("@"));
+		try {
+			await SpecUtils.busRequest({
+				subject: constants.endpoints.service.VALIDATE_PASSWORD,
+				data: { username: user.username, password: "NEI" }
+			});
+		} catch ({ status, error: { code } }) {
+			expect(status).toBe(401, "firstName login status");
+			expect(code).toBe(deprecatedErrors.errorCodes.invalidUsernameOrPassword);
+		}
 
-        try {
-            await SpecUtils.busRequest({
-                subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                data: { username: email, password: user.password }
-            });
+		try {
+			await SpecUtils.busRequest({
+				subject: constants.endpoints.service.VALIDATE_PASSWORD,
+				data: { username: user.firstName, password: "NEI" }
+			});
+		} catch ({ status, error: { code } }) {
+			expect(status).toBe(401, "username login status");
+			expect(code).toBe(deprecatedErrors.errorCodes.invalidUsernameOrPassword);
+		}
+	});
 
-            done.fail();
-        } catch (err) {
-            expect(err.status).toBe(401, "err.status");
-            expect(err.data).toBeUndefined("err.data");
+	it("should return 200 when validating correct password without hashDate", async () => {
+		const user = mocks.getOldUserObject();
 
-            done();
-        }
-    });
+		//@ts-ignore
+		await db.dropDatabase(constants.collections.USERS);
 
-    it("should return 400 when user without verified email logs in with config.requireEmailVerification set to true", async done => {
-        mocks.mockMailService();
-        config.requireEmailVerification = true;
+		await db.collection(constants.collections.USERS).update({ id: user.id }, user, { upsert: true })
 
-        const user = mocks.getUserObject();
+		const response = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: user.email, password: config.initialUserPassword }
+		});
 
-        await SpecUtils.busRequest({
-            subject: constants.endpoints.service.CREATE_USER,
-            data: user
-        });
+		expect(response.status).toBe(200, "response.status");
+		expect(response.error).toBeUndefined("response.error");
+	});
 
-        try {
-            await SpecUtils.busRequest({
-                subject: constants.endpoints.service.VALIDATE_PASSWORD,
-                data: { username: user.email, password: user.password }
-            });
+	it("should return 200 when validating correct password old hashDate", async () => {
+		const user = mocks.getOldUserObject();
 
-            done.fail();
-        } catch (err) {
-            expect(err.status).toBe(400, "err.status");
-            expect(err.error.code).toBe(errors.get("fruster-user-service.EMAIL_NOT_VERIFIED").error.code, "err.error.code");
+		user.hashDate = new Date("1970");
 
-            config.requireEmailVerification = false;
+		//@ts-ignore
+		await db.dropDatabase(constants.collections.USERS);
 
-            done();
-        }
-    });
+		await db.collection(constants.collections.USERS).update({ id: user.id }, user, { upsert: true })
 
-    it("should be possible for to login even if the email has not been verified but config.optionalEmailVerification is set to true", async () => {
-        mocks.mockMailService();
+		const response = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: user.email, password: config.initialUserPassword }
+		});
 
-        const user = mocks.getUserObject();
+		expect(response.status).toBe(200, "response.status");
+		expect(response.error).toBeUndefined("response.error");
+	});
 
-        await SpecUtils.busRequest({
-            subject: constants.endpoints.service.CREATE_USER,
-            data: user
-        });
+	it("should be possible to login with non case sensitive username", async () => {
+		mocks.mockMailService();
 
-        config.optionalEmailVerification = true;
+		const user = mocks.getUserObject();
+		user.email = "urban@hello.se";
 
-        const response = await SpecUtils.busRequest({
-            subject: constants.endpoints.service.VALIDATE_PASSWORD,
-            data: { username: user.email, password: user.password }
-        });
+		await SpecUtils.busRequest({
+			subject: constants.endpoints.service.CREATE_USER,
+			data: user
+		});
 
-        expect(response.status).toBe(200, "response.status");
-        expect(response.error).toBeUndefined("response.error");
+		const response = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: "UrbAn@HeLlO.se", password: user.password }
+		});
 
-        config.optionalEmailVerification = false;
-    });
+		expect(response.status).toBe(200, "response.status");
+		expect(response.error).toBeUndefined("response.error");
+	});
 
-    it("should be possible for old accounts to login even if the email has not been verified", async () => {
-        mocks.mockMailService();
+	it("should return 401 when validating incorrect password", async done => {
+		mocks.mockMailService();
 
-        const user = mocks.getUserObject();
+		const user = mocks.getUserObject();
 
-        await SpecUtils.busRequest({
-            subject: constants.endpoints.service.CREATE_USER,
-            data: user
-        });
+		await SpecUtils.busRequest({
+			subject: constants.endpoints.service.CREATE_USER,
+			data: user
+		});
 
-        config.requireEmailVerification = true;
+		try {
+			await SpecUtils.busRequest({
+				subject: constants.endpoints.service.VALIDATE_PASSWORD,
+				data: { username: user.email, password: "yoyoyo" }
+			});
+		} catch (err) {
+			expect(err.status).toBe(401, "err.status");
+			expect(err.data).toBeUndefined("err.data");
 
-        const response = await SpecUtils.busRequest({
-            subject: constants.endpoints.service.VALIDATE_PASSWORD,
-            data: { username: user.email, password: user.password }
-        });
+			done();
+		}
+	});
 
-        expect(response.status).toBe(200, "response.status");
-        expect(response.error).toBeUndefined("response.error");
+	it("should not be possible to login using an incomplete email", async done => {
+		mocks.mockMailService();
 
-        config.requireEmailVerification = false;
-    });
+		const user = mocks.getUserObject();
+
+		await SpecUtils.busRequest({
+			subject: constants.endpoints.service.CREATE_USER,
+			data: user
+		});
+
+		let email = user.email;
+		email = email.substring(0, email.indexOf("@"));
+
+		try {
+			await SpecUtils.busRequest({
+				subject: constants.endpoints.service.VALIDATE_PASSWORD,
+				data: { username: email, password: user.password }
+			});
+
+			done.fail();
+		} catch (err) {
+			expect(err.status).toBe(401, "err.status");
+			expect(err.data).toBeUndefined("err.data");
+
+			done();
+		}
+	});
+
+	it("should return 400 when user without verified email logs in with config.requireEmailVerification set to true", async done => {
+		mocks.mockMailService();
+
+		config.requireEmailVerification = true;
+
+		const user = mocks.getUserObject();
+
+		await SpecUtils.busRequest({
+			subject: constants.endpoints.service.CREATE_USER,
+			data: user
+		});
+
+		try {
+			await SpecUtils.busRequest({
+				subject: constants.endpoints.service.VALIDATE_PASSWORD,
+				data: { username: user.email, password: user.password }
+			});
+
+			done.fail();
+		} catch (err) {
+			expect(err.status).toBe(400, "err.status");
+			expect(err.error.code).toBe(errors.get("fruster-user-service.EMAIL_NOT_VERIFIED").error.code, "err.error.code");
+
+			config.requireEmailVerification = false;
+
+			done();
+		}
+	});
+
+	it("should be possible for to login even if the email has not been verified but config.optionalEmailVerification is set to true", async () => {
+		mocks.mockMailService();
+
+		const user = mocks.getUserObject();
+
+		await SpecUtils.busRequest({
+			subject: constants.endpoints.service.CREATE_USER,
+			data: user
+		});
+
+		config.optionalEmailVerification = true;
+
+		const response = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: user.email, password: user.password }
+		});
+
+		expect(response.status).toBe(200, "response.status");
+		expect(response.error).toBeUndefined("response.error");
+
+		config.optionalEmailVerification = false;
+	});
+
+	it("should be possible for old accounts to login even if the email has not been verified", async () => {
+		mocks.mockMailService();
+
+		const user = mocks.getUserObject();
+
+		await SpecUtils.busRequest({
+			subject: constants.endpoints.service.CREATE_USER,
+			data: user
+		});
+
+		config.requireEmailVerification = true;
+
+		const response = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: user.email, password: user.password }
+		});
+
+		expect(response.status).toBe(200, "response.status");
+		expect(response.error).toBeUndefined("response.error");
+
+		config.requireEmailVerification = false;
+	});
 
 });

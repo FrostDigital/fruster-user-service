@@ -49,7 +49,7 @@ module.exports = {
 		await bus.connect(busAddress);
 		const db = await mongo.connect(mongoUrl);
 
-		createIndexes(db);
+		await createIndexes(db);
 
 		// REPOS
 		const userRepo = new UserRepo(db);
@@ -353,10 +353,10 @@ module.exports = {
 };
 
 /**
- * @param {Db} db 
+ * @param {Db} db
  */
-function createIndexes(db) {
-	db.collection(constants.collections.USERS)
+async function createIndexes(db) {
+	await db.collection(constants.collections.USERS)
 		.createIndex({ email: 1 }, {
 			unique: true,
 			partialFilterExpression: {
@@ -367,10 +367,15 @@ function createIndexes(db) {
 	if (!config.uniqueIndexes.includes("id"))
 		config.uniqueIndexes.push("id");
 
-	config.uniqueIndexes.forEach(index => {
+	config.uniqueIndexes.forEach(async index => {
 		const indexObj = {};
-		indexObj[index] = 1;
-		db.collection(constants.collections.USERS).createIndex(indexObj, { unique: true });
+		if (index.includes("profile")) {
+			indexObj[index.replace("profile.", "")] = 1;
+			await db.collection(constants.collections.PROFILES).createIndex(indexObj, { unique: true });
+		} else {
+			indexObj[index] = 1;
+			await db.collection(constants.collections.USERS).createIndex(indexObj, { unique: true });
+		}
 	});
 
 	return db;

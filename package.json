@@ -8,23 +8,23 @@
     },
     "dependencies": {
         "body-parser": "^1.18.3",
-        "cookie-parser": "^1.4.3",
+        "cookie-parser": "^1.4.4",
         "csprng": "^0.1.2",
         "express": "^4.16.4",
-        "fruster-bus": "^0.3.4",
+        "fruster-bus": "^0.5.3",
         "fruster-errors": "0.1.2",
         "fruster-health": "0.0.13",
         "fruster-log": "0.0.18",
-        "mongodb": "^2.2.34",
-        "@types/mongodb": "2.2.19",
+        "mongodb": "2.2.36",
         "request": "^2.88.0",
         "uuid": "^3.3.2"
     },
     "devDependencies": {
+        "@types/mongodb": "2.2.19",
         "fruster-test-utils": "^0.4.0",
-        "jasmine": "3.3.0",
+        "jasmine": "3.3.1",
         "jasmine-spec-reporter": "^4.2.1",
-        "nyc": "^13.1.0"
+        "nyc": "^13.3.0"
     },
     "engines": {
         "node": "7.10.0"
