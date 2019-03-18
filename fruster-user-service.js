@@ -53,7 +53,7 @@ module.exports = {
 		try {
 			await createIndexes(db);
 		} catch (err) {
-			log.warn("Mongodb error", err);
+			log.warn("Error while creating indexes", err);
 		}
 
 		// REPOS
