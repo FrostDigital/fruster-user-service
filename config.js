@@ -25,7 +25,7 @@ module.exports = {
 	initialUserEmail: process.env.INITIAL_USER_EMAIL || "admin@frost.se",
 
 	/** The password of the initial account being created upon first run. Should be changed in prod! */
-	initialUserPassword: process.env.INITIAL_USER_PASSWORD || "FrusterR0ckS",
+	initialUserPassword: process.env.INITIAL_USER_PASSWORD || "Frosties2019",
 
 	/** The roles of the initial account being created upon first run */
 	initialUserRole: process.env.INITIAL_USER_ROLE || "super-admin",
