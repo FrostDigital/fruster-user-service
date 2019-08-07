@@ -447,6 +447,27 @@ describe("GetUsersByQueryHandler", () => {
 		}
 	});
 
+	it("should be possible to get users by a query expanded profile and sort by profile key, but without append `profile.`", async () => {
+		config.userFields = [constants.dataset.REQUIRED_ONLY];
+		await createTestUsers(10);
+
+		const { data: { users, totalCount } } = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
+			data: {
+				query: { roles: { $in: ["user"] } },
+				expand: "profile",
+				sort: { firstName: -1 } // NOTE: This is not `profile.firstName`
+			}
+		});
+
+		expect(users.length).toBe(10, "users.length");
+		expect(totalCount).toBe(10, "totalCount");
+
+		for (let i = 0; i < 9; i++) {
+			expect(users[i].profile.firstName).toBeGreaterThan(users[i + 1].profile.firstName, "firstName should less than next");
+		}
+	});
+
 	/**
 	 * @param {Number} number
 	 * @param {Number=} startAt
