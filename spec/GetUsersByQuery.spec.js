@@ -223,7 +223,7 @@ describe("GetUsersByQueryHandler", () => {
 			data: {
 				query: { roles: { $in: ["user"] } },
 				expand: "profile",
-				sort: { "profile.firstName": 1 }
+				sort: { "firstName": 1 }
 			}
 		});
 
@@ -286,7 +286,7 @@ describe("GetUsersByQueryHandler", () => {
 			data: {
 				query: { roles: { $in: ["user"] } },
 				expand: "profile",
-				sort: { "profile.firstName": 1 },
+				sort: { firstName: 1 },
 				caseInsensitiveSort: true
 			}
 		});
@@ -383,11 +383,9 @@ describe("GetUsersByQueryHandler", () => {
 		expect(usersRequest2.length).toBe(3, "res2.data.length");
 		expect(totalCountRequest2).toBe(10, "totalCountRequest2");
 
-		for (let i = 0; i < 3; i++) {
-			if (i > 0) {
-				expect(usersRequest1[i].customField).toBeGreaterThan(usersRequest1[i - 1].customField, "users[i].customField");
-				expect(usersRequest2[i].customField).toBeLessThan(usersRequest2[i - 1].customField, "usersRequest2[i].customField");
-			}
+		for (let i = 1; i < 3; i++) {
+			expect(usersRequest1[i].customField).toBeGreaterThan(usersRequest1[i - 1].customField, "users[i].customField");
+			expect(usersRequest2[i].customField).toBeLessThan(usersRequest2[i - 1].customField, "usersRequest2[i].customField");
 		}
 
 		async function doRequest(sort) {
@@ -449,10 +447,10 @@ describe("GetUsersByQueryHandler", () => {
 		}
 	});
 
-    /**
-     * @param {Number} number
-     * @param {Number=} startAt
-     */
+	/**
+	 * @param {Number} number
+	 * @param {Number=} startAt
+	 */
 	async function createTestUsers(number = 2, startAt = 0) {
 		for (let i = startAt; i < startAt + number; i++) {
 			await SpecUtils.createUser(getTestUserData(`user${i}`, i));
@@ -470,10 +468,10 @@ describe("GetUsersByQueryHandler", () => {
 		}
 	}
 
-    /**
-     * @param {Number} number
-     * @param {Number=} startAt
-     */
+	/**
+	 * @param {Number} number
+	 * @param {Number=} startAt
+	 */
 	async function insertTestUsers(number = 2, startAt = 0) {
 		const users = [];
 
