@@ -5,7 +5,6 @@ const specConstants = require("./support/spec-constants");
 const SpecUtils = require("./support/SpecUtils");
 const config = require("../config");
 
-
 describe("GetUsersByQueryHandler", () => {
 
 	/** @type {Db} */
@@ -20,20 +19,20 @@ describe("GetUsersByQueryHandler", () => {
 	it("should be possible to get users by a simple query", async () => {
 		await insertTestUsers(10);
 
-		const res = await SpecUtils.busRequest({
+		const { data: { totalCount, users } } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
 			data: {
 				query: { roles: { $in: ["user"] } }
 			}
 		});
 
-		expect(res.data.users.length).toBe(10, "res.data.users.length");
-		expect(res.data.totalCount).toBe(10, "res.data.totalCount");
+		expect(users.length).toBe(10, "users.length");
+		expect(totalCount).toBe(10, "totalCount");
 
 		for (let i = 0; i < 10; i++) {
-			expect(res.data.users[i].id).toBe(`user${i}`, "res.data.users[i].id");
-			expect(res.data.users[i].password).toBeUndefined("res.data.users[i].password");
-			expect(res.data.users[i].salt).toBeUndefined("res.data.users[i].salt");
+			expect(users[i].id).toBe(`user${i}`, "users[i].id");
+			expect(users[i].password).toBeUndefined("users[i].password");
+			expect(users[i].salt).toBeUndefined("users[i].salt");
 		}
 	});
 
@@ -41,7 +40,7 @@ describe("GetUsersByQueryHandler", () => {
 		config.userFields = [constants.dataset.REQUIRED_ONLY];
 		await createTestUsers(10);
 
-		const res = await SpecUtils.busRequest({
+		const { data: { totalCount, users } } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
 			data: {
 				query: { roles: { $in: ["user"] } },
@@ -50,24 +49,24 @@ describe("GetUsersByQueryHandler", () => {
 			}
 		});
 
-		expect(res.data.users.length).toBe(10, "res.data.users.length");
-		expect(res.data.totalCount).toBe(10, "res.data.totalCount");
+		expect(users.length).toBe(10, "users.length");
+		expect(totalCount).toBe(10, "totalCount");
 
 		for (let i = 0; i < 10; i++) {
-			expect(res.data.users[i].id).toBeDefined("res.data.users[i].id");
-			expect(res.data.users[i].password).toBeUndefined("res.data.users[i].password");
-			expect(res.data.users[i].salt).toBeUndefined("res.data.users[i].salt");
-			expect(res.data.users[i].profile).toBeDefined("res.data.users[i].profile");
-			expect(res.data.users[i].profile.firstName).toBe(`user${i}-firstName`, "res.data.users[i].profile.firstName");
-			expect(res.data.users[i].profile.lastName).toBe(`user${i}-lastName`, "res.data.users[i].profile.lastName");
-			expect(res.data.users[i].profile.customField).toBe(Math.cos(i), "res.data.users[i].profile.customField");
+			expect(users[i].id).toBeDefined("users[i].id");
+			expect(users[i].password).toBeUndefined("users[i].password");
+			expect(users[i].salt).toBeUndefined("users[i].salt");
+			expect(users[i].profile).toBeDefined("users[i].profile");
+			expect(users[i].profile.firstName).toBe(`user${i}-firstName`, "users[i].profile.firstName");
+			expect(users[i].profile.lastName).toBe(`user${i}-lastName`, "users[i].profile.lastName");
+			expect(users[i].profile.customField).toBe(Math.cos(i), "users[i].profile.customField");
 
-			expect(res.data.users[i].metadata).toBeDefined("res.data.users[i].profile.metadata");
-			expect(res.data.users[i].metadata.created).toBeDefined("res.data.users[i].profile.metadata.created");
-			expect(res.data.users[i].metadata.updated).toBeDefined("res.data.users[i].profile.metadata.updated");
-			expect(res.data.users[i].profile.metadata).toBeDefined("res.data.users[i].profile.metadata");
-			expect(res.data.users[i].profile.metadata.created).toBeDefined("res.data.users[i].profile.metadata.created");
-			expect(res.data.users[i].profile.metadata.updated).toBeDefined("res.data.users[i].profile.metadata.updated");
+			expect(users[i].metadata).toBeDefined("users[i].profile.metadata");
+			expect(users[i].metadata.created).toBeDefined("users[i].profile.metadata.created");
+			expect(users[i].metadata.updated).toBeDefined("users[i].profile.metadata.updated");
+			expect(users[i].profile.metadata).toBeDefined("users[i].profile.metadata");
+			expect(users[i].profile.metadata.created).toBeDefined("users[i].profile.metadata.created");
+			expect(users[i].profile.metadata.updated).toBeDefined("users[i].profile.metadata.updated");
 		}
 	});
 
@@ -75,7 +74,7 @@ describe("GetUsersByQueryHandler", () => {
 		config.userFields = [constants.dataset.REQUIRED_ONLY];
 		await createTestUsers(10);
 
-		const res = await SpecUtils.busRequest({
+		const { data: { totalCount, users } } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
 			data: {
 				query: { roles: { $in: ["user"] } },
@@ -83,24 +82,24 @@ describe("GetUsersByQueryHandler", () => {
 			}
 		});
 
-		expect(res.data.users.length).toBe(10, "res.data.users.length");
-		expect(res.data.totalCount).toBe(10, "res.data.totalCount");
+		expect(users.length).toBe(10, "users.length");
+		expect(totalCount).toBe(10, "totalCount");
 
 		for (let i = 0; i < 10; i++) {
-			expect(res.data.users[i].id).toBeDefined("res.data.users[i].id");
-			expect(res.data.users[i].password).toBeUndefined("res.data.users[i].password");
-			expect(res.data.users[i].salt).toBeUndefined("res.data.users[i].salt");
-			expect(res.data.users[i].profile).toBeDefined("res.data.users[i].profile");
-			expect(res.data.users[i].profile.firstName).toBe(`user${i}-firstName`, "res.data.users[i].profile.firstName");
-			expect(res.data.users[i].profile.lastName).toBe(`user${i}-lastName`, "res.data.users[i].profile.lastName");
-			expect(res.data.users[i].profile.customField).toBe(Math.cos(i), "res.data.users[i].profile.customField");
+			expect(users[i].id).toBeDefined("users[i].id");
+			expect(users[i].password).toBeUndefined("users[i].password");
+			expect(users[i].salt).toBeUndefined("users[i].salt");
+			expect(users[i].profile).toBeDefined("users[i].profile");
+			expect(users[i].profile.firstName).toBe(`user${i}-firstName`, "users[i].profile.firstName");
+			expect(users[i].profile.lastName).toBe(`user${i}-lastName`, "users[i].profile.lastName");
+			expect(users[i].profile.customField).toBe(Math.cos(i), "users[i].profile.customField");
 
-			expect(res.data.users[i].metadata).toBeDefined("res.data.users[i].profile.metadata");
-			expect(res.data.users[i].metadata.created).toBeDefined("res.data.users[i].profile.metadata.created");
-			expect(res.data.users[i].metadata.updated).toBeDefined("res.data.users[i].profile.metadata.updated");
-			expect(res.data.users[i].profile.metadata).toBeDefined("res.data.users[i].profile.metadata");
-			expect(res.data.users[i].profile.metadata.created).toBeDefined("res.data.users[i].profile.metadata.created");
-			expect(res.data.users[i].profile.metadata.updated).toBeDefined("res.data.users[i].profile.metadata.updated");
+			expect(users[i].metadata).toBeDefined("users[i].profile.metadata");
+			expect(users[i].metadata.created).toBeDefined("users[i].profile.metadata.created");
+			expect(users[i].metadata.updated).toBeDefined("users[i].profile.metadata.updated");
+			expect(users[i].profile.metadata).toBeDefined("users[i].profile.metadata");
+			expect(users[i].profile.metadata.created).toBeDefined("users[i].profile.metadata.created");
+			expect(users[i].profile.metadata.updated).toBeDefined("users[i].profile.metadata.updated");
 		}
 	});
 
@@ -108,7 +107,7 @@ describe("GetUsersByQueryHandler", () => {
 		config.userFields = [constants.dataset.REQUIRED_ONLY];
 		await createTestUsers(10);
 
-		const res = await SpecUtils.busRequest({
+		const { data: { totalCount, users } } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
 			data: {
 				query: {
@@ -120,30 +119,30 @@ describe("GetUsersByQueryHandler", () => {
 			}
 		});
 
-		expect(res.data.users.length).toBe(1, "res.data.users.length");
-		expect(res.data.totalCount).toBe(1, "res.data.totalCount");
+		expect(users.length).toBe(1, "users.length");
+		expect(totalCount).toBe(1, "totalCount");
 
-		expect(res.data.users[0].id).toBeDefined("res.data.users[0].id");
-		expect(res.data.users[0].password).toBeUndefined("res.data.users[0].password");
-		expect(res.data.users[0].salt).toBeUndefined("res.data.users[0].salt");
-		expect(res.data.users[0].profile).toBeDefined("res.data.users[0].profile");
-		expect(res.data.users[0].profile.firstName).toBe(`user7-firstName`, "res.data.users[0].profile.firstName");
-		expect(res.data.users[0].profile.lastName).toBe(`user7-lastName`, "res.data.users[0].profile.lastName");
-		expect(res.data.users[0].profile.customField).toBe(Math.cos(7), "res.data.users[0].profile.customField");
+		expect(users[0].id).toBeDefined("users[0].id");
+		expect(users[0].password).toBeUndefined("users[0].password");
+		expect(users[0].salt).toBeUndefined("users[0].salt");
+		expect(users[0].profile).toBeDefined("users[0].profile");
+		expect(users[0].profile.firstName).toBe(`user7-firstName`, "users[0].profile.firstName");
+		expect(users[0].profile.lastName).toBe(`user7-lastName`, "users[0].profile.lastName");
+		expect(users[0].profile.customField).toBe(Math.cos(7), "users[0].profile.customField");
 
-		expect(res.data.users[0].metadata).toBeDefined("res.data.users[0].profile.metadata");
-		expect(res.data.users[0].metadata.created).toBeDefined("res.data.users[0].profile.metadata.created");
-		expect(res.data.users[0].metadata.updated).toBeDefined("res.data.users[0].profile.metadata.updated");
-		expect(res.data.users[0].profile.metadata).toBeDefined("res.data.users[0].profile.metadata");
-		expect(res.data.users[0].profile.metadata.created).toBeDefined("res.data.users[0].profile.metadata.created");
-		expect(res.data.users[0].profile.metadata.updated).toBeDefined("res.data.users[0].profile.metadata.updated");
+		expect(users[0].metadata).toBeDefined("users[0].profile.metadata");
+		expect(users[0].metadata.created).toBeDefined("users[0].profile.metadata.created");
+		expect(users[0].metadata.updated).toBeDefined("users[0].profile.metadata.updated");
+		expect(users[0].profile.metadata).toBeDefined("users[0].profile.metadata");
+		expect(users[0].profile.metadata.created).toBeDefined("users[0].profile.metadata.created");
+		expect(users[0].profile.metadata.updated).toBeDefined("users[0].profile.metadata.updated");
 	});
 
 	it("should be possible to get users by a query with expanded profile included in query and filter result", async () => {
 		config.userFields = [constants.dataset.REQUIRED_ONLY];
 		await createTestUsers(10);
 
-		const res = await SpecUtils.busRequest({
+		const { data: { totalCount, users } } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
 			data: {
 				query: {
@@ -161,26 +160,26 @@ describe("GetUsersByQueryHandler", () => {
 			}
 		});
 
-		expect(res.data.users.length).toBe(1, "res.data.users.length");
-		expect(res.data.totalCount).toBe(1, "res.data.totalCount");
+		expect(users.length).toBe(1, "users.length");
+		expect(totalCount).toBe(1, "totalCount");
 
-		expect(res.data.users[0].id).toBeDefined("res.data.users[0].id");
-		expect(res.data.users[0].password).toBeUndefined("res.data.users[0].password");
-		expect(res.data.users[0].salt).toBeUndefined("res.data.users[0].salt");
-		expect(res.data.users[0].profile).toBeDefined("res.data.users[0].profile");
-		expect(res.data.users[0].profile.firstName).toBe(`user7-firstName`, "res.data.users[0].profile.firstName");
-		expect(res.data.users[0].profile.lastName).toBeUndefined("res.data.users[0].profile.lastName");
-		expect(res.data.users[0].profile.customField).toBeUndefined("res.data.users[0].profile.customField");
+		expect(users[0].id).toBeDefined("users[0].id");
+		expect(users[0].password).toBeUndefined("users[0].password");
+		expect(users[0].salt).toBeUndefined("users[0].salt");
+		expect(users[0].profile).toBeDefined("users[0].profile");
+		expect(users[0].profile.firstName).toBe(`user7-firstName`, "users[0].profile.firstName");
+		expect(users[0].profile.lastName).toBeUndefined("users[0].profile.lastName");
+		expect(users[0].profile.customField).toBeUndefined("users[0].profile.customField");
 
-		expect(res.data.users[0].metadata).toBeUndefined("res.data.users[0].profile.metadata");
-		expect(res.data.users[0].profile.metadata).toBeUndefined("res.data.users[0].profile.metadata");
+		expect(users[0].metadata).toBeUndefined("users[0].profile.metadata");
+		expect(users[0].profile.metadata).toBeUndefined("users[0].profile.metadata");
 	});
 
 	it("should be possible to get users by a query with expanded profile included in query and limit result", async () => {
 		config.userFields = [constants.dataset.REQUIRED_ONLY];
 		await createTestUsers(10);
 
-		const res = await SpecUtils.busRequest({
+		const { data: { totalCount, users } } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
 			data: {
 				query: {
@@ -193,24 +192,24 @@ describe("GetUsersByQueryHandler", () => {
 			}
 		});
 
-		expect(res.data.users.length).toBe(2, "res.data.users.length");
-		expect(res.data.totalCount).toBe(10, "res.data.totalCount");
+		expect(users.length).toBe(2, "users.length");
+		expect(totalCount).toBe(10, "totalCount");
 
 		for (let i = 0; i < 2; i++) {
-			expect(res.data.users[i].id).toBeDefined("res.data.users[i].id");
-			expect(res.data.users[i].password).toBeUndefined("res.data.users[i].password");
-			expect(res.data.users[i].salt).toBeUndefined("res.data.users[i].salt");
-			expect(res.data.users[i].profile).toBeDefined("res.data.users[i].profile");
-			expect(res.data.users[i].profile.firstName).toBe(`user${i}-firstName`, "res.data.users[i].profile.firstName");
-			expect(res.data.users[i].profile.lastName).toBe(`user${i}-lastName`, "res.data.users[i].profile.lastName");
-			expect(res.data.users[i].profile.customField).toBe(Math.cos(i), "res.data.users[i].profile.customField");
+			expect(users[i].id).toBeDefined("users[i].id");
+			expect(users[i].password).toBeUndefined("users[i].password");
+			expect(users[i].salt).toBeUndefined("users[i].salt");
+			expect(users[i].profile).toBeDefined("users[i].profile");
+			expect(users[i].profile.firstName).toBe(`user${i}-firstName`, "users[i].profile.firstName");
+			expect(users[i].profile.lastName).toBe(`user${i}-lastName`, "users[i].profile.lastName");
+			expect(users[i].profile.customField).toBe(Math.cos(i), "users[i].profile.customField");
 
-			expect(res.data.users[i].metadata).toBeDefined("res.data.users[i].profile.metadata");
-			expect(res.data.users[i].metadata.created).toBeDefined("res.data.users[i].profile.metadata.created");
-			expect(res.data.users[i].metadata.updated).toBeDefined("res.data.users[i].profile.metadata.updated");
-			expect(res.data.users[i].profile.metadata).toBeDefined("res.data.users[i].profile.metadata");
-			expect(res.data.users[i].profile.metadata.created).toBeDefined("res.data.users[i].profile.metadata.created");
-			expect(res.data.users[i].profile.metadata.updated).toBeDefined("res.data.users[i].profile.metadata.updated");
+			expect(users[i].metadata).toBeDefined("users[i].profile.metadata");
+			expect(users[i].metadata.created).toBeDefined("users[i].profile.metadata.created");
+			expect(users[i].metadata.updated).toBeDefined("users[i].profile.metadata.updated");
+			expect(users[i].profile.metadata).toBeDefined("users[i].profile.metadata");
+			expect(users[i].profile.metadata.created).toBeDefined("users[i].profile.metadata.created");
+			expect(users[i].profile.metadata.updated).toBeDefined("users[i].profile.metadata.updated");
 		}
 	});
 
@@ -306,7 +305,7 @@ describe("GetUsersByQueryHandler", () => {
 	it("should be possible to paginate result from get users by query with `limit`", async () => {
 		await insertTestUsers(10);
 
-		const res = await SpecUtils.busRequest({
+		const { data: { totalCount, users } } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
 			data: {
 				query: { roles: { $in: ["user"] } },
@@ -314,20 +313,20 @@ describe("GetUsersByQueryHandler", () => {
 			}
 		});
 
-		expect(res.data.users.length).toBe(3, "res.data.length");
-		expect(res.data.totalCount).toBe(10, "res.data.totalCount");
+		expect(users.length).toBe(3, "length");
+		expect(totalCount).toBe(10, "totalCount");
 
 		for (let i = 0; i < 3; i++) {
-			expect(res.data.users[i].id).toBe(`user${i}`, "res.data.users[i].id");
-			expect(res.data.users[i].password).toBeUndefined("res.data.users[i].password");
-			expect(res.data.users[i].salt).toBeUndefined("res.data.users[i].salt");
+			expect(users[i].id).toBe(`user${i}`, "users[i].id");
+			expect(users[i].password).toBeUndefined("users[i].password");
+			expect(users[i].salt).toBeUndefined("users[i].salt");
 		}
 	});
 
 	it("should be possible to shift paginated result from get users by query with `start`", async () => {
 		await insertTestUsers(10);
 
-		const res = await SpecUtils.busRequest({
+		const { data: { totalCount, users } } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
 			data: {
 				query: { roles: { $in: ["user"] } },
@@ -336,20 +335,20 @@ describe("GetUsersByQueryHandler", () => {
 			}
 		});
 
-		expect(res.data.users.length).toBe(3, "res.data.length");
-		expect(res.data.totalCount).toBe(10, "res.data.totalCount");
+		expect(users.length).toBe(3, "length");
+		expect(totalCount).toBe(10, "totalCount");
 
 		for (let i = 0; i < 3; i++) {
-			expect(res.data.users[i].id).toBe(`user${i + 3}`, "res.data.users[i].id");
-			expect(res.data.users[i].password).toBeUndefined("res.data.users[i].password");
-			expect(res.data.users[i].salt).toBeUndefined("res.data.users[i].salt");
+			expect(users[i].id).toBe(`user${i + 3}`, "users[i].id");
+			expect(users[i].password).toBeUndefined("users[i].password");
+			expect(users[i].salt).toBeUndefined("users[i].salt");
 		}
 	});
 
 	it("should be possible to filter result with `filter`", async () => {
 		await insertTestUsers(10);
 
-		const res = await SpecUtils.busRequest({
+		const { data: { totalCount, users } } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
 			data: {
 				query: { roles: { $in: ["user"] } },
@@ -362,13 +361,13 @@ describe("GetUsersByQueryHandler", () => {
 			}
 		});
 
-		expect(res.data.users.length).toBe(3, "res.data.length");
-		expect(res.data.totalCount).toBe(10, "res.data.totalCount");
+		expect(users.length).toBe(3, "length");
+		expect(totalCount).toBe(10, "totalCount");
 
 		for (let i = 0; i < 3; i++) {
-			expect(Object.keys(res.data.users[i]).length).toBe(2, "Object.keys(res.data.users[i]).length");
-			expect(res.data.users[i].firstName).toBe(`user${i + 3}-firstName`, "res.data.users[i].firstName");
-			expect(res.data.users[i].lastName).toBe(`user${i + 3}-lastName`, "res.data.users[i].lastName");
+			expect(Object.keys(users[i]).length).toBe(2, "Object.keys(users[i]).length");
+			expect(users[i].firstName).toBe(`user${i + 3}-firstName`, "users[i].firstName");
+			expect(users[i].lastName).toBe(`user${i + 3}-lastName`, "users[i].lastName");
 		}
 	});
 
@@ -378,17 +377,15 @@ describe("GetUsersByQueryHandler", () => {
 		const { data: { users: usersRequest1, totalCount: totalCountRequest1 } } = await doRequest(1);
 		const { data: { users: usersRequest2, totalCount: totalCountRequest2 } } = await doRequest(-1);
 
-		expect(usersRequest1.length).toBe(3, "res.data.length");
+		expect(usersRequest1.length).toBe(3, "length");
 		expect(totalCountRequest1).toBe(10, "totalCountRequest1");
 
 		expect(usersRequest2.length).toBe(3, "res2.data.length");
 		expect(totalCountRequest2).toBe(10, "totalCountRequest2");
 
-		for (let i = 0; i < 3; i++) {
-			if (i > 0) {
-				expect(usersRequest1[i].customField).toBeGreaterThan(usersRequest1[i - 1].customField, "res.data.users[i].customField");
-				expect(usersRequest2[i].customField).toBeLessThan(usersRequest2[i - 1].customField, "usersRequest2[i].customField");
-			}
+		for (let i = 1; i < 3; i++) {
+			expect(usersRequest1[i].customField).toBeGreaterThan(usersRequest1[i - 1].customField, "users[i].customField");
+			expect(usersRequest2[i].customField).toBeLessThan(usersRequest2[i - 1].customField, "usersRequest2[i].customField");
 		}
 
 		async function doRequest(sort) {
@@ -412,7 +409,7 @@ describe("GetUsersByQueryHandler", () => {
 	it("should return empty array if no users can be found", async () => {
 		await insertTestUsers(10);
 
-		const res = await SpecUtils.busRequest({
+		const { data: { totalCount, users } } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
 			data: {
 				query: { roles: { $in: ["no-one-can-have-this-role"] } },
@@ -425,8 +422,50 @@ describe("GetUsersByQueryHandler", () => {
 			}
 		});
 
-		expect(res.data.users.length).toBe(0, "res.data.length");
-		expect(res.data.totalCount).toBe(0, "res.data.totalCount");
+		expect(users.length).toBe(0, "length");
+		expect(totalCount).toBe(0, "totalCount");
+	});
+
+	it("should be possible to get users by a query with expanded profile and sort by user key", async () => {
+		config.userFields = [constants.dataset.REQUIRED_ONLY];
+		await createTestUsers(10);
+
+		const { data: { totalCount, users } } = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
+			data: {
+				query: { roles: { $in: ["user"] } },
+				expand: "profile",
+				sort: { email: -1 }
+			}
+		});
+
+		expect(users.length).toBe(10, "users.length");
+		expect(totalCount).toBe(10, "totalCount");
+
+		for (let i = 0; i < 9; i++) {
+			expect(users[i].email).toBeGreaterThan(users[i + 1].email, "email should less than next");
+		}
+	});
+
+	it("should be possible to get users by a query expanded profile and sort by profile key, but without append `profile.`", async () => {
+		config.userFields = [constants.dataset.REQUIRED_ONLY];
+		await createTestUsers(10);
+
+		const { data: { users, totalCount } } = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
+			data: {
+				query: { roles: { $in: ["user"] } },
+				expand: "profile",
+				sort: { firstName: -1 } // NOTE: This is not `profile.firstName`
+			}
+		});
+
+		expect(users.length).toBe(10, "users.length");
+		expect(totalCount).toBe(10, "totalCount");
+
+		for (let i = 0; i < 9; i++) {
+			expect(users[i].profile.firstName).toBeGreaterThan(users[i + 1].profile.firstName, "firstName should less than next");
+		}
 	});
 
 	/**

@@ -32,12 +32,12 @@ describe("UserRepo", () => {
 	});
 
 	it("should get all users", async () => {
-		let [users] = await userRepo.getUsersByQuery();
-		expect(users.length).toBe(3); // user1 + user2 + initial users = 3			
+		let [users] = await userRepo.getUsersByQuery({});
+		expect(users.length).toBe(3); // user1 + user2 + initial users = 3
 	});
 
 	it("should get users by query", async () => {
-		let [users] = await userRepo.getUsersByQuery({ email: "user1@example.com" });
+		let [users] = await userRepo.getUsersByQuery({ query: { email: "user1@example.com" } });
 
 		expect(users.length).toBe(1);
 		expect(users[0]._id).toBeUndefined();
@@ -46,7 +46,7 @@ describe("UserRepo", () => {
 });
 
 /**
- * @param {Db} db 
+ * @param {Db} db
  */
 function insertTestUsers(db) {
 	let users = ["user1", "user2"]
