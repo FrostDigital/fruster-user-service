@@ -223,7 +223,7 @@ describe("GetUsersByQueryHandler", () => {
 			data: {
 				query: { roles: { $in: ["user"] } },
 				expand: "profile",
-				sort: { "firstName": 1 }
+				sort: { "profile.firstName": 1 }
 			}
 		});
 
@@ -286,7 +286,7 @@ describe("GetUsersByQueryHandler", () => {
 			data: {
 				query: { roles: { $in: ["user"] } },
 				expand: "profile",
-				sort: { firstName: 1 },
+				sort: { "profile.firstName": 1 },
 				caseInsensitiveSort: true
 			}
 		});
