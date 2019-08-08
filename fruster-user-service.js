@@ -44,7 +44,6 @@ const docs = require("./lib/docs");
 const log = require("fruster-log");
 
 module.exports = {
-
 	start: async (busAddress, mongoUrl) => {
 
 		await bus.connect(busAddress);
@@ -370,7 +369,7 @@ async function createIndexes(db) {
 	if (!config.uniqueIndexes.includes("id"))
 		config.uniqueIndexes.push("id");
 
-	if (!config.uniqueIndexes.includes("profile.id"))
+	if (!(config.profileFields.includes(constants.dataset.ALL_FIELDS) && config.userFields.includes(constants.dataset.ALL_FIELDS)))
 		config.uniqueIndexes.push("profile.id");
 
 	config.uniqueIndexes.forEach(async index => {
