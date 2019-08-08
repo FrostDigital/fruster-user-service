@@ -370,6 +370,9 @@ async function createIndexes(db) {
 	if (!config.uniqueIndexes.includes("id"))
 		config.uniqueIndexes.push("id");
 
+	if (!config.uniqueIndexes.includes("profile.id"))
+		config.uniqueIndexes.push("profile.id");
+
 	config.uniqueIndexes.forEach(async index => {
 		const indexObj = {};
 		if (index.includes("profile")) {
