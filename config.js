@@ -25,7 +25,7 @@ module.exports = {
 	initialUserEmail: process.env.INITIAL_USER_EMAIL || "admin@frost.se",
 
 	/** The password of the initial account being created upon first run. Should be changed in prod! */
-	initialUserPassword: process.env.INITIAL_USER_PASSWORD || "FrusterR0ckS",
+	initialUserPassword: process.env.INITIAL_USER_PASSWORD || "Frosties2019",
 
 	/** The roles of the initial account being created upon first run */
 	initialUserRole: process.env.INITIAL_USER_ROLE || "super-admin",
@@ -109,8 +109,8 @@ module.exports = {
 	 */
 	profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL"),
 
-	/** Treshold for what is considered to be a slow query. If slow, this will be logged */
-	slowQueryTresholdMs: parseInt(process.env.SLOW_QUERY_TRESHOLD_MS || "250")
+	/** Threshold for what is considered to be a slow query. If slow, this will be logged */
+	slowQueryThresholdMs: Number.parseInt(process.env.SLOW_QUERY_THRESHOLD_MS || "250")
 
 };
 

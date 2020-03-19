@@ -41,15 +41,19 @@ const config = require("./config");
 const constants = require("./lib/constants.js");
 const expressApp = require("./web/express-app");
 const docs = require("./lib/docs");
+const log = require("fruster-log");
 
 module.exports = {
-
 	start: async (busAddress, mongoUrl) => {
 
 		await bus.connect(busAddress);
 		const db = await mongo.connect(mongoUrl);
 
-		await createIndexes(db);
+		try {
+			await createIndexes(db);
+		} catch (err) {
+			log.warn("Error while creating indexes", err);
+		}
 
 		// REPOS
 		const userRepo = new UserRepo(db);
@@ -359,13 +363,14 @@ async function createIndexes(db) {
 	await db.collection(constants.collections.USERS)
 		.createIndex({ email: 1 }, {
 			unique: true,
-			partialFilterExpression: {
-				email: { $exists: true }
-			}
+			partialFilterExpression: { email: { $exists: true } }
 		});
 
 	if (!config.uniqueIndexes.includes("id"))
 		config.uniqueIndexes.push("id");
+
+	if (!(config.profileFields.includes(constants.dataset.ALL_FIELDS) && config.userFields.includes(constants.dataset.ALL_FIELDS)))
+		config.uniqueIndexes.push("profile.id");
 
 	config.uniqueIndexes.forEach(async index => {
 		const indexObj = {};
