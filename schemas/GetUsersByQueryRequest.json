@@ -1,31 +1,34 @@
 {
-    "id": "GetUsersByQueryRequest",
-    "description": "Request for getting users by query.",
-    "additionalProperties": true,
-    "properties": {
-        "query": {
-            "$ref": "GenericAttrs#/definitions/query"
-        },
-        "filter": {
-            "$ref": "GenericAttrs#/definitions/filter"
-        },
-        "start": {
-            "$ref": "GenericAttrs#/definitions/start"
-        },
-        "limit": {
-            "$ref": "GenericAttrs#/definitions/limit"
-        },
-        "sort": {
-            "$ref": "GenericAttrs#/definitions/sort"
-        },
-        "expand": {
-            "$ref": "GenericAttrs#/definitions/expand"
-        },
-        "caseInsensitiveSort": {
-            "$ref": "GenericAttrs#/definitions/caseInsensitiveSort"
-        }
-    },
-    "required": [
-        "query"
-    ]
+	"id": "GetUsersByQueryRequest",
+	"description": "Request for getting users by query.",
+	"additionalProperties": true,
+	"properties": {
+		"query": {
+			"$ref": "GenericAttrs#/definitions/query"
+		},
+		"filter": {
+			"$ref": "GenericAttrs#/definitions/filter"
+		},
+		"start": {
+			"$ref": "GenericAttrs#/definitions/start"
+		},
+		"limit": {
+			"$ref": "GenericAttrs#/definitions/limit"
+		},
+		"sort": {
+			"$ref": "GenericAttrs#/definitions/sort"
+		},
+		"expand": {
+			"$ref": "GenericAttrs#/definitions/expand"
+		},
+		"caseInsensitiveSort": {
+			"$ref": "GenericAttrs#/definitions/caseInsensitiveSort"
+		},
+		"count": {
+			"$ref": "GenericAttrs#/definitions/count"
+		}
+	},
+	"required": [
+		"query"
+	]
 }
