@@ -57,6 +57,10 @@
         "caseInsensitiveSort": {
             "type": "boolean",
             "description": "Whether or not to use case insensitive sorting. This only works with sorting on string values. E.g. sort = { firstName: 1 }"
+        },
+        "count": {
+            "type": "boolean",
+            "description": "Whether or not to return only user count without users. E.g. count = true"
         }
     }
 }

@@ -23,6 +23,9 @@
         },
         "caseInsensitiveSort": {
             "$ref": "GenericAttrs#/definitions/caseInsensitiveSort"
+        },
+        "count": {
+            "$ref": "GenericAttrs#/definitions/count"
         }
     },
     "required": [
