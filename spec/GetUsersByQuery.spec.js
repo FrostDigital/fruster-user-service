@@ -468,6 +468,22 @@ describe("GetUsersByQueryHandler", () => {
 		}
 	});
 
+	it("should be possible to get users count without fetching users by a query", async () => {
+		config.userFields = [constants.dataset.REQUIRED_ONLY];
+		await createTestUsers(10);
+
+		const { data: { users, totalCount } } = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
+			data: {
+				query: { roles: { $in: ["user"] } },
+				count: true
+			}
+		});
+
+		expect(users.length).toBe(0, "users.length");
+		expect(totalCount).toBe(10, "totalCount");
+	});
+
 	/**
 	 * @param {Number} number
 	 * @param {Number=} startAt

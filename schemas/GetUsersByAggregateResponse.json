@@ -1,0 +1,10 @@
+{
+	"id": "GetUsersByAggregateResponse",
+	"description": "Response from get users by aggregate. Response data may vary depending on aggregation query.",
+	"additionalProperties": false,
+	"properties": {
+		"users": {
+			"$ref": "UserListResponse"
+		}
+	}
+}

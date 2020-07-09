@@ -1,62 +1,66 @@
 {
-    "id": "GenericAttrs",
-    "definitions": {
-        "filter": {
-            "type": "object",
-            "description": "mongodb like filtering object in a String: Number fashion: firstName: 0 to exclude & firstName: 1 to include.",
-            "additionalProperties": true,
-            "minProperties": 1,
-            "properties": {
-                "id": {
-                    "minimum": 0,
-                    "maximum": 1,
-                    "type": "number",
-                    "description": "Just an example property."
-                }
-            }
-        },
-        "start": {
-            "type": "number",
-            "minimum": 0,
-            "description": "Index to start results from."
-        },
-        "limit": {
-            "type": "number",
-            "minimum": 1,
-            "description": "Number of results."
-        },
-        "query": {
-            "type": "object",
-            "description": "mongodb like query object in a String: any fashion, e.g. { id: { $in: ['7a967d8b-8a25-4d20-b0e9-8ebe9383d488', '9f6b47c0-628c-45ca-8c43-8a99bf37e241'] }} to get users with ids '7a967d8b-8a25-4d20-b0e9-8ebe9383d488' and '9f6b47c0-628c-45ca-8c43-8a99bf37e241.'",
-            "additionalProperties": true,
-            "minProperties": 1,
-            "properties": {}
-        },
-        "sort": {
-            "type": "object",
-            "description": "mongodb like sort object in a String: Number fashion, e.g. { id: 1} to sort by id.",
-            "additionalProperties": true,
-            "minProperties": 1,
-            "properties": {
-                "id": {
-                    "minimum": -1,
-                    "maximum": 1,
-                    "type": "number",
-                    "description": "Just an example property."
-                }
-            }
-        },
-        "expand": {
-            "type": "string",
-            "enum": [
-                "profile",
-                "true"
-            ],
-            "description": "Whether or not to expand user object with its profile."
-        },
-        "caseInsensitiveSort": {
-            "type": "boolean",
-            "description": "Whether or not to use case insensitive sorting. This only works with sorting on string values. E.g. sort = { firstName: 1 }"
-        }
-    }
+	"id": "GenericAttrs",
+	"definitions": {
+		"filter": {
+			"type": "object",
+			"description": "mongodb like filtering object in a String: Number fashion: firstName: 0 to exclude & firstName: 1 to include.",
+			"additionalProperties": true,
+			"minProperties": 1,
+			"properties": {
+				"id": {
+					"minimum": 0,
+					"maximum": 1,
+					"type": "number",
+					"description": "Just an example property."
+				}
+			}
+		},
+		"start": {
+			"type": "number",
+			"minimum": 0,
+			"description": "Index to start results from."
+		},
+		"limit": {
+			"type": "number",
+			"minimum": 1,
+			"description": "Number of results."
+		},
+		"query": {
+			"type": "object",
+			"description": "mongodb like query object in a String: any fashion, e.g. { id: { $in: ['7a967d8b-8a25-4d20-b0e9-8ebe9383d488', '9f6b47c0-628c-45ca-8c43-8a99bf37e241'] }} to get users with ids '7a967d8b-8a25-4d20-b0e9-8ebe9383d488' and '9f6b47c0-628c-45ca-8c43-8a99bf37e241.'",
+			"additionalProperties": true,
+			"minProperties": 1,
+			"properties": {}
+		},
+		"sort": {
+			"type": "object",
+			"description": "mongodb like sort object in a String: Number fashion, e.g. { id: 1} to sort by id.",
+			"additionalProperties": true,
+			"minProperties": 1,
+			"properties": {
+				"id": {
+					"minimum": -1,
+					"maximum": 1,
+					"type": "number",
+					"description": "Just an example property."
+				}
+			}
+		},
+		"expand": {
+			"type": "string",
+			"enum": [
+				"profile",
+				"true"
+			],
+			"description": "Whether or not to expand user object with its profile."
+		},
+		"caseInsensitiveSort": {
+			"type": "boolean",
+			"description": "Whether or not to use case insensitive sorting. This only works with sorting on string values. E.g. sort = { firstName: 1 }"
+		},
+		"count": {
+			"type": "boolean",
+			"description": "Whether or not to return only user count without users. E.g. count = true"
+		}
+	}
 }
