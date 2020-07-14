@@ -370,11 +370,12 @@ module.exports = {
  * @param {Db} db
  */
 async function createIndexes(db) {
-	await db.collection(constants.collections.USERS)
-		.createIndex({ email: 1 }, {
-			unique: true,
-			partialFilterExpression: { email: { $exists: true } }
-		});
+	if (config.usernameValidationDbField.includes("email") && !config.skipEmailUniqueIndex)
+		await db.collection(constants.collections.USERS)
+			.createIndex({ email: 1 }, {
+				unique: true,
+				partialFilterExpression: { email: { $exists: true } }
+			});
 
 	if (!config.uniqueIndexes.includes("id"))
 		config.uniqueIndexes.push("id");

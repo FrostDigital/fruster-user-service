@@ -34,11 +34,11 @@ module.exports = {
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
 	/** Wether or not to require the users to verify their email address before being able to signin.
-	     If this is set to true a web server will run providing a simple request new token / verify frontend @ /resend-verification & /verify-email:tokenId */
+		 If this is set to true a web server will run providing a simple request new token / verify frontend @ /resend-verification & /verify-email:tokenId */
 	requireEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === "true",
 
 	/** Wether or not to ask the users to verify their email address but not requiring it to signin.
-	     If this is set to true a web server will run providing a simple request new token / verify  frontend @ /resend-verification & /verify-email:tokenId */
+		 If this is set to true a web server will run providing a simple request new token / verify  frontend @ /resend-verification & /verify-email:tokenId */
 	optionalEmailVerification: process.env.OPTIONAL_EMAIL_VERIFICATION === "true",
 
 	/** The roles email verification applies to, if set to * it applies to all roles. */
@@ -48,7 +48,7 @@ module.exports = {
 	port: process.env.PORT || 3120,
 
 	/** :user-{field}: can be used to display user information in the email. e.g. :user-firstName:
-	     :token is the email verification token to be used to validate the email address. */
+		 :token is the email verification token to be used to validate the email address. */
 	emailVerificationMessage: process.env.EMAIL_VERIFICATION_MESSAGE || "Hello :user-firstName: :user-lastName:, \nVisit http://localhost:3120/verify-email?token=:token: to verify your email.",
 
 	emailVerificationSubject: process.env.EMAIL_VERIFICATION_SUBJECT || "Verify email",
@@ -56,7 +56,7 @@ module.exports = {
 	emailVerificationFrom: process.env.EMAIL_VERIFICATION_FROM || "verification@fruster.se",
 
 	/** Template to use for emails about verifying email. If not set, the standard inline email will be used. */
-	emailVerificationEmailTempate: process.env.EMAIL_VERIFICATION_TEMPLATE || undefined,
+	emailVerificationEmailTemplate: process.env.EMAIL_VERIFICATION_TEMPLATE || undefined,
 
 	/**
 	 * If set, after an email has been verified the web redirects to this url. The verified email, or error, will be added to the url as query params:
@@ -69,14 +69,17 @@ module.exports = {
 	lowerCaseName: process.env.LOWER_CASE_NAME === "true",
 
 	/** If user service accepts queries for ALL users
-	     This is disabled by default for security reasons. */
+		 This is disabled by default for security reasons. */
 	allowGetAll: process.env.ALLOW_GET_ALL === "true",
 
 	/** Database field used to validate password (e.g. login or updating password) with, can be CSV for multiple fields  */
 	usernameValidationDbField: parseArray(process.env.USERNAME_VALIDATION_DB_FIELD || "email"),
 
+	/** Skip email unique index if email not unique. */
+	skipEmailUniqueIndex: process.env.SKIP_EMAIL_UNIQUE_INDEX === "true",
+
 	/** Which hashing algorithm to use for hashing passwords, supports whatever cryptojs supports.
-         NOTE: changing this will make it impossible to login with any accounts created with another hashing teqnique prior. */
+		 NOTE: changing this will make it impossible to login with any accounts created with another hashing teqnique prior. */
 	hashingAlgorithm: process.env.HASHING_ALGORITHM || "sha512",
 
 	/** Whether or not to use database for roles and scopes. This makes it possible to dynamically add new system roles and scopes.  */
