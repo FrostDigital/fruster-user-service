@@ -40,7 +40,7 @@
 			"lib/docs.js",
 			"lib/deprecatedErrors.js",
 			"lib/repos/AbstractRoleScopesRepo.js",
-			"lib/repos/RoleScopesConfigRepo.js",
+			"lib/repos/RoleScopesConfigRepo.js"
 		]
 	}
 }
