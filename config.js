@@ -59,6 +59,13 @@ module.exports = {
 	emailVerificationEmailTemplate: process.env.EMAIL_VERIFICATION_TEMPLATE || undefined,
 
 	/**
+	 * If need different email templates for different roles.
+	 * Value should <role1>,<role2>:<templateId1>;<role3>,<role4>:<templateId2>
+	 * Ex - "admin:939e8ab4-9aa7-4d33-96ec-09c41db82072;customer,consultant:898654d5-b07b-420b-99bc-ccaa133eb092"
+	 */
+	verificationEmailTemplates: process.env.VERIFICATION_EMAIL_TEMPLATES || undefined,
+
+	/**
 	 * If set, after an email has been verified the web redirects to this url. The verified email, or error, will be added to the url as query params:
 	 * Example w/ verified email http://flamingo.education  > http://flamingo.education/?verified={email}
 	 * Example w/ error http://flamingo.education  > http://flamingo.education/?error={error} e.g. "INVALID_TOKEN"

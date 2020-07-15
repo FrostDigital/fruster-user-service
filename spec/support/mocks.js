@@ -2,6 +2,7 @@ const uuid = require("uuid");
 const bus = require("fruster-bus");
 const constants = require("../../lib/constants.js");
 const SpecUtils = require("./SpecUtils");
+const MailServiceClient = require("../../lib/clients/MailServiceClient");
 
 module.exports = {
 
@@ -53,7 +54,7 @@ module.exports = {
 	},
 
 	mockMailService: (expectFunc) => {
-		bus.subscribe("mail-service.send", (req) => {
+		bus.subscribe(MailServiceClient.endpoints.SEND_MAIL, (req) => {
 			if (expectFunc)
 				expectFunc(req);
 			return {

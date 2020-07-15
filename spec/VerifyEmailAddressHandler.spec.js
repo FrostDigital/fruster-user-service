@@ -29,10 +29,10 @@ describe("VerifyEmailAddressHandler", () => {
 	it("should remove emailVerificationToken and set emailVerified to true when verifying with emailVerificationToken", async () => {
 		const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
-		bus.subscribe(MailServiceClient.endpoints.SEND, (req) => {
-			expect(req.data.from).toBe(config.emailVerificationFrom, "req.data.from");
-			expect(req.data.to.includes(testUserData.email)).toBeTruthy("req.data.to.includes(testUserData.email)");
-			return { reqId: req.reqId, status: 200 }
+		bus.subscribe(MailServiceClient.endpoints.SEND_MAIL, ({ reqId, data }) => {
+			expect(data.from).toBe(config.emailVerificationFrom, "data.from");
+			expect(data.to.includes(testUserData.email)).toBeTruthy("data.to.includes(testUserData.email)");
+			return { reqId, status: 200 }
 		});
 
 		const createUserResponse = (await mocks.createUser(testUserData)).data;
@@ -69,10 +69,10 @@ describe("VerifyEmailAddressHandler", () => {
 
 		const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
-		bus.subscribe(MailServiceClient.endpoints.SEND, (req) => {
-			expect(req.data.from).toBe(config.emailVerificationFrom);
-			expect(req.data.to[0]).toBe(testUserData.email);
-			expect(req.data.templateId).toBe(config.emailVerificationEmailTemplate);
+		bus.subscribe(MailServiceClient.endpoints.SEND_MAIL, ({ data }) => {
+			expect(data.from).toBe(config.emailVerificationFrom, "from");
+			expect(data.to[0]).toBe(testUserData.email, "to");
+			expect(data.templateId).toBe(config.emailVerificationEmailTemplate, "templateId");
 
 			done();
 		});
