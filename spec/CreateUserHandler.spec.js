@@ -507,10 +507,10 @@ describe("CreateUserHandler", () => {
 		expect(data.id).toBe(userId, "data.id");
 	});
 
-	it("should resend verification mail when updating email if conf.requireEmailVerification is set to true and conf.verificationEmailTemplates and config.requirePasswordOnEmailUpdate set", async () => {
+	it("should resend verification mail when updating email if conf.requireEmailVerification is set to true and conf.emailVerificationTemplateByRole and config.requirePasswordOnEmailUpdate set", async () => {
 		config.requireEmailVerification = true;
 		config.requirePasswordOnEmailUpdate = true;
-		config.verificationEmailTemplates = "admin:596a3cee-21a2-4066-b169-9bd63579267d";
+		config.emailVerificationTemplateByRole = "admin:596a3cee-21a2-4066-b169-9bd63579267d";
 
 		const mockSendMailService = frusterTestUtils.mockService({
 			subject: MailServiceClient.endpoints.SEND_MAIL,

@@ -65,14 +65,14 @@ describe("VerifyEmailAddressHandler", () => {
 	});
 
 	it("should use sendgrid mail template if specified in config", async done => {
-		config.emailVerificationEmailTemplate = "band-ola";
+		config.emailVerificationTemplate = "band-ola";
 
 		const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
 		bus.subscribe(MailServiceClient.endpoints.SEND_MAIL, ({ data }) => {
 			expect(data.from).toBe(config.emailVerificationFrom, "from");
 			expect(data.to[0]).toBe(testUserData.email, "to");
-			expect(data.templateId).toBe(config.emailVerificationEmailTemplate, "templateId");
+			expect(data.templateId).toBe(config.emailVerificationTemplate, "templateId");
 
 			done();
 		});
