@@ -2,6 +2,9 @@ const Db = require("mongodb").Db;
 const config = require("../config");
 const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");
+const errors = require("../lib/errors.js");
+const testBus = require("fruster-bus").testBus;
+const MailServiceClient = require("../lib/clients/MailServiceClient");
 const SpecUtils = require("./support/SpecUtils");
 const frusterTestUtils = require("fruster-test-utils");
 const RoleManager = require("../lib/managers/RoleManager");
@@ -504,4 +507,41 @@ describe("CreateUserHandler", () => {
 		expect(data.id).toBe(userId, "data.id");
 	});
 
+	it("should resend verification mail when updating email if conf.requireEmailVerification is set to true and conf.emailVerificationTemplateByRole and config.requirePasswordOnEmailUpdate set", async () => {
+		config.requireEmailVerification = true;
+		config.requirePasswordOnEmailUpdate = true;
+		config.emailVerificationTemplateByRole = "admin:596a3cee-21a2-4066-b169-9bd63579267d";
+
+		const mockSendMailService = frusterTestUtils.mockService({
+			subject: MailServiceClient.endpoints.SEND_MAIL,
+			response: { status: 200 }
+		});
+
+		const { data: createdUser } = await testBus.request({
+			subject: constants.endpoints.service.CREATE_USER,
+			message: { data: mocks.getUserObject() }
+		});
+
+		const newEmail = "ram@ram.se";
+
+		await testBus.request({
+			subject: constants.endpoints.service.UPDATE_USER,
+			message: {
+				data: {
+					id: createdUser.id,
+					email: newEmail,
+					firstName: createdUser.firstName,
+					lastName: createdUser.lastName,
+					password: mocks.getUserObject().password
+				}
+			}
+		});
+
+		const testUser = await db.collection(constants.collections.USERS).findOne({ id: createdUser.id });
+
+		expect(testUser.emailVerified).toBe(false, "testUser.emailVerified");
+		expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
+
+		expect(mockSendMailService.requests[1].data.templateArgs.user.email).toBe(newEmail, "email");
+	});
 });

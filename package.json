@@ -31,11 +31,16 @@
 	},
 	"nyc": {
 		"exclude": [
+			"web",
+			"spec/*",
+			"config.js",
+			"lib/deprecatedErrors.js",
+			"lib/errors.js",
+			"lib/constants.js",
+			"lib/docs.js",
 			"lib/deprecatedErrors.js",
 			"lib/repos/AbstractRoleScopesRepo.js",
-			"lib/repos/RoleScopesConfigRepo.js",
-			"web",
-			"spec"
+			"lib/repos/RoleScopesConfigRepo.js"
 		]
 	}
 }
