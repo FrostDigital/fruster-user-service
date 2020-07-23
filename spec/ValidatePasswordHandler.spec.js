@@ -303,4 +303,30 @@ describe("ValidatePasswordHandler", () => {
 		config.requireEmailVerification = false;
 	});
 
+	it("should return 200 when validating correct password with additional query", async () => {
+		const user = mocks.getUserObject();
+
+		const orgId = "org-id";
+
+		//@ts-ignore
+		await db.dropDatabase(constants.collections.USERS);
+
+		await SpecUtils.busRequest({
+			subject: constants.endpoints.service.CREATE_USER,
+			data: { ...user, organisation: { id: orgId } }
+		});
+
+		const { status, data, error } = await SpecUtils.busRequest({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: {
+				username: user.email,
+				password: user.password,
+				additionalQuery: { "organisation.id": orgId }
+			}
+		});
+
+		expect(status).toBe(200, "status");
+		expect(error).toBeUndefined("error");
+	});
+
 });
