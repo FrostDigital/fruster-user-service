@@ -14,6 +14,7 @@ const CreateUserHandler = require("./lib/handlers/CreateUserHandler");
 const GetUserHandler = require("./lib/handlers/GetUserHandler"); /** DEPRECATED */
 const GetUsersByQueryHandler = require("./lib/handlers/GetUsersByQueryHandler");
 const GetUsersByAggregateHandler = require("./lib/handlers/GetUsersByAggregateHandler");
+const GetByAggregateHandler = require("./lib/handlers/GetByAggregateHandler");
 const GetUserByIdHandler = require("./lib/handlers/GetUserByIdHandler");
 const GetScopesForRolesHandler = require("./lib/handlers/GetScopesForRolesHandler");
 const UpdateUserHandler = require("./lib/handlers/UpdateUserHandler");
@@ -78,6 +79,7 @@ module.exports = {
 		const getUserHandler = new GetUserHandler(userRepo, roleManager); /** DEPRECATED */
 		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleManager, profileManager);
 		const getUsersByAggregateHandler = new GetUsersByAggregateHandler(userRepo, roleManager);
+		const getByAggregateHandler = new GetByAggregateHandler(userRepo);
 		const getUserByIdHandler = new GetUserByIdHandler(userRepo, roleManager, profileManager);
 		const getScopesForRolesHandler = new GetScopesForRolesHandler(roleManager);
 		const updateUserHandler = new UpdateUserHandler(userRepo, passwordManager, roleManager, profileManager, userManager);
@@ -89,7 +91,7 @@ module.exports = {
 		const addRolesHandler = new AddRolesHandler(userRepo, roleManager);
 		const removeRolesHandler = new RemoveRolesHandler(userRepo, roleManager);
 		const verifyEmailAddressHandler = new VerifyEmailAddressHandler(userRepo);
-		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(userRepo, roleManager);
+		const resendVerificationEmailHandler = new ResendVerificationEmailHandler(userRepo);
 
 		const getProfilesByQueryHandler = new GetProfilesByQueryHandler(roleManager, profileManager);
 		const updateProfileHandler = new UpdateProfileHandler(profileRepo, userManager, profileManager);
@@ -248,6 +250,14 @@ module.exports = {
 			responseSchema: constants.schemas.response.GET_USERS_BY_AGGREGATE,
 			docs: docs.service.GET_USERS_BY_AGGREGATE,
 			handle: (req) => getUsersByAggregateHandler.handle(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.service.GET_BY_AGGREGATE,
+			requestSchema: constants.schemas.request.GET_USERS_BY_AGGREGATE,
+			responseSchema: constants.schemas.response.GET_BY_AGGREGATE,
+			docs: docs.service.GET_BY_AGGREGATE,
+			handle: (req) => getByAggregateHandler.handle(req)
 		});
 
 		bus.subscribe({
