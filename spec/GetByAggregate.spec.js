@@ -1,5 +1,6 @@
 const frusterTestUtils = require("fruster-test-utils")
 const constants = require("../lib/constants");
+const errors = require("../lib/errors");
 const Db = require("mongodb").Db;
 const specConstants = require("./support/spec-constants");
 const SpecUtils = require("./support/SpecUtils");
@@ -35,6 +36,28 @@ describe("GetByAggregateHandler", () => {
 		expect(data.length).toBe(2, "data.length");
 		expect(data[0]._id).toBe("user", "data[0]._id");
 		expect(data[0].count).toBe(10, "data[0].count");
+	});
+
+	it("should throw bad request error if trying to access private properties", async done => {
+		await insertTestUsers(10);
+
+		try {
+			await SpecUtils.busRequest({
+				subject: constants.endpoints.service.GET_BY_AGGREGATE,
+				data: {
+					aggregate: [
+						{ $project: { password: 1 } }
+					]
+				}
+			});
+
+			done.fail();
+		} catch ({ error, status }) {
+			expect(status).toBe(400, "status");
+			expect(error.code).toBe(errors.badRequest().error.code, "code");
+			expect(error.detail).toBe("Cannot expose password|salt|emailVerificationToken|hashDate", "detail");
+			done();
+		}
 	});
 
 	/**
