@@ -120,7 +120,10 @@ module.exports = {
 	profileFields: parseArray(process.env.PROFILE_FIELDS || "ALL"),
 
 	/** Threshold for what is considered to be a slow query. If slow, this will be logged */
-	slowQueryThresholdMs: Number.parseInt(process.env.SLOW_QUERY_THRESHOLD_MS || "250")
+	slowQueryThresholdMs: Number.parseInt(process.env.SLOW_QUERY_THRESHOLD_MS || "250"),
+
+	/** Properties should not expose to outside. These filed will remove from response, or will throw error if response has such field*/
+	privateProperties: "password|salt|emailVerificationToken|hashDate" + (process.env.PRIVATE_PROPERTIES ? "|" + process.env.PRIVATE_PROPERTIES : "")
 
 };
 

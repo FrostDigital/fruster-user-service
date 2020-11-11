@@ -1,0 +1,9 @@
+{
+	"id": "GetByAggregateResponse",
+	"description": "Response from get user records by aggregate.",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"description": "Response data may vary depending on aggregation query."
+	}
+}
