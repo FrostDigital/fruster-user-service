@@ -1,7 +1,8 @@
+const Db = require("mongodb").Db;
 const frusterTestUtils = require("fruster-test-utils")
 const constants = require("../lib/constants");
 const errors = require("../lib/errors");
-const Db = require("mongodb").Db;
+const config = require("../config");
 const specConstants = require("./support/spec-constants");
 const SpecUtils = require("./support/SpecUtils");
 
@@ -13,6 +14,12 @@ describe("GetByAggregateHandler", () => {
 	frusterTestUtils
 		.startBeforeEach(specConstants
 			.testUtilsOptions(connection => db = connection.db));
+
+	let privateProperties;
+
+	beforeAll(() => privateProperties = config.privateProperties);
+
+	afterAll(() => { process.env.PRIVATE_PROPERTIES = undefined })
 
 	it("should be possible to get by a aggregate", async () => {
 		await insertTestUsers(10);
@@ -41,12 +48,14 @@ describe("GetByAggregateHandler", () => {
 	it("should throw bad request error if trying to access private properties", async done => {
 		await insertTestUsers(10);
 
+		config.privateProperties = privateProperties + "|firstName|lastName";
+
 		try {
 			await SpecUtils.busRequest({
 				subject: constants.endpoints.service.GET_BY_AGGREGATE,
 				data: {
 					aggregate: [
-						{ $project: { password: 1 } }
+						{ $project: { lastName: 1 } }
 					]
 				}
 			});
@@ -55,7 +64,7 @@ describe("GetByAggregateHandler", () => {
 		} catch ({ error, status }) {
 			expect(status).toBe(400, "status");
 			expect(error.code).toBe(errors.badRequest().error.code, "code");
-			expect(error.detail).toBe("Cannot expose password|salt|emailVerificationToken|hashDate", "detail");
+			expect(error.detail).toContain("Cannot expose password|salt|emailVerificationToken|hashDate", "detail");
 			done();
 		}
 	});
