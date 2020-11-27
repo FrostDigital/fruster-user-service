@@ -33,6 +33,9 @@ module.exports = {
 	/** Wether or not to require users to have a password. Typically used with some external login method such as BankID or facebook. */
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
+	/** Wether need send set password email */
+	requireSendSetPasswordEmail: parseBool(process.env.REQUIRE_SEND_SET_PASSWORD_EMAIL || "false"),
+
 	/** Wether or not to require the users to verify their email address before being able to signin.
 		 If this is set to true a web server will run providing a simple request new token / verify frontend @ /resend-verification & /verify-email:tokenId */
 	requireEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === "true",
@@ -71,6 +74,31 @@ module.exports = {
 	 * Example w/ error http://flamingo.education  > http://flamingo.education/?error={error} e.g. "INVALID_TOKEN"
 	 */
 	emailVerificationRedirectUrl: process.env.EMAIL_VERIFICATION_REDIRECT_URL || undefined,
+
+	/** :user-{field}: can be used to display user information in the email. e.g. :user-firstName:
+			 :token is the set password token to be used to set password. */
+	setPasswordEmailMessage: process.env.SET_PASSWORD_EMAIL_MESSAGE || "Hello :user-firstName: :user-lastName:, \nVisit http://localhost:3120/set-password?token=:token: to set password.",
+
+	setPasswordEmailSubject: process.env.SET_PASSWORD_EMAIL_SUBJECT || "Set password",
+
+	setPasswordEmailFrom: process.env.SET_PASSWORD_EMAIL_FROM || "verification@fruster.se",
+
+	/** Template to use for emails about verifying email. If not set, the standard inline email will be used. */
+	setPasswordEmailTemplate: process.env.SET_PASSWORD_EMAIL_TEMPLATE || undefined,
+
+	/**
+	 * If need different email templates for different roles.
+	 * Value should <role1>,<role2>:<templateId1>;<role3>,<role4>:<templateId2>
+	 * Ex - "admin:939e8ab4-9aa7-4d33-96ec-09c41db82072;customer,consultant:898654d5-b07b-420b-99bc-ccaa133eb092"
+	 */
+	setPasswordEmailTemplateByRole: process.env.SET_PASSWORD_EMAIL_TEMPLATE_BY_ROLE || undefined,
+
+	/**
+	 * If set, after set password the web redirects to this url. The set password, or error, will be added to the url as query params:
+	 * Example w/ verified email http://flamingo.education  > http://flamingo.education/?verified={email}
+	 * Example w/ error http://flamingo.education  > http://flamingo.education/?error={error} e.g. "INVALID_TOKEN"
+	 */
+	setPasswordEmailRedirectUrl: process.env.SET_PASSWORD_EMAIL_REDIRECT_URL || undefined,
 
 	/** Will lowercase names (firstname, lastname and middle name) during create and update if set to true */
 	lowerCaseName: process.env.LOWER_CASE_NAME === "true",

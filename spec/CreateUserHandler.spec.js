@@ -2,7 +2,6 @@ const Db = require("mongodb").Db;
 const config = require("../config");
 const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");
-const errors = require("../lib/errors.js");
 const testBus = require("fruster-bus").testBus;
 const MailServiceClient = require("../lib/clients/MailServiceClient");
 const SpecUtils = require("./support/SpecUtils");
@@ -543,5 +542,32 @@ describe("CreateUserHandler", () => {
 		expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
 
 		expect(mockSendMailService.requests[1].data.templateArgs.user.email).toBe(newEmail, "email");
+	});
+
+	it("should be possible to create user without password if configure to send set password url", async () => {
+		const mockSendMailService = frusterTestUtils.mockService({
+			subject: MailServiceClient.endpoints.SEND_MAIL,
+			response: { status: 200 }
+		});
+
+		const { password, ...user } = mocks.getUserObject();
+		user.roles.push("super-admin");
+
+		config.requireSendSetPasswordEmail = true;
+
+		const { status, data } = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+		expect(status).toBe(201, "status");
+
+		expect(data.firstName).toBe(user.firstName, "data.firstName");
+		expect(data.middleName).toBe(user.middleName, "data.middleName");
+		expect(data.lastName).toBe(user.lastName, "data.lastName");
+		expect(data.email).toBe(user.email, "data.email");
+
+		expect(mockSendMailService.invocations).toBe(1, "mockSendMailService.invocations");
+
+		const requestData = mockSendMailService.requests[0].data;
+
+		expect(requestData.to).toContain(user.email, "requestData.to");
 	});
 });

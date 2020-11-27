@@ -1,0 +1,117 @@
+<html>
+
+<head>
+
+	<title>Set password</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<script src="https://code.jquery.com/jquery-3.1.0.js"
+		integrity="sha256-slogkvB1K3VOkzAI8QITxV3VzpOnkeNVsKvtkYLMjfk=" crossorigin="anonymous"></script>
+
+	<style type="text/css">
+		body {
+			font-family: sans-serif;
+			padding: 1em;
+			margin: 0;
+		}
+
+		#verified {
+			color: green;
+		}
+
+		#error {
+			color: red;
+		}
+
+		#input-error {
+			color: red;
+		}
+	</style>
+
+	<script>
+		$(() => {
+			let token;
+
+			$.each(document.location.search.substr(1).split('&'), (c, q) => {
+				const i = q.split('=');
+
+				if (i[0] === "token")
+					token = i[1].toString();
+			});
+
+			if (!token)
+				$("#error").show();
+
+			$("#set-password-form").submit(() => {
+				$("#input-error").text("");
+				$("#input-error").hide();
+				$("#error").hide();
+
+				const newPassword = $("#password-input").val();
+				const rePassword = $("#re-password-input").val();
+
+				if (newPassword === rePassword) {
+					$("#loading").show();
+
+					$.post("./set-password", { token, newPassword })
+						.done(({ status, error }) => {
+							$("#loading").hide();
+
+							switch (status) {
+								case 200:
+									$("#verified").show();
+									break;
+
+								case 400:
+									$("#input-error").text(error);
+									$("#input-error").show();
+									break;
+
+								default:
+									$("#error").show();
+							};
+						});
+
+					return false;
+				} else {
+					$("#input-error").text("Password not matching");
+					$("#input-error").show();
+					return false;
+				}
+
+				return false;
+			});
+		});
+	</script>
+
+</head>
+
+<body>
+
+	<div id="loading" hidden>
+		Please wait...
+	</div>
+
+	<div id="verified" hidden>
+		The password is set to the user!
+	</div>
+
+	<div id="error" hidden>
+		Something went wrong, please try again!
+	</div>
+
+	<form id="set-password-form" method="POST">
+		<p>Set password</p>
+
+		<input id="password-input" type="password" required placeholder="Password">
+		<input id="re-password-input" type="password" required placeholder="Confirm Password">
+
+		<button> Submit </button>
+
+		<div id="input-error" hidden></div>
+	</form>
+
+</body>
+
+</html>
