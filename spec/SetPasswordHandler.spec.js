@@ -58,7 +58,7 @@ describe("SetPasswordHandler", () => {
 			subject: constants.endpoints.service.SET_PASSWORD,
 			data: {
 				newPassword: "Localhost:8081",
-				token: data.sendPasswordToken
+				token: data.setPasswordToken
 			}
 		});
 
