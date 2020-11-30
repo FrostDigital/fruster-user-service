@@ -36,6 +36,9 @@ describe("VerifyEmailAddressHandler", () => {
 		});
 
 		const createUserResponse = (await mocks.createUser(testUserData)).data;
+
+		await SpecUtils.delay(200);
+
 		const testUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
 		const verificationResponse = await SpecUtils.busRequest({
 			subject: constants.endpoints.http.VERIFY_EMAIL,
@@ -78,6 +81,8 @@ describe("VerifyEmailAddressHandler", () => {
 		});
 
 		await mocks.createUser(testUserData);
+
+		await SpecUtils.delay(200);
 	});
 
 });

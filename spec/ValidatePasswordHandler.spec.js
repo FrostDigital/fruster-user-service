@@ -240,6 +240,8 @@ describe("ValidatePasswordHandler", () => {
 			data: user
 		});
 
+		await SpecUtils.delay(200);
+
 		try {
 			await SpecUtils.busRequest({
 				subject: constants.endpoints.service.VALIDATE_PASSWORD,

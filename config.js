@@ -34,7 +34,7 @@ module.exports = {
 	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
 
 	/** Wether need send set password email */
-	requireSendSetPasswordEmail: parseBool(process.env.REQUIRE_SEND_SET_PASSWORD_EMAIL || "false"),
+	requireSendSetPasswordEmail: process.env.REQUIRE_SEND_SET_PASSWORD_EMAIL === "true",
 
 	/** Wether or not to require the users to verify their email address before being able to signin.
 		 If this is set to true a web server will run providing a simple request new token / verify frontend @ /resend-verification & /verify-email:tokenId */
@@ -81,17 +81,10 @@ module.exports = {
 
 	setPasswordEmailSubject: process.env.SET_PASSWORD_EMAIL_SUBJECT || "Set password",
 
-	setPasswordEmailFrom: process.env.SET_PASSWORD_EMAIL_FROM || "verification@fruster.se",
+	setPasswordEmailFrom: process.env.SET_PASSWORD_EMAIL_FROM || "set_password@fruster.se",
 
 	/** Template to use for emails about verifying email. If not set, the standard inline email will be used. */
 	setPasswordEmailTemplate: process.env.SET_PASSWORD_EMAIL_TEMPLATE || undefined,
-
-	/**
-	 * If need different email templates for different roles.
-	 * Value should <role1>,<role2>:<templateId1>;<role3>,<role4>:<templateId2>
-	 * Ex - "admin:939e8ab4-9aa7-4d33-96ec-09c41db82072;customer,consultant:898654d5-b07b-420b-99bc-ccaa133eb092"
-	 */
-	setPasswordEmailTemplateByRole: process.env.SET_PASSWORD_EMAIL_TEMPLATE_BY_ROLE || undefined,
 
 	/**
 	 * If set, after set password the web redirects to this url. The set password, or error, will be added to the url as query params:

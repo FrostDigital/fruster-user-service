@@ -1,10 +1,9 @@
+const frusterTestUtils = require("fruster-test-utils");
 const mocks = require('./support/mocks.js');
 const SpecUtils = require('./support/SpecUtils');
-const constants = require('../lib/constants.js');
-const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
-const MailServiceClient = require('../lib/clients/MailServiceClient.js');
 const config = require('../config.js');
+const constants = require('../lib/constants.js');
 
 
 describe("SetPasswordHandler", () => {
@@ -17,22 +16,20 @@ describe("SetPasswordHandler", () => {
 
 	it("should be possible to set password", async () => {
 		const user = mocks.getUserObject();
-		const createdUserResponse = await SpecUtils.createUser(user);
+		const { data } = await SpecUtils.createUser(user);
 
-		const oldUser = await db.collection("users")
-			.findOne({ id: createdUserResponse.data.id });
+		const oldUser = await db.collection("users").findOne({ id: data.id });
 
 		await SpecUtils.busRequest({
 			subject: constants.endpoints.service.SET_PASSWORD,
-			user: createdUserResponse.data,
+			user: data,
 			data: {
 				newPassword: "Localhost:8081",
-				id: createdUserResponse.data.id
+				id: data.id
 			}
 		});
 
-		const newUser = await db.collection("users")
-			.findOne({ id: createdUserResponse.data.id });
+		const newUser = await db.collection("users").findOne({ id: data.id });
 
 		expect(newUser.password).not.toBe(oldUser.password, "newUser.password");
 		expect(newUser.salt).not.toBe(oldUser.salt, "newUser.salt");
@@ -40,19 +37,14 @@ describe("SetPasswordHandler", () => {
 	});
 
 	it("should be possible to set password with token", async () => {
-		const mockSendMailService = frusterTestUtils.mockService({
-			subject: MailServiceClient.endpoints.SEND_MAIL,
-			response: { status: 200 }
-		});
-
 		const { password, ...user } = mocks.getUserObject();
 		user.roles.push("super-admin");
 
 		config.requireSendSetPasswordEmail = true;
 
-		const { data } = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+		const { data } = await SpecUtils.createUser(user);
 
-		const oldUser = await db.collection("users").findOne({ id: data.id });
+		await SpecUtils.delay(200);
 
 		const { status } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.SET_PASSWORD,

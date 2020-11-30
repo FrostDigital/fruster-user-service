@@ -12,14 +12,14 @@ class SpecUtils {
 		return SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 	}
 
-    /**
-     * Makes a bus request with the appropriate options for most tests.
-     *
-     * @param {Object|String} options
-     * @param {Object=} inputData
-     *
-     * @return {Promise<FrusterResponse>}
-     */
+	/**
+	 * Makes a bus request with the appropriate options for most tests.
+	 *
+	 * @param {Object|String} options
+	 * @param {Object=} inputData
+	 *
+	 * @return {Promise<FrusterResponse>}
+	 */
 	static async busRequest(options, inputData) {
 		let subject;
 

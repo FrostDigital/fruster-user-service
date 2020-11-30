@@ -42,13 +42,14 @@ describe("ResendVerificationEmailHandler", () => {
 				} else
 					initialUserCreated = true;
 
-				conf.requireEmailVerification = false;
-
 				return { reqId: req.reqId, status: 200 };
 			}
 		});
 
 		const createUserResponse = (await mocks.createUser(testUserData)).data;
+
+		await SpecUtils.delay(200);
+
 		const testUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
 
 		verificationToken = testUser.emailVerificationToken;

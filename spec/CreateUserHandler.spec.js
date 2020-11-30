@@ -68,8 +68,6 @@ describe("CreateUserHandler", () => {
 	it("should be possible to create user split into user and profile datasets", async () => {
 		const testBegan = new Date();
 
-		await SpecUtils.delay(200);
-
 		mocks.mockMailService();
 
 		config.userFields = ["isRelatedToSlatan"];
@@ -79,6 +77,8 @@ describe("CreateUserHandler", () => {
 		user.isRelatedToSlatan = true;
 
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+		await SpecUtils.delay(200);
 
 		expect(response.status).toBe(201, "response.status");
 
@@ -128,42 +128,6 @@ describe("CreateUserHandler", () => {
 		expect(response.data.scopes.length).toBe(currentRoleScopes.length, "response.data.scopes.length");
 	});
 
-	it("should be possible to create user via http", async () => {
-		mocks.mockMailService();
-
-		const user = mocks.getUserObject();
-		user.roles.push("super-admin");
-
-		const response = await SpecUtils.busRequest({
-			subject: constants.endpoints.service.CREATE_USER,
-			data: user,
-			user: { scopes: ["admin.*"] }
-		});
-
-		expect(response.status).toBe(201, "response.status");
-
-		expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
-		expect(response.error).toBeUndefined("response.error");
-
-		expect(response.data.firstName).toBe(user.firstName, "response.data.firstName");
-		expect(response.data.middleName).toBe(user.middleName, "response.data.middleName");
-		expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
-		expect(response.data.email).toBe(user.email, "response.data.email");
-
-		const roles = await roleManager.getRoles();
-		const currentRoleScopes = [];
-
-		Object.keys(roles)
-			.forEach(role => {
-				roles[role].forEach(scope => {
-					if (!currentRoleScopes.includes(scope))
-						currentRoleScopes.push(scope);
-				});
-			});
-
-		expect(response.data.scopes.length).toBe(currentRoleScopes.length, "response.data.scopes.length");
-	});
-
 	it("should be possible to create user with custom fields", async () => {
 		mocks.mockMailService();
 
@@ -175,6 +139,8 @@ describe("CreateUserHandler", () => {
 		user.custom = "field";
 
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+		await SpecUtils.delay(200);
 
 		expect(response.status).toBe(201, "response.status");
 
@@ -222,7 +188,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should validate password when creating user", async done => {
-		mocks.mockMailService();
 		const user = mocks.getUserObject();
 		user.password = "hej";
 
@@ -241,7 +206,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should validate email when creating user", async done => {
-		mocks.mockMailService();
 		const user = mocks.getUserObject();
 		user.email = "email";
 
@@ -265,8 +229,6 @@ describe("CreateUserHandler", () => {
 				unique: true,
 				partialFilterExpression: { firstName: { $exists: true } }
 			});
-
-		mocks.mockMailService();
 
 		const user = mocks.getUserObject();
 		user.email = "email@email.com";
@@ -345,6 +307,8 @@ describe("CreateUserHandler", () => {
 		const user = mocks.getUserObject();
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
+		await SpecUtils.delay(200);
+
 		expect(response.status).toBe(201, "response.status");
 
 		expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
@@ -376,6 +340,8 @@ describe("CreateUserHandler", () => {
 
 		const user = mocks.getUserObject();
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+		await SpecUtils.delay(200);
 
 		expect(response.status).toBe(201, "response.status");
 
@@ -409,6 +375,8 @@ describe("CreateUserHandler", () => {
 		const user = mocks.getUserObject();
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
+		await SpecUtils.delay(200);
+
 		expect(response.status).toBe(201, "response.status");
 
 		expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
@@ -440,6 +408,8 @@ describe("CreateUserHandler", () => {
 
 		const user = mocks.getUserObject();
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+		await SpecUtils.delay(200);
 
 		expect(response.status).toBe(201, "response.status");
 
@@ -521,6 +491,8 @@ describe("CreateUserHandler", () => {
 			message: { data: mocks.getUserObject() }
 		});
 
+		await SpecUtils.delay(200);
+
 		const newEmail = "ram@ram.se";
 
 		await testBus.request({
@@ -556,6 +528,8 @@ describe("CreateUserHandler", () => {
 		config.requireSendSetPasswordEmail = true;
 
 		const { status, data } = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+		await SpecUtils.delay(200);
 
 		expect(status).toBe(201, "status");
 

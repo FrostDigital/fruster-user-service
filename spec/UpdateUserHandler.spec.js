@@ -272,6 +272,9 @@ describe("UpdateUserHandler", () => {
 		let id;
 
 		const createdUserResponse = await SpecUtils.createUser(user);
+
+		await SpecUtils.delay(200);
+
 		id = createdUserResponse.data.id;
 		user.email = email;
 
@@ -310,6 +313,9 @@ describe("UpdateUserHandler", () => {
 
 		const user = mocks.getUserObject();
 		const createdUserResponse = await SpecUtils.createUser(user);
+
+		await SpecUtils.delay(200);
+
 		const updateResponse = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.UPDATE_USER,
 			skipOptionsRequest: true,
@@ -343,6 +349,8 @@ describe("UpdateUserHandler", () => {
 			}
 		});
 
+		await SpecUtils.delay(200);
+
 		const newEmail = "ram@ram.se";
 
 		await testBus.request({
@@ -375,6 +383,9 @@ describe("UpdateUserHandler", () => {
 		let id;
 
 		const createdUserResponse = await SpecUtils.createUser(user);
+
+		await SpecUtils.delay(200);
+
 		id = createdUserResponse.data.id;
 		user.email = email;
 
