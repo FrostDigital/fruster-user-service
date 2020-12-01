@@ -76,8 +76,6 @@ describe("CreateUserHandler", () => {
 
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
-		await SpecUtils.delay(200);
-
 		expect(response.status).toBe(201, "response.status");
 
 		expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
@@ -135,8 +133,6 @@ describe("CreateUserHandler", () => {
 		user.custom = "field";
 
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
-
-		await SpecUtils.delay(200);
 
 		expect(response.status).toBe(201, "response.status");
 
