@@ -68,8 +68,6 @@ describe("CreateUserHandler", () => {
 	it("should be possible to create user split into user and profile datasets", async () => {
 		const testBegan = new Date();
 
-		mocks.mockMailService();
-
 		config.userFields = ["isRelatedToSlatan"];
 
 		const user = mocks.getUserObject();
@@ -129,8 +127,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should be possible to create user with custom fields", async () => {
-		mocks.mockMailService();
-
 		const user = mocks.getUserObject();
 		user.roles.push("super-admin");
 
@@ -169,8 +165,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should not create the same role more than once when creating user", async () => {
-		mocks.mockMailService();
-
 		const user = mocks.getUserObject();
 		user.roles.push("admin");
 		user.roles.push("admin");
@@ -253,7 +247,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should validate required fields when creating user", async () => {
-		mocks.mockMailService();
 		let user = mocks.getUserObject();
 		delete user.firstName;
 		await doRequest(user);
@@ -287,8 +280,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should not require password to be set if configured not to", async () => {
-		mocks.mockMailService();
-
 		config.requirePassword = false;
 
 		const user = mocks.getUserObject();
@@ -435,7 +426,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should not allow multiple users with the same email to be created", async done => {
-		mocks.mockMailService();
 		const user = mocks.getUserObject();
 		await SpecUtils.createUser(user);
 
@@ -462,8 +452,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should be possible to create user with id", async () => {
-		mocks.mockMailService();
-
 		const userId = "5706ec69-0f4b-4af7-9bf2-e8e7fd0eacd6";
 
 		const user = mocks.getUserObject();
@@ -481,10 +469,7 @@ describe("CreateUserHandler", () => {
 		config.requirePasswordOnEmailUpdate = true;
 		config.emailVerificationTemplateByRole = "admin:596a3cee-21a2-4066-b169-9bd63579267d";
 
-		const mockSendMailService = frusterTestUtils.mockService({
-			subject: MailServiceClient.endpoints.SEND_MAIL,
-			response: { status: 200 }
-		});
+		const mockSendMailService = mocks.mockMailService();
 
 		const { data: createdUser } = await testBus.request({
 			subject: constants.endpoints.service.CREATE_USER,
@@ -517,10 +502,7 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should be possible to create user without password if configure to send set password url", async () => {
-		const mockSendMailService = frusterTestUtils.mockService({
-			subject: MailServiceClient.endpoints.SEND_MAIL,
-			response: { status: 200 }
-		});
+		const mockSendMailService = mocks.mockMailService();
 
 		const { password, ...user } = mocks.getUserObject();
 		user.roles.push("super-admin");
@@ -543,5 +525,33 @@ describe("CreateUserHandler", () => {
 		const requestData = mockSendMailService.requests[0].data;
 
 		expect(requestData.to).toContain(user.email, "requestData.to");
+	});
+
+	it("should be possible to create user without password if configure to send set password url via email template", async () => {
+		const mockSendMailService = mocks.mockMailService();
+
+		const { password, ...user } = mocks.getUserObject();
+		user.roles.push("super-admin");
+
+		config.requireSendSetPasswordEmail = true;
+		config.setPasswordEmailTemplate = "template1";
+
+		const { status, data } = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+		await SpecUtils.delay(200);
+
+		expect(status).toBe(201, "status");
+
+		expect(data.firstName).toBe(user.firstName, "data.firstName");
+		expect(data.middleName).toBe(user.middleName, "data.middleName");
+		expect(data.lastName).toBe(user.lastName, "data.lastName");
+		expect(data.email).toBe(user.email, "data.email");
+
+		expect(mockSendMailService.invocations).toBe(1, "mockSendMailService.invocations");
+
+		const requestData = mockSendMailService.requests[0].data;
+
+		expect(requestData.to).toContain(user.email, "requestData.to");
+		expect(requestData.templateId).toContain(config.setPasswordEmailTemplate, "requestData.templateId");
 	});
 });

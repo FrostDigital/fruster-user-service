@@ -29,17 +29,14 @@ describe("VerifyEmailAddressHandler", () => {
 	it("should remove emailVerificationToken and set emailVerified to true when verifying with emailVerificationToken", async () => {
 		const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
-		bus.subscribe(MailServiceClient.endpoints.SEND_MAIL, ({ reqId, data }) => {
-			expect(data.from).toBe(config.emailVerificationFrom, "data.from");
-			expect(data.to.includes(testUserData.email)).toBeTruthy("data.to.includes(testUserData.email)");
-			return { reqId, status: 200 }
-		});
+		const mockSendMailService = mocks.mockMailService();
 
 		const createUserResponse = (await mocks.createUser(testUserData)).data;
 
 		await SpecUtils.delay(200);
 
 		const testUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
+
 		const verificationResponse = await SpecUtils.busRequest({
 			subject: constants.endpoints.http.VERIFY_EMAIL,
 			params: { tokenId: testUser.emailVerificationToken }
@@ -51,6 +48,9 @@ describe("VerifyEmailAddressHandler", () => {
 
 		expect(updatedTestUser.emailVerificationToken).toBeUndefined("should remove emailVerificationToken");
 		expect(updatedTestUser.emailVerified).toBe(true, "should set emailVerified to true");
+
+		expect(mockSendMailService.requests[0].data.from).toBe(config.emailVerificationFrom, "mockSendMailService.requests[0].data.from");
+		expect(mockSendMailService.requests[0].data.to[0]).toBe(testUserData.email, "mockSendMailService.requests[0].data.to");
 	});
 
 	it("should not be able to verify email with faulty token", async done => {
@@ -67,22 +67,20 @@ describe("VerifyEmailAddressHandler", () => {
 		}
 	});
 
-	it("should use sendgrid mail template if specified in config", async done => {
+	it("should use sendgrid mail template if specified in config", async () => {
 		config.emailVerificationTemplate = "band-ola";
 
 		const testUserData = mocks.getUserWithUnverifiedEmailObject();
 
-		bus.subscribe(MailServiceClient.endpoints.SEND_MAIL, ({ data }) => {
-			expect(data.from).toBe(config.emailVerificationFrom, "from");
-			expect(data.to[0]).toBe(testUserData.email, "to");
-			expect(data.templateId).toBe(config.emailVerificationTemplate, "templateId");
-
-			done();
-		});
+		const mockSendMailService = mocks.mockMailService();
 
 		await mocks.createUser(testUserData);
 
 		await SpecUtils.delay(200);
+
+		expect(mockSendMailService.requests[0].data.from).toBe(config.emailVerificationFrom, "mockSendMailService.requests[0].data.from");
+		expect(mockSendMailService.requests[0].data.to[0]).toBe(testUserData.email, "mockSendMailService.requests[0].data.to");
+		expect(mockSendMailService.requests[0].data.templateId).toBe(config.emailVerificationTemplate, "mockSendMailService.requests[0].data.templateId");
 	});
 
 });

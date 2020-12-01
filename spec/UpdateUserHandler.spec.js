@@ -298,18 +298,8 @@ describe("UpdateUserHandler", () => {
 		config.emailVerificationTemplate = uuid.v4();
 
 		const newEmail = "ram@ram.se";
-		let invocations = 0;
 
-		mocks.mockMailService(req => {
-			/** The first time mail service will be contacted is when the user is created, so we only want check the second */
-			if (invocations > 0) {
-				expect(req.data.templateArgs.user.email).toBe(newEmail, "req.data.templateArgs.user.email");
-				expect(req.data.templateArgs.user.firstName).toBe(user.firstName, "req.data.templateArgs.user.firstName");
-				expect(req.data.templateArgs.user.lastName).toBe(user.lastName, "req.data.templateArgs.user.lastName");
-			}
-
-			invocations++;
-		});
+		const mockSendMailService = mocks.mockMailService();
 
 		const user = mocks.getUserObject();
 		const createdUserResponse = await SpecUtils.createUser(user);
@@ -319,7 +309,13 @@ describe("UpdateUserHandler", () => {
 		const updateResponse = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.UPDATE_USER,
 			skipOptionsRequest: true,
-			data: { id: createdUserResponse.data.id, email: newEmail, firstName: user.firstName, lastName: user.lastName, password: user.password }
+			data: {
+				id: createdUserResponse.data.id,
+				email: newEmail,
+				firstName: user.firstName,
+				lastName: user.lastName,
+				password: user.password
+			}
 		});
 
 		const testUser = await db.collection(constants.collections.USERS).findOne({ id: updateResponse.data.id });
@@ -327,9 +323,13 @@ describe("UpdateUserHandler", () => {
 		expect(updateResponse.status).toBe(200, "updateResponse.status");
 		expect(testUser.emailVerified).toBe(false, "updateResponse.data.emailVerified");
 		expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
-		expect(invocations).toBeGreaterThan(0, "mail service invocations");
 		expect(new Date(updateResponse.data.metadata.updated).getTime())
 			.toBeGreaterThan(new Date(createdUserResponse.data.metadata.updated).getTime(), "updateResponse.data.metadata.updated")
+
+		expect(mockSendMailService.invocations).toBeGreaterThan(0, "mail service invocations");
+		expect(mockSendMailService.requests[1].data.templateArgs.user.email).toBe(newEmail, "email");
+		expect(mockSendMailService.requests[1].data.templateArgs.user.firstName).toBe(user.firstName, "firstName");
+		expect(mockSendMailService.requests[1].data.templateArgs.user.lastName).toBe(user.lastName, "lastName");
 	});
 
 	it("should resend verification mail when updating email if conf.requireEmailVerification is set to true and conf.emailVerificationTemplateByRole and config.requirePasswordOnEmailUpdate set", async () => {
@@ -337,10 +337,7 @@ describe("UpdateUserHandler", () => {
 		config.requirePasswordOnEmailUpdate = true;
 		config.emailVerificationTemplateByRole = "admin:596a3cee-21a2-4066-b169-9bd63579267d";
 
-		const mockSendMailService = frusterTestUtils.mockService({
-			subject: MailServiceClient.endpoints.SEND_MAIL,
-			response: { status: 200 }
-		});
+		const mockSendMailService = mocks.mockMailService();
 
 		const { data: createdUser } = await testBus.request({
 			subject: constants.endpoints.service.CREATE_USER,

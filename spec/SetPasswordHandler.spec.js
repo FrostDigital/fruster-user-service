@@ -4,6 +4,7 @@ const SpecUtils = require('./support/SpecUtils');
 const specConstants = require("./support/spec-constants");
 const config = require('../config.js');
 const constants = require('../lib/constants.js');
+const errors = require("../lib/errors.js");
 
 
 describe("SetPasswordHandler", () => {
@@ -13,6 +14,8 @@ describe("SetPasswordHandler", () => {
 	frusterTestUtils
 		.startBeforeEach(specConstants
 			.testUtilsOptions((connection) => { db = connection.db; }));
+
+	afterEach(() => SpecUtils.resetConfig());
 
 	it("should be possible to set password", async () => {
 		const user = mocks.getUserObject();
@@ -37,6 +40,7 @@ describe("SetPasswordHandler", () => {
 	});
 
 	it("should be possible to set password with token", async () => {
+		mocks.mockMailService();
 		const { password, ...user } = mocks.getUserObject();
 		user.roles.push("super-admin");
 
@@ -61,6 +65,42 @@ describe("SetPasswordHandler", () => {
 		expect(newUser.password).toBeDefined("newUser.password");
 		expect(newUser.salt).toBeDefined("newUser.salt");
 		expect(newUser.hashDate).toBeDefined("newUser.hashDate");
+	});
+
+	it("should throw bad request error if id or token not found", async done => {
+		try {
+			await SpecUtils.busRequest({
+				subject: constants.endpoints.service.SET_PASSWORD,
+				data: {
+					newPassword: "Localhost:8081"
+				}
+			});
+
+			done.fail();
+		} catch ({ status, error }) {
+			expect(status).toBe(400, "status");
+			expect(error.code).toBe(errors.badRequest().error.code, "error.code");
+			expect(error.detail).toBe("The request need id or token", "error.detail");
+			done();
+		}
+	});
+
+	it("should throw not found error if id or token not found", async done => {
+		try {
+			await SpecUtils.busRequest({
+				subject: constants.endpoints.service.SET_PASSWORD,
+				data: {
+					newPassword: "Localhost:8081",
+					token: "not-found"
+				}
+			});
+
+			done.fail();
+		} catch ({ status, error }) {
+			expect(status).toBe(404, "status");
+			expect(error.code).toBe(errors.notFound().error.code, "error.code");
+			done();
+		}
 	});
 
 });
