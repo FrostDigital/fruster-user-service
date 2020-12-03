@@ -516,7 +516,7 @@ describe("GetUsersByQueryHandler", () => {
 			users.push(`user${i}`);
 		}
 
-		return db.collection(constants.collections.USERS)
+		return await db.collection(constants.collections.USERS)
 			.insertMany(users.map((username, i) => {
 				return {
 					id: username,

@@ -40,7 +40,7 @@ describe("SetPasswordHandler", () => {
 	});
 
 	it("should be possible to set password with token", async () => {
-		mocks.mockMailService();
+		const sendMockMailService = mocks.mockMailService();
 		const { password, ...user } = mocks.getUserObject();
 		user.roles.push("super-admin");
 
@@ -50,11 +50,13 @@ describe("SetPasswordHandler", () => {
 
 		await SpecUtils.delay(200);
 
+		const token = getToken(sendMockMailService.requests[0].data.message);
+
 		const { status } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.SET_PASSWORD,
 			data: {
 				newPassword: "Localhost:8081",
-				token: data.setPasswordToken
+				token
 			}
 		});
 
@@ -102,5 +104,20 @@ describe("SetPasswordHandler", () => {
 			done();
 		}
 	});
+
+	function getToken(message) {
+		const splices = message.split(" ");
+
+		let url = "";
+		let search = "http://localhost:3120/set-password?token=";
+
+		for (const splice of splices)
+			if (splice.includes(search)) {
+				url = splice;
+				break;
+			}
+
+		return url.replace(search, "");
+	}
 
 });
