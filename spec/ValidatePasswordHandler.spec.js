@@ -158,8 +158,6 @@ describe("ValidatePasswordHandler", () => {
 	});
 
 	it("should be possible to login with non case sensitive username", async () => {
-		mocks.mockMailService();
-
 		const user = mocks.getUserObject();
 		user.email = "urban@hello.se";
 
@@ -178,8 +176,6 @@ describe("ValidatePasswordHandler", () => {
 	});
 
 	it("should return 401 when validating incorrect password", async done => {
-		mocks.mockMailService();
-
 		const user = mocks.getUserObject();
 
 		await SpecUtils.busRequest({
@@ -240,6 +236,8 @@ describe("ValidatePasswordHandler", () => {
 			data: user
 		});
 
+		await SpecUtils.delay(200);
+
 		try {
 			await SpecUtils.busRequest({
 				subject: constants.endpoints.service.VALIDATE_PASSWORD,
@@ -258,8 +256,6 @@ describe("ValidatePasswordHandler", () => {
 	});
 
 	it("should be possible for to login even if the email has not been verified but config.optionalEmailVerification is set to true", async () => {
-		mocks.mockMailService();
-
 		const user = mocks.getUserObject();
 
 		await SpecUtils.busRequest({
@@ -281,8 +277,6 @@ describe("ValidatePasswordHandler", () => {
 	});
 
 	it("should be possible for old accounts to login even if the email has not been verified", async () => {
-		mocks.mockMailService();
-
 		const user = mocks.getUserObject();
 
 		await SpecUtils.busRequest({

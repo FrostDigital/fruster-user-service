@@ -23,32 +23,18 @@ describe("ResendVerificationEmailHandler", () => {
 		done();
 	});
 
-	it("should resend email", async (done) => {
+	it("should resend email", async () => {
 		conf.requireEmailVerification = true;
 
 		const testUserData = mocks.getUserWithUnverifiedEmailObject();
 		let verificationToken;
-		let initialUserCreated = false;
 
-		bus.subscribe({
-			subject: MailServiceClient.endpoints.SEND_MAIL,
-			handle: (req) => {
-				if (initialUserCreated) {
-					expect(req.data.message.includes(verificationToken)).toBe(false, "req.data.message.includes(verificationToken)");
-					expect(req.data.from).toBe(conf.emailVerificationFrom, "req.data.from");
-					expect(req.data.to[0]).toBe(testUserData.email, "req.data.to[0]");
-
-					done();
-				} else
-					initialUserCreated = true;
-
-				conf.requireEmailVerification = false;
-
-				return { reqId: req.reqId, status: 200 };
-			}
-		});
+		const mockSendMailService = mocks.mockMailService();
 
 		const createUserResponse = (await mocks.createUser(testUserData)).data;
+
+		await SpecUtils.delay(200);
+
 		const testUser = await db.collection(constants.collections.USERS).findOne({ id: createUserResponse.id });
 
 		verificationToken = testUser.emailVerificationToken;
@@ -58,6 +44,10 @@ describe("ResendVerificationEmailHandler", () => {
 			data: {},
 			params: { email: createUserResponse.email }
 		});
+
+		expect(mockSendMailService.requests[1].data.message.includes(verificationToken)).toBe(false, "mockSendMailService.requests[1].data.message.includes(verificationToken)");
+		expect(mockSendMailService.requests[1].data.from).toBe(conf.emailVerificationFrom, "mockSendMailService.requests[1].data.from");
+		expect(mockSendMailService.requests[1].data.to[0]).toBe(testUserData.email, "mockSendMailService.requests[1].data.to");
 	});
 
 });

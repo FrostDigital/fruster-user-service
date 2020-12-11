@@ -1,5 +1,5 @@
 const uuid = require("uuid");
-const bus = require("fruster-bus");
+const frusterTestUtils = require("fruster-test-utils");
 const constants = require("../../lib/constants.js");
 const SpecUtils = require("./SpecUtils");
 const MailServiceClient = require("../../lib/clients/MailServiceClient");
@@ -53,14 +53,10 @@ module.exports = {
 		});
 	},
 
-	mockMailService: (expectFunc) => {
-		bus.subscribe(MailServiceClient.endpoints.SEND_MAIL, (req) => {
-			if (expectFunc)
-				expectFunc(req);
-			return {
-				reqId: req.reqId,
-				status: 200
-			}
+	mockMailService: () => {
+		return frusterTestUtils.mockService({
+			subject: MailServiceClient.endpoints.SEND_MAIL,
+			response: { status: 200 }
 		});
 	}
 

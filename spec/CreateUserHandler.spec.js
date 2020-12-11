@@ -2,7 +2,6 @@ const Db = require("mongodb").Db;
 const config = require("../config");
 const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");
-const errors = require("../lib/errors.js");
 const testBus = require("fruster-bus").testBus;
 const MailServiceClient = require("../lib/clients/MailServiceClient");
 const SpecUtils = require("./support/SpecUtils");
@@ -69,10 +68,6 @@ describe("CreateUserHandler", () => {
 	it("should be possible to create user split into user and profile datasets", async () => {
 		const testBegan = new Date();
 
-		await SpecUtils.delay(200);
-
-		mocks.mockMailService();
-
 		config.userFields = ["isRelatedToSlatan"];
 
 		const user = mocks.getUserObject();
@@ -129,45 +124,7 @@ describe("CreateUserHandler", () => {
 		expect(response.data.scopes.length).toBe(currentRoleScopes.length, "response.data.scopes.length");
 	});
 
-	it("should be possible to create user via http", async () => {
-		mocks.mockMailService();
-
-		const user = mocks.getUserObject();
-		user.roles.push("super-admin");
-
-		const response = await SpecUtils.busRequest({
-			subject: constants.endpoints.service.CREATE_USER,
-			data: user,
-			user: { scopes: ["admin.*"] }
-		});
-
-		expect(response.status).toBe(201, "response.status");
-
-		expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
-		expect(response.error).toBeUndefined("response.error");
-
-		expect(response.data.firstName).toBe(user.firstName, "response.data.firstName");
-		expect(response.data.middleName).toBe(user.middleName, "response.data.middleName");
-		expect(response.data.lastName).toBe(user.lastName, "response.data.lastName");
-		expect(response.data.email).toBe(user.email, "response.data.email");
-
-		const roles = await roleManager.getRoles();
-		const currentRoleScopes = [];
-
-		Object.keys(roles)
-			.forEach(role => {
-				roles[role].forEach(scope => {
-					if (!currentRoleScopes.includes(scope))
-						currentRoleScopes.push(scope);
-				});
-			});
-
-		expect(response.data.scopes.length).toBe(currentRoleScopes.length, "response.data.scopes.length");
-	});
-
 	it("should be possible to create user with custom fields", async () => {
-		mocks.mockMailService();
-
 		const user = mocks.getUserObject();
 		user.roles.push("super-admin");
 
@@ -204,8 +161,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should not create the same role more than once when creating user", async () => {
-		mocks.mockMailService();
-
 		const user = mocks.getUserObject();
 		user.roles.push("admin");
 		user.roles.push("admin");
@@ -223,7 +178,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should validate password when creating user", async done => {
-		mocks.mockMailService();
 		const user = mocks.getUserObject();
 		user.password = "hej";
 
@@ -242,7 +196,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should validate email when creating user", async done => {
-		mocks.mockMailService();
 		const user = mocks.getUserObject();
 		user.email = "email";
 
@@ -267,8 +220,6 @@ describe("CreateUserHandler", () => {
 				partialFilterExpression: { firstName: { $exists: true } }
 			});
 
-		mocks.mockMailService();
-
 		const user = mocks.getUserObject();
 		user.email = "email@email.com";
 
@@ -292,7 +243,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should validate required fields when creating user", async () => {
-		mocks.mockMailService();
 		let user = mocks.getUserObject();
 		delete user.firstName;
 		await doRequest(user);
@@ -326,8 +276,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should not require password to be set if configured not to", async () => {
-		mocks.mockMailService();
-
 		config.requirePassword = false;
 
 		const user = mocks.getUserObject();
@@ -345,6 +293,8 @@ describe("CreateUserHandler", () => {
 
 		const user = mocks.getUserObject();
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+		await SpecUtils.delay(200);
 
 		expect(response.status).toBe(201, "response.status");
 
@@ -378,6 +328,8 @@ describe("CreateUserHandler", () => {
 		const user = mocks.getUserObject();
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
+		await SpecUtils.delay(200);
+
 		expect(response.status).toBe(201, "response.status");
 
 		expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
@@ -409,6 +361,8 @@ describe("CreateUserHandler", () => {
 
 		const user = mocks.getUserObject();
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+		await SpecUtils.delay(200);
 
 		expect(response.status).toBe(201, "response.status");
 
@@ -442,6 +396,8 @@ describe("CreateUserHandler", () => {
 		const user = mocks.getUserObject();
 		const response = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
+		await SpecUtils.delay(200);
+
 		expect(response.status).toBe(201, "response.status");
 
 		expect(Object.keys(response.data).length).not.toBe(0, "Object.keys(response.data).length");
@@ -466,7 +422,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should not allow multiple users with the same email to be created", async done => {
-		mocks.mockMailService();
 		const user = mocks.getUserObject();
 		await SpecUtils.createUser(user);
 
@@ -493,8 +448,6 @@ describe("CreateUserHandler", () => {
 	});
 
 	it("should be possible to create user with id", async () => {
-		mocks.mockMailService();
-
 		const userId = "5706ec69-0f4b-4af7-9bf2-e8e7fd0eacd6";
 
 		const user = mocks.getUserObject();
@@ -512,15 +465,14 @@ describe("CreateUserHandler", () => {
 		config.requirePasswordOnEmailUpdate = true;
 		config.emailVerificationTemplateByRole = "admin:596a3cee-21a2-4066-b169-9bd63579267d";
 
-		const mockSendMailService = frusterTestUtils.mockService({
-			subject: MailServiceClient.endpoints.SEND_MAIL,
-			response: { status: 200 }
-		});
+		const mockSendMailService = mocks.mockMailService();
 
 		const { data: createdUser } = await testBus.request({
 			subject: constants.endpoints.service.CREATE_USER,
 			message: { data: mocks.getUserObject() }
 		});
+
+		await SpecUtils.delay(200);
 
 		const newEmail = "ram@ram.se";
 
@@ -543,5 +495,59 @@ describe("CreateUserHandler", () => {
 		expect(testUser.emailVerificationToken).toBeDefined("testUser.emailVerificationToken");
 
 		expect(mockSendMailService.requests[1].data.templateArgs.user.email).toBe(newEmail, "email");
+	});
+
+	it("should be possible to create user without password if configure to send set password url", async () => {
+		const mockSendMailService = mocks.mockMailService();
+
+		const { password, ...user } = mocks.getUserObject();
+		user.roles.push("super-admin");
+
+		config.requireSendSetPasswordEmail = true;
+
+		const { status, data } = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+		await SpecUtils.delay(200);
+
+		expect(status).toBe(201, "status");
+
+		expect(data.firstName).toBe(user.firstName, "data.firstName");
+		expect(data.middleName).toBe(user.middleName, "data.middleName");
+		expect(data.lastName).toBe(user.lastName, "data.lastName");
+		expect(data.email).toBe(user.email, "data.email");
+
+		expect(mockSendMailService.invocations).toBe(1, "mockSendMailService.invocations");
+
+		const requestData = mockSendMailService.requests[0].data;
+
+		expect(requestData.to).toContain(user.email, "requestData.to");
+	});
+
+	it("should be possible to create user without password if configure to send set password url via email template", async () => {
+		const mockSendMailService = mocks.mockMailService();
+
+		const { password, ...user } = mocks.getUserObject();
+		user.roles.push("super-admin");
+
+		config.requireSendSetPasswordEmail = true;
+		config.setPasswordEmailTemplate = "template1";
+
+		const { status, data } = await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+
+		await SpecUtils.delay(200);
+
+		expect(status).toBe(201, "status");
+
+		expect(data.firstName).toBe(user.firstName, "data.firstName");
+		expect(data.middleName).toBe(user.middleName, "data.middleName");
+		expect(data.lastName).toBe(user.lastName, "data.lastName");
+		expect(data.email).toBe(user.email, "data.email");
+
+		expect(mockSendMailService.invocations).toBe(1, "mockSendMailService.invocations");
+
+		const requestData = mockSendMailService.requests[0].data;
+
+		expect(requestData.to).toContain(user.email, "requestData.to");
+		expect(requestData.templateId).toContain(config.setPasswordEmailTemplate, "requestData.templateId");
 	});
 });

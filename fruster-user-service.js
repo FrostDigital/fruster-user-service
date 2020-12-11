@@ -365,12 +365,21 @@ module.exports = {
 			handle: (req) => resendVerificationEmailHandler.handle(req)
 		});
 
-		if (!busAddress.includes("mock") && (config.requireEmailVerification || config.useDbRolesAndScopes || config.optionalEmailVerification))
+		if (!busAddress.includes("mock") && (
+			config.requireEmailVerification ||
+			config.useDbRolesAndScopes ||
+			config.optionalEmailVerification ||
+			config.requireSendSetPasswordEmail
+		))
 			expressApp.start(config.port);
 	},
 
 	stop: () => {
-		if (config.requireEmailVerification || config.optionalEmailVerification || config.useDbRolesAndScopes)
+		if (config.requireEmailVerification ||
+			config.optionalEmailVerification ||
+			config.useDbRolesAndScopes ||
+			config.requireSendSetPasswordEmail
+		)
 			expressApp.stop();
 	}
 
