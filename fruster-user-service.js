@@ -36,6 +36,8 @@ const RemoveSystemRoleScopesHandler = require("./lib/handlers/system/RemoveSyste
 const GetProfilesByQueryHandler = require("./lib/handlers/GetProfilesByQueryHandler");
 const UpdateProfileHandler = require("./lib/handlers/UpdateProfileHandler");
 
+const GetMeHandler = require("./lib/handlers/GetMeHandler");
+
 const bus = require("fruster-bus");
 const mongo = require("mongodb");
 const Db = mongo.Db;
@@ -95,6 +97,7 @@ module.exports = {
 
 		const getProfilesByQueryHandler = new GetProfilesByQueryHandler(roleManager, profileManager);
 		const updateProfileHandler = new UpdateProfileHandler(profileRepo, userManager, profileManager);
+		const getMeHandler = new GetMeHandler();
 
 		// ROLES & SCOPES, if configured
 		if (config.useDbRolesAndScopes) {
@@ -217,6 +220,14 @@ module.exports = {
 			mustBeLoggedIn: true,
 			docs: docs.http.UPDATE_PASSWORD,
 			handle: (req) => updatePasswordHandler.handleHttp(req)
+		});
+
+		bus.subscribe({
+			subject: constants.endpoints.http.GET_ME,
+			responseSchema: constants.schemas.response.GET_ME_RESPONSE,
+			mustBeLoggedIn: true,
+			docs: docs.http.GET_ME,
+			handle: (req) => getMeHandler.handleHttp(req)
 		});
 
 		// SERVICE
