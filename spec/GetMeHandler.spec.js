@@ -6,7 +6,8 @@ const config = require("../config");
 
 describe("GetMeHandler", () => {
 
-	beforeEach(() => config.useMeEndpoint = true)
+	beforeEach(() => config.useMeEndpoint = true);
+	afterEach(() => config.useMeEndpoint = false);
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
