@@ -222,13 +222,15 @@ module.exports = {
 			handle: (req) => updatePasswordHandler.handleHttp(req)
 		});
 
-		bus.subscribe({
-			subject: constants.endpoints.http.GET_ME,
-			responseSchema: constants.schemas.response.GET_ME_RESPONSE,
-			mustBeLoggedIn: true,
-			docs: docs.http.GET_ME,
-			handle: (req) => getMeHandler.handleHttp(req)
-		});
+		if (config.useMeEndpoint) {
+			bus.subscribe({
+				subject: constants.endpoints.http.GET_ME,
+				responseSchema: constants.schemas.response.GET_ME_RESPONSE,
+				mustBeLoggedIn: true,
+				docs: docs.http.GET_ME,
+				handle: (req) => getMeHandler.handleHttp(req)
+			});
+		}
 
 		// SERVICE
 		bus.subscribe({

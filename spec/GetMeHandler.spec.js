@@ -2,8 +2,11 @@ const constants = require('../lib/constants.js');
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
 const bus = require("fruster-bus").testBus;
+const config = require("../config");
 
 describe("GetMeHandler", () => {
+
+	beforeEach(() => config.useMeEndpoint = true)
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
