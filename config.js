@@ -144,7 +144,10 @@ module.exports = {
 	slowQueryThresholdMs: Number.parseInt(process.env.SLOW_QUERY_THRESHOLD_MS || "250"),
 
 	/** Properties should not expose to outside. These filed will remove from response, or will throw error if response has such field*/
-	privateProperties: "password|salt|emailVerificationToken|hashDate" + (process.env.PRIVATE_PROPERTIES ? "|" + process.env.PRIVATE_PROPERTIES : "")
+	privateProperties: "password|salt|emailVerificationToken|hashDate" + (process.env.PRIVATE_PROPERTIES ? "|" + process.env.PRIVATE_PROPERTIES : ""),
+
+	/** Whether or not to use the /me to be able to get the logged in user via a http endpoint */
+	useMeEndpoint: parseBool(process.env.USE_ME_ENDPOINT || "false")
 
 };
 
