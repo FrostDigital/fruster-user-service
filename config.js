@@ -30,9 +30,6 @@ module.exports = {
 	/** The roles of the initial account being created upon first run */
 	initialUserRole: process.env.INITIAL_USER_ROLE || "super-admin",
 
-	/** Wether or not to require users to have a password. Typically used with some external login method such as BankID or facebook. */
-	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
-
 	/** Wether need send set password email */
 	requireSendSetPasswordEmail: process.env.REQUIRE_SEND_SET_PASSWORD_EMAIL === "true",
 
@@ -124,6 +121,16 @@ module.exports = {
 
 	/** Whether or not to require a new user to have firstName and lastName */
 	requireNames: parseBool(process.env.REQUIRE_NAMES || "true"),
+
+	/** Wether or not to require users to have a password. Typically used with some external login method such as BankID or facebook. */
+	requirePassword: parseBool(process.env.REQUIRE_PASSWORD || "true"),
+
+	/**
+	 * Create user without any required field via service endpoint.
+	 * The service endpoint caller need to validate the request before send to the service endpoint.
+	 * Need to set requireNames, requirePassword as false as well.
+	 */
+	withoutRequiredField: parseBool(process.env.WITHOUT_REQUIRED_FIELD || "false"),
 
 	/**
 	 * The fields to be saved in the user dataset. If `ALL` is defined in both userFields and profileFields; userFields is dominant.

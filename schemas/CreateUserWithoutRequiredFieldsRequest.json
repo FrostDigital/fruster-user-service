@@ -1,0 +1,5 @@
+{
+	"id": "CreateUserWithoutRequiredFieldsRequest",
+	"description": "Request for creating a fruster user with the possibility of no any required field. Can include any number of custom fields.",
+	"additionalProperties": true
+}
