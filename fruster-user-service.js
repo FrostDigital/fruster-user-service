@@ -235,7 +235,7 @@ module.exports = {
 		// SERVICE
 		bus.subscribe({
 			subject: constants.endpoints.service.CREATE_USER,
-			requestSchema: constants.schemas.request.CREATE_USER_REQUEST,
+			requestSchema: constants.schemas.request.CREATE_USER_SERVICE_REQUEST,
 			responseSchema: constants.schemas.response.USER_RESPONSE,
 			docs: docs.service.CREATE_USER,
 			handle: (req) => createUserHandler.handle(req)
