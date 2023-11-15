@@ -17,7 +17,7 @@
 		"fruster-log": "0.0.18",
 		"mongodb": "2.2.36",
 		"request": "^2.88.2",
-		"uuid": "^8.3.1"
+		"uuid": "^9.0.1"
 	},
 	"devDependencies": {
 		"@types/mongodb": "2.2.26",

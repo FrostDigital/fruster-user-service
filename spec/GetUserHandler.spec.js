@@ -109,6 +109,24 @@ describe("GetUserHandler", () => {
 		expect(res.data[1].id).toBe("user2", "res.data[1].id");
 	});
 
+	it("should search for user HTTP endpoint", async () => {
+		const res = await bus.request({
+			subject: constants.endpoints.http.admin.GET_USERS,
+			skipOptionsRequest: true,
+			message: {
+				reqId: "reqId",
+				query: {
+					searchField: "email",
+					searchValue: "user1",
+				},
+				user: { scopes: ["admin.*"] }
+			}
+		});
+
+		expect(res.data.length).toBe(1, "res.data.length");
+		expect(res.data[0].id).toBe("user1", "res.data[0].id");
+	});
+
 	it("should get internal server error if passing an invalid query", async done => {
 		try {
 			await bus.request({
@@ -144,7 +162,7 @@ describe("GetUserHandler", () => {
 });
 
 /**
- * @param {Db} db 
+ * @param {Db} db
  */
 function insertTestUsers(db) {
 	const users = ["user1", "user2"].map((username) => {
