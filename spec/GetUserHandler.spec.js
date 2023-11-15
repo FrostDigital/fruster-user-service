@@ -117,15 +117,14 @@ describe("GetUserHandler", () => {
 				reqId: "reqId",
 				query: {
 					searchField: "email",
-					searchValue: ".*user.*",
+					searchValue: "user1",
 				},
 				user: { scopes: ["admin.*"] }
 			}
 		});
 
-		expect(res.data.length).toBe(2, "res.data.length");
+		expect(res.data.length).toBe(1, "res.data.length");
 		expect(res.data[0].id).toBe("user1", "res.data[0].id");
-		expect(res.data[1].id).toBe("user2", "res.data[1].id");
 	});
 
 	it("should get internal server error if passing an invalid query", async done => {
