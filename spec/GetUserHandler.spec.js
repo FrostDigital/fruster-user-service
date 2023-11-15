@@ -109,7 +109,7 @@ describe("GetUserHandler", () => {
 		expect(res.data[1].id).toBe("user2", "res.data[1].id");
 	});
 
-	fit("should search for user HTTP endpoint", async () => {
+	it("should search for user HTTP endpoint", async () => {
 		const res = await bus.request({
 			subject: constants.endpoints.http.admin.GET_USERS,
 			skipOptionsRequest: true,
