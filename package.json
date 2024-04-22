@@ -13,7 +13,7 @@
 		"express": "^4.17.1",
 		"fruster-bus": "^0.7.11",
 		"fruster-errors": "0.1.2",
-		"fruster-health": "0.0.15",
+		"fruster-health": "0.2.1",
 		"fruster-log": "0.0.18",
 		"mongodb": "2.2.36",
 		"request": "^2.88.2",
@@ -25,9 +25,6 @@
 		"jasmine": "3.6.3",
 		"jasmine-spec-reporter": "^6.0.0",
 		"nyc": "^15.1.0"
-	},
-	"engines": {
-		"node": "7.10.0"
 	},
 	"nyc": {
 		"exclude": [
