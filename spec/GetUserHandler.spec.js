@@ -26,15 +26,14 @@ describe("GetUserHandler", () => {
 		}
 	});
 
-	it("should fail to get ALL users when query is empty", async done => {
+	it("should fail to get ALL users when query is empty", async () => {
 		try {
 			// @ts-ignore
 			await SpecUtils.busRequest(constants.endpoints.service.GET_USER);
 
-			done.fail();
+			fail();
 		} catch (err) {
 			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-			done();
 		}
 	});
 
@@ -177,5 +176,5 @@ function insertTestUsers(db) {
 		}
 	});
 
-	return db.collection("users").insert(users);
+	return db.collection("users").insertMany(users);
 }

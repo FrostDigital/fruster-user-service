@@ -4,7 +4,6 @@ const specConstants = require("./support/spec-constants");
 const TestUtils = require("./support/SpecUtils");
 const config = require("../config");
 
-
 describe("GetProfilesByQueryHandler", () => {
 
 	frusterTestUtils
