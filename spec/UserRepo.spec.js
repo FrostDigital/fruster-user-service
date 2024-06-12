@@ -3,7 +3,6 @@ const UserRepo = require("../lib/repos/UserRepo");
 const Db = require("mongodb").Db;
 const specConstants = require("./support/spec-constants");
 
-
 describe("UserRepo", () => {
 
 	/**@type {UserRepo} */
@@ -20,7 +19,6 @@ describe("UserRepo", () => {
 		const user = await userRepo.getById("user1");
 
 		expect(user.id).toBe("user1");
-		// @ts-ignore
 		expect(user._id).toBeUndefined();
 		expect(user.firstName).toBe("user1-firstName");
 		expect(user.lastName).toBe("user1-lastName");
@@ -59,5 +57,5 @@ function insertTestUsers(db) {
 			}
 		});
 
-	return db.collection("users").insert(users);
+	return db.collection("users").insertMany(users);
 }

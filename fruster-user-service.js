@@ -49,9 +49,8 @@ const log = require("fruster-log");
 
 module.exports = {
 	start: async (busAddress, mongoUrl) => {
-
 		await bus.connect(busAddress);
-		const db = await mongo.connect(mongoUrl);
+		const db = (await mongo.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })).db();
 
 		try {
 			await createIndexes(db);

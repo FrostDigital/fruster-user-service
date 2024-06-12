@@ -104,7 +104,7 @@ function insertTestUsers(db) {
 			}
 		});
 
-	return db.collection("users").insert(users);
+	return db.collection("users").insertMany(users);
 }
 
 function createTestUsers() {
@@ -131,5 +131,5 @@ function insertTestUserWithEmptyLastName(db) {
 		password: "user1337"
 	}
 
-	return db.collection("users").insert(user);
+	return db.collection("users").insertOne(user);
 }
