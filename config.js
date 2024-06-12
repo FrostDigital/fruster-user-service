@@ -154,7 +154,10 @@ module.exports = {
 	privateProperties: "password|salt|emailVerificationToken|hashDate|setPasswordToken" + (process.env.PRIVATE_PROPERTIES ? "|" + process.env.PRIVATE_PROPERTIES : ""),
 
 	/** Whether or not to use the /me to be able to get the logged in user via a http endpoint */
-	useMeEndpoint: parseBool(process.env.USE_ME_ENDPOINT || "false")
+	useMeEndpoint: parseBool(process.env.USE_ME_ENDPOINT || "false"),
+
+	/** locale for sorting user's numeric string fields. */
+	locale: process.env.locale || "sv"
 
 };
 
