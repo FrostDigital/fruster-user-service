@@ -83,7 +83,7 @@ describe("SetPasswordHandler", () => {
 	});
 
 	it("should throw not found error if id or token not found", async () => {
-		const {status, error} = await SpecUtils.busRequest({
+		const {status, error} = await SpecUtils.busRequestExpectError({
 			subject: constants.endpoints.service.SET_PASSWORD,
 			data: {
 				newPassword: "Localhost:8081",
