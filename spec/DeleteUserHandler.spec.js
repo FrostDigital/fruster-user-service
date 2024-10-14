@@ -74,7 +74,7 @@ describe("DeleteUserHandler", () => {
         try {
             await SpecUtils.busRequest(constants.endpoints.service.DELETE_USER, { id: uuid.v4() });
 
-			expect(true).toBe(false, "Should not reach this point");
+			fail();
         } catch (err) {
             expect(err.status).toBe(404, "deleteResponse.status");
         }

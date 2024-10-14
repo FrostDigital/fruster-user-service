@@ -13,7 +13,6 @@ describe("GetProfilesByQueryHandler", () => {
 			afterStart: async (connection) => {
 				try {
 					await connection.db.collection(constants.collections.USERS).deleteMany({});
-					console.log()
 				} catch(e) {}
 			}
 		});

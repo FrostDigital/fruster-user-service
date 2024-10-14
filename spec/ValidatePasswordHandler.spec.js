@@ -173,16 +173,12 @@ describe("ValidatePasswordHandler", () => {
 			data: user
 		});
 
-		try {
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.VALIDATE_PASSWORD,
-				data: { username: user.email, password: "yoyoyo" }
-			});
-			expect(true).toBe(false, "Should not reach this point");
-		} catch (err) {
-			expect(err.status).toBe(401, "err.status");
-			expect(err.data).toBeUndefined("err.data");
-		}
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: user.email, password: "yoyoyo" }
+		});
+		expect(err.status).toBe(401, "err.status");
+		expect(err.data).toBeUndefined("err.data");
 	});
 
 	it("should not be possible to login using an incomplete email", async () => {

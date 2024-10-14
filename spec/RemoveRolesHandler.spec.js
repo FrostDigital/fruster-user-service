@@ -62,16 +62,13 @@ describe("RemoveRolesHandler", () => {
         const user = mocks.getUserObject();
         const createdUser = (await SpecUtils.createUser(user)).data;
 
-        try {
-            await SpecUtils.busRequest({
+        const err = await SpecUtils.busRequestExpectError({
                 subject: constants.endpoints.service.REMOVE_ROLES,
                 data: { id: createdUser.id, roles: ["admin"] }
             });
-			expect(true).toBe(false, "Should not reach this point");
-        } catch (err) {
-            expect(err.status).toBe(400, "err.status");
-            expect(err.error.code).toBe("user-service.400.14", "err.error.code");
-        }
+
+		expect(err.status).toBe(400, "err.status");
+		expect(err.error.code).toBe("user-service.400.14", "err.error.code");
     });
 
 });

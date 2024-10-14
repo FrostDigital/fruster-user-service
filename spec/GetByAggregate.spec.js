@@ -56,8 +56,7 @@ describe("GetByAggregateHandler", () => {
 
 		config.privateProperties = privateProperties + "|firstName|lastName";
 
-		try {
-			await SpecUtils.busRequest({
+		const {error, status} = await SpecUtils.busRequestExpectError({
 				subject: constants.endpoints.service.GET_BY_AGGREGATE,
 				data: {
 					aggregate: [
@@ -66,12 +65,9 @@ describe("GetByAggregateHandler", () => {
 				}
 			});
 
-			expect(true).toBe(false, "Should not reach this point");
-		} catch ({ error, status }) {
-			expect(status).toBe(400, "status");
-			expect(error.code).toBe(errors.badRequest().error.code, "code");
-			expect(error.detail).toContain("Cannot expose password|salt|emailVerificationToken|hashDate", "detail");
-		}
+		expect(status).toBe(400, "status");
+		expect(error.code).toBe(errors.badRequest().error.code, "code");
+		expect(error.detail).toContain("Cannot expose password|salt|emailVerificationToken|hashDate", "detail");
 	});
 
 	/**

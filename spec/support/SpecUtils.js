@@ -54,7 +54,7 @@ class SpecUtils {
 
 	static busRequestExpectError(options, inputData) {
 		return SpecUtils.busRequest(options, inputData)
-			.then(() => expect(true).toBe(false))
+			.then(() => fail())
 			.catch(err => {
 				expect(err).toBeDefined()
 				return err;

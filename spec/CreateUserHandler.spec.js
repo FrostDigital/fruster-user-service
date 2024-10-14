@@ -195,7 +195,7 @@ describe("CreateUserHandler", () => {
 
 		try {
 			await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
-			expect(true).toBe(false, "should not be possible to create user with faulty email");
+			fail();
 		} catch (err) {
 			expect(err.status).toBe(400, "err.status");
 
@@ -214,21 +214,18 @@ describe("CreateUserHandler", () => {
 		const user = mocks.getUserObject();
 		user.email = "email@email.com";
 
-		try {
-			await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+		await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
-			const user2 = mocks.getUserObject();
-			user2.email = "email2@email.com";
+		const user2 = mocks.getUserObject();
+		user2.email = "email2@email.com";
 
-			await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user2);
+		const err = await SpecUtils.busRequestExpectError(constants.endpoints.service.CREATE_USER, user2);
 
-			expect(true).toBe(false, "should not be possible to create user with faulty email");
-		} catch (err) {
-			expect(err.status).toBe(400, "err.status");
+		expect(err.status).toBe(400, "err.status");
 
-			expect(err.data).toBeUndefined("err.data");
-			expect(Object.keys(err.error).length).not.toBe(0);
-		}
+		expect(err.data).toBeUndefined("err.data");
+		expect(Object.keys(err.error).length).not.toBe(0);
+
 	});
 
 	it("should validate required fields when creating user", async () => {
@@ -427,7 +424,7 @@ describe("CreateUserHandler", () => {
 				SpecUtils.createUser(user)
 			]);
 
-			expect(true).toBe(false, "should not be possible to create multiple users with the same email");
+			fail();
 		} catch (err) {
 			expect(err.status).toBe(400, "err.status");
 

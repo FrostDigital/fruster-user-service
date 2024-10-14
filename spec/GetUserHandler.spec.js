@@ -17,46 +17,29 @@ describe("GetUserHandler", () => {
 			}));
 
 	it("should fail to get ALL users when passing in empty object as query", async () => {
-		try {
-			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {});
-
-			expect(true).toBe(false, "Should not reach this point");
-		} catch (err) {
-			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-		}
+		const err = await SpecUtils.busRequestExpectError(constants.endpoints.service.GET_USER, {});
+		expect(err.error.code).toBe("user-service.400.13", "err.error.code");
 	});
 
 	it("should fail to get ALL users when query is empty", async () => {
-		try {
-			await SpecUtils.busRequest(constants.endpoints.service.GET_USER);
-			expect(true).toBe(false, "Should not reach this point");
-		} catch (err) {
-			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-		}
+		const err = await SpecUtils.busRequestExpectError(constants.endpoints.service.GET_USER);
+		expect(err.error.code).toBe("user-service.400.13", "err.error.code");
 	});
 
 	it("should fail to query by password", async () => {
-		try {
-			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
-				password: "foo"
-			});
+		const err = await SpecUtils.busRequestExpectError(constants.endpoints.service.GET_USER, {
+			password: "foo"
+		});
 
-			expect(true).toBe(false, "Should not reach this point");
-		} catch (err) {
-			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-		}
+		expect(err.error.code).toBe("user-service.400.13", "err.error.code");
 	});
 
 	it("should fail to query by salt", async () => {
-		try {
-			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
-				salt: "foo"
-			});
+		const err = await SpecUtils.busRequestExpectError(constants.endpoints.service.GET_USER, {
+			salt: "foo"
+		});
 
-			expect(true).toBe(false, "Should not reach this point");
-		} catch (err) {
-			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-		}
+		expect(err.error.code).toBe("user-service.400.13", "err.error.code");
 	});
 
 	it("should get users by email", async () => {
@@ -133,8 +116,7 @@ describe("GetUserHandler", () => {
 					user: { scopes: ["admin.*"] }
 				}
 			});
-
-			expect(true).toBe(false, "Should not reach this point");
+			fail();
 		} catch (err) {
 			expect(err.status).toBe(500, "err.status");
 		}

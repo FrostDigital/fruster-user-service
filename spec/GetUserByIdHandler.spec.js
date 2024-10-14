@@ -25,20 +25,15 @@ describe("GetUserByIdHandler", () => {
 	}
 
 	it("should get 404 if user does not exist", async () => {
-		try {
-			await setupTestUsers();
+		await setupTestUsers();
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.http.admin.GET_USER,
+			data: {},
+			user: { scopes: ["admin.*"] },
+			params: { id: "non-existing-user-id" },
+		});
 
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.http.admin.GET_USER,
-				data: {},
-				user: { scopes: ["admin.*"] },
-				params: { id: "non-existing-user-id" },
-			});
-
-			expect(true).toBe(false);
-		} catch (err) {
-			expect(err.status).toBe(404);
-		}
+		expect(err.status).toBe(404);
 	});
 
 	it("should get user by id", async () => {

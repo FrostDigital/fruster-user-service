@@ -61,7 +61,7 @@ describe("AddSystemRoleHandler", () => {
 
 		try {
 			await addRole();
-			expect(true).toBe(false);
+			fail();
 		} catch (err) {
 			expect(err.error.code).toBe(errors.get("fruster-user-service.SYSTEM_ROLE_ALREADY_EXISTS").error.code);
 		}

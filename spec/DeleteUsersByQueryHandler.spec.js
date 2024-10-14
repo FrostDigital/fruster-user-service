@@ -144,7 +144,7 @@ describe("DeleteUsersByQueryHandler", () => {
             const userInDatabase = await db.collection(constants.collections.USERS).findOne(reqData);
             expect(userInDatabase).toBe(null, "userInDatabase");
 
-			expect(true).toBe(false, "Should not reach this point");
+			fail();
         } catch (err) {
             expect(err.status).toBe(400);
         }

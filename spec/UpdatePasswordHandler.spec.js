@@ -75,17 +75,13 @@ describe("UpdatePasswordHandler", () => {
             id: "someone else's id"
         };
 
-        try {
-            await SpecUtils.busRequest({
-                subject: constants.endpoints.service.UPDATE_PASSWORD,
-                user: response.data,
-                data: updatePassword
-            });
+        const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.UPDATE_PASSWORD,
+			user: response.data,
+			data: updatePassword
+		});
 
-			expect(true).toBe(false, "Should not reach this point");
-        } catch (err) {
-            expect(err.error.code).toBe(deprecatedErrors.errorCodes.forbidden, "err.error.code");
-        };
+		expect(err.error.code).toBe(deprecatedErrors.errorCodes.forbidden, "err.error.code");
     });
 
     it("should not be possible to update password without validating the old password", async () => {
@@ -97,17 +93,13 @@ describe("UpdatePasswordHandler", () => {
             id: response.data.id
         };
 
-        try {
-            await SpecUtils.busRequest({
-                subject: constants.endpoints.service.UPDATE_PASSWORD,
-                user: response.data,
-                data: updatePassword
-            });
+        const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.UPDATE_PASSWORD,
+			user: response.data,
+			data: updatePassword
+		});
 
-            expect(true).toBe(false, "Should not reach this point");
-        } catch (err) {
-            expect(err.error.code).toBe(deprecatedErrors.errorCodes.invalidUsernameOrPassword, "err.error.code");
-        }
+		expect(err.error.code).toBe(deprecatedErrors.errorCodes.invalidUsernameOrPassword, "err.error.code");
     });
 
 });
