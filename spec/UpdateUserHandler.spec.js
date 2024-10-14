@@ -4,10 +4,10 @@ const config = require('../config');
 const mocks = require('./support/mocks.js');
 const SpecUtils = require('./support/SpecUtils');
 const constants = require('../lib/constants.js');
-const MailServiceClient = require("../lib/clients/MailServiceClient");
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
 const errors = require('../lib/errors');
+const { createIndexes } = require("../fruster-user-service.js");
 const Db = require("mongodb").Db;
 
 
@@ -90,57 +90,43 @@ describe("UpdateUserHandler", () => {
 		expect(testUser.emailVerificationToken).toBeUndefined("testUser.emailVerificationToken");
 	});
 
-	it("should return error when user can't be updated", async done => {
-		try {
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.UPDATE_USER,
-				data: { id: "ID_", email: "hello" }
-			});
+	it("should return error when user can't be updated", async () => {
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.UPDATE_USER,
+			data: { id: "ID_", email: "hello" }
+		});
 
-			done.fail();
-		} catch (err) {
-			expect(err.status).toBe(400, "err.status");
-			done();
-		}
+		expect(err.status).toBe(400, "err.status");
 	});
 
-	it("should return error when trying to update password", async done => {
+	it("should return error when trying to update password", async () => {
 		const user = mocks.getUserObject();
 		const createdUserResponse = await SpecUtils.createUser(user);
 
-		try {
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.UPDATE_USER,
-				data: { id: createdUserResponse.data.id, password: "new-password" }
-			});
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.UPDATE_USER,
+			data: { id: createdUserResponse.data.id, password: "new-password" }
+		});
 
-			done.fail();
-		} catch (err) {
-			expect(err.status).toBe(400, err.status);
-			expect(err.data).toBeUndefined("err.data");
-
-			done();
-		}
+		expect(err.status).toBe(400, "err.status");
+		expect(err.data).toBeUndefined("err.data");
 	});
 
-	it("should return error when trying to update email with faulty email", async done => {
+	it("should return error when trying to update email with faulty email", async () => {
 		const user = mocks.getUserObject();
 		const createdUserResponse = await SpecUtils.createUser(user);
 
-		try {
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.UPDATE_USER,
-				data: { id: createdUserResponse.data.id, email: "hello" }
-			});
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.UPDATE_USER,
+			data: { id: createdUserResponse.data.id, email: "hello" }
+		});
 
-			done.fail();
-		} catch (err) {
-			expect(err.status).toBe(400, "err.status");
-			done();
-		};
+		expect(err.status).toBe(400, "err.status");
 	});
 
-	it("should return error when trying to update email with existing email", async done => {
+	it("should return error when trying to update email with existing email", async () => {
+		await createIndexes(db);
+
 		const user = mocks.getUserObject();
 		const email = "new-email" + Math.random() + "@gotmail.com";
 
@@ -150,17 +136,12 @@ describe("UpdateUserHandler", () => {
 
 		await SpecUtils.createUser(user);
 
-		try {
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.UPDATE_USER,
-				data: { id: id, email: email }
-			});
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.UPDATE_USER,
+			data: { id: id, email: email }
+		});
 
-			done.fail();
-		} catch (err) {
-			expect(err.status).toBe(400, "err.status");
-			done();
-		}
+		expect(err.status).toBe(400, "err.status");
 	});
 
 	it("should be possible to send old email with update request", async () => {
@@ -179,53 +160,42 @@ describe("UpdateUserHandler", () => {
 		expect(updateResponse.status).toBe(200, "updateResponse.status");
 	});
 
-	it("should require password when updating email if config.requirePasswordOnEmailUpdate is true", async done => {
-		try {
-			config.requirePasswordOnEmailUpdate = true;
+	it("should require password when updating email if config.requirePasswordOnEmailUpdate is true", async () => {
+		config.requirePasswordOnEmailUpdate = true;
 
-			const user = mocks.getUserObject();
-			const email = "rambo.dreadlock@fejkmejl.se";
+		const user = mocks.getUserObject();
+		const email = "rambo.dreadlock@fejkmejl.se";
 
-			const createdUserResponse = await SpecUtils.createUser(user);
-			const id = createdUserResponse.data.id;
-			user.email = email;
+		const createdUserResponse = await SpecUtils.createUser(user);
+		const id = createdUserResponse.data.id;
+		user.email = email;
 
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.UPDATE_USER,
-				data: { id, email }
-			});
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.UPDATE_USER,
+			data: { id, email }
+		});
 
-			done.fail();
-		} catch (err) {
-			expect(err.status).toBe(errors.get("fruster-user-service.PASSWORD_REQUIRED").status);
-			expect(err.error.code).toBe(errors.get("fruster-user-service.PASSWORD_REQUIRED").error.code);
-
-			done();
-		}
+		expect(err.status).toBe(errors.get("fruster-user-service.PASSWORD_REQUIRED").status);
+		expect(err.error.code).toBe(errors.get("fruster-user-service.PASSWORD_REQUIRED").error.code);
 	});
 
-	it("should not be possible to provide incorrect password when updating email if config.requirePasswordOnEmailUpdate is true", async done => {
-		try {
-			config.requirePasswordOnEmailUpdate = true;
+	it("should not be possible to provide incorrect password when updating email if config.requirePasswordOnEmailUpdate is true", async () => {
+		config.requirePasswordOnEmailUpdate = true;
 
-			const user = mocks.getUserObject();
-			const email = "rambo.dreadlock@fejkmejl.se";
+		const user = mocks.getUserObject();
+		const email = "rambo.dreadlock@fejkmejl.se";
 
-			const createdUserResponse = await SpecUtils.createUser(user);
-			const id = createdUserResponse.data.id;
-			user.email = email;
+		const createdUserResponse = await SpecUtils.createUser(user);
+		const id = createdUserResponse.data.id;
+		user.email = email;
 
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.UPDATE_USER,
-				data: { id, email, password: "This is incorrect" }
-			});
-			done.fail();
-		} catch (err) {
-			expect(err.status).toBe(errors.get("fruster-user-service.UNAUTHORIZED").status);
-			expect(err.error.code).toBe(errors.get("fruster-user-service.UNAUTHORIZED").error.code);
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.UPDATE_USER,
+			data: { id, email, password: "This is incorrect" }
+		});
 
-			done();
-		}
+		expect(err.status).toBe(errors.get("fruster-user-service.UNAUTHORIZED").status);
+		expect(err.error.code).toBe(errors.get("fruster-user-service.UNAUTHORIZED").error.code);
 	});
 
 	it("should be possible to update email with correct password if config.requirePasswordOnEmailUpdate is true", async () => {

@@ -11,56 +11,35 @@ describe("GetUserHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => {
-				return insertTestUsers(connection.db);
+			.testUtilsOptions(async (connection) => {
+				await connection.db.collection(constants.collections.USERS).deleteMany({});
+				await insertTestUsers(connection.db);
 			}));
 
-	it("should fail to get ALL users when passing in empty object as query", async done => {
-		try {
-			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {});
-
-			done.fail();
-		} catch (err) {
-			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-			done();
-		}
+	it("should fail to get ALL users when passing in empty object as query", async () => {
+		const err = await SpecUtils.busRequestExpectError(constants.endpoints.service.GET_USER, {});
+		expect(err.error.code).toBe("user-service.400.13", "err.error.code");
 	});
 
 	it("should fail to get ALL users when query is empty", async () => {
-		try {
-			// @ts-ignore
-			await SpecUtils.busRequest(constants.endpoints.service.GET_USER);
-
-			fail();
-		} catch (err) {
-			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-		}
+		const err = await SpecUtils.busRequestExpectError(constants.endpoints.service.GET_USER);
+		expect(err.error.code).toBe("user-service.400.13", "err.error.code");
 	});
 
-	it("should fail to query by password", async done => {
-		try {
-			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
-				password: "foo"
-			});
+	it("should fail to query by password", async () => {
+		const err = await SpecUtils.busRequestExpectError(constants.endpoints.service.GET_USER, {
+			password: "foo"
+		});
 
-			done.fail();
-		} catch (err) {
-			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-			done();
-		}
+		expect(err.error.code).toBe("user-service.400.13", "err.error.code");
 	});
 
-	it("should fail to query by salt", async done => {
-		try {
-			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
-				salt: "foo"
-			});
+	it("should fail to query by salt", async () => {
+		const err = await SpecUtils.busRequestExpectError(constants.endpoints.service.GET_USER, {
+			salt: "foo"
+		});
 
-			done.fail();
-		} catch (err) {
-			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-			done();
-		}
+		expect(err.error.code).toBe("user-service.400.13", "err.error.code");
 	});
 
 	it("should get users by email", async () => {
@@ -96,7 +75,7 @@ describe("GetUserHandler", () => {
 			message: {
 				reqId: "reqId",
 				query: {
-					start: 1,
+					start: 0,
 					limit: 2
 				},
 				user: { scopes: ["admin.*"] }
@@ -126,7 +105,7 @@ describe("GetUserHandler", () => {
 		expect(res.data[0].id).toBe("user1", "res.data[0].id");
 	});
 
-	it("should get internal server error if passing an invalid query", async done => {
+	it("should get internal server error if passing an invalid query", async () => {
 		try {
 			await bus.request({
 				subject: constants.endpoints.http.admin.GET_USERS,
@@ -137,11 +116,9 @@ describe("GetUserHandler", () => {
 					user: { scopes: ["admin.*"] }
 				}
 			});
-
-			done.fail();
+			fail();
 		} catch (err) {
 			expect(err.status).toBe(500, "err.status");
-			done();
 		}
 	});
 

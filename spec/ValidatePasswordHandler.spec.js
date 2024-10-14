@@ -16,15 +16,17 @@ describe("ValidatePasswordHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => db = connection.db));
+			.testUtilsOptions(async (connection) => {
+				db = connection.db;
+				try {
+					await db.collection(constants.collections.USERS).deleteMany({});
+				} catch (e) { }
+			}));
 
 	afterEach(() => SpecUtils.resetConfig());
 
 	it("should return 200 when validating correct password", async () => {
 		const user = mocks.getUserObject();
-
-		//@ts-ignore
-		await db.dropDatabase(constants.collections.USERS);
 
 		await SpecUtils.busRequest({
 			subject: constants.endpoints.service.CREATE_USER,
@@ -45,9 +47,6 @@ describe("ValidatePasswordHandler", () => {
 		config.usernameValidationDbField = ["username", "email", "firstName"];
 
 		const user = { ...mocks.getUserObject(), username: "1337" };
-
-		//@ts-ignore
-		await db.dropDatabase(constants.collections.USERS);
 
 		await SpecUtils.busRequest({
 			subject: constants.endpoints.service.CREATE_USER,
@@ -81,9 +80,6 @@ describe("ValidatePasswordHandler", () => {
 		config.usernameValidationDbField = ["username", "email", "firstName"];
 
 		const user = { ...mocks.getUserObject(), username: "1337" };
-
-		//@ts-ignore
-		await db.dropDatabase(constants.collections.USERS);
 
 		await SpecUtils.busRequest({
 			subject: constants.endpoints.service.CREATE_USER,
@@ -124,10 +120,7 @@ describe("ValidatePasswordHandler", () => {
 	it("should return 200 when validating correct password without hashDate", async () => {
 		const user = mocks.getOldUserObject();
 
-		//@ts-ignore
-		await db.dropDatabase(constants.collections.USERS);
-
-		await db.collection(constants.collections.USERS).update({ id: user.id }, user, { upsert: true })
+		await db.collection(constants.collections.USERS).updateOne({ id: user.id }, {$set: user}, { upsert: true })
 
 		const response = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.VALIDATE_PASSWORD,
@@ -143,10 +136,7 @@ describe("ValidatePasswordHandler", () => {
 
 		user.hashDate = new Date("1970");
 
-		//@ts-ignore
-		await db.dropDatabase(constants.collections.USERS);
-
-		await db.collection(constants.collections.USERS).update({ id: user.id }, user, { upsert: true })
+		await db.collection(constants.collections.USERS).updateOne({ id: user.id }, {$set: user}, { upsert: true })
 
 		const response = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.VALIDATE_PASSWORD,
@@ -175,7 +165,7 @@ describe("ValidatePasswordHandler", () => {
 		expect(response.error).toBeUndefined("response.error");
 	});
 
-	it("should return 401 when validating incorrect password", async done => {
+	it("should return 401 when validating incorrect password", async () => {
 		const user = mocks.getUserObject();
 
 		await SpecUtils.busRequest({
@@ -183,20 +173,15 @@ describe("ValidatePasswordHandler", () => {
 			data: user
 		});
 
-		try {
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.VALIDATE_PASSWORD,
-				data: { username: user.email, password: "yoyoyo" }
-			});
-		} catch (err) {
-			expect(err.status).toBe(401, "err.status");
-			expect(err.data).toBeUndefined("err.data");
-
-			done();
-		}
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: user.email, password: "yoyoyo" }
+		});
+		expect(err.status).toBe(401, "err.status");
+		expect(err.data).toBeUndefined("err.data");
 	});
 
-	it("should not be possible to login using an incomplete email", async done => {
+	it("should not be possible to login using an incomplete email", async () => {
 		mocks.mockMailService();
 
 		const user = mocks.getUserObject();
@@ -209,22 +194,16 @@ describe("ValidatePasswordHandler", () => {
 		let email = user.email;
 		email = email.substring(0, email.indexOf("@"));
 
-		try {
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.VALIDATE_PASSWORD,
-				data: { username: email, password: user.password }
-			});
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: email, password: user.password }
+		});
 
-			done.fail();
-		} catch (err) {
-			expect(err.status).toBe(401, "err.status");
-			expect(err.data).toBeUndefined("err.data");
-
-			done();
-		}
+		expect(err.status).toBe(401, "err.status");
+		expect(err.data).toBeUndefined("err.data");
 	});
 
-	it("should return 400 when user without verified email logs in with config.requireEmailVerification set to true", async done => {
+	it("should return 400 when user without verified email logs in with config.requireEmailVerification set to true", async () => {
 		mocks.mockMailService();
 
 		config.requireEmailVerification = true;
@@ -238,21 +217,16 @@ describe("ValidatePasswordHandler", () => {
 
 		await SpecUtils.delay(200);
 
-		try {
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.VALIDATE_PASSWORD,
-				data: { username: user.email, password: user.password }
-			});
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.VALIDATE_PASSWORD,
+			data: { username: user.email, password: user.password }
+		});
 
-			done.fail();
-		} catch (err) {
-			expect(err.status).toBe(400, "err.status");
-			expect(err.error.code).toBe(errors.get("fruster-user-service.EMAIL_NOT_VERIFIED").error.code, "err.error.code");
+		expect(err.status).toBe(400, "err.status");
+		expect(err.error.code).toBe(errors.get("fruster-user-service.EMAIL_NOT_VERIFIED").error.code, "err.error.code");
 
-			config.requireEmailVerification = false;
+		config.requireEmailVerification = false;
 
-			done();
-		}
 	});
 
 	it("should be possible for to login even if the email has not been verified but config.optionalEmailVerification is set to true", async () => {
@@ -301,9 +275,6 @@ describe("ValidatePasswordHandler", () => {
 		const user = mocks.getUserObject();
 
 		const orgId = "org-id";
-
-		//@ts-ignore
-		await db.dropDatabase(constants.collections.USERS);
 
 		await SpecUtils.busRequest({
 			subject: constants.endpoints.service.CREATE_USER,

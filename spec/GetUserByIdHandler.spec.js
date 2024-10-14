@@ -13,7 +13,10 @@ describe("GetUserByIdHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => db = connection.db));
+			.testUtilsOptions(async (connection) => {
+				db = connection.db;
+				await db.collection(constants.collections.USERS).deleteMany({});
+			}));
 
 	afterEach(() => SpecUtils.resetConfig());
 
@@ -21,22 +24,16 @@ describe("GetUserByIdHandler", () => {
 		await insertTestUsers(db);
 	}
 
-	it("should get 404 if user does not exist", async done => {
-		try {
-			await setupTestUsers();
+	it("should get 404 if user does not exist", async () => {
+		await setupTestUsers();
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.http.admin.GET_USER,
+			data: {},
+			user: { scopes: ["admin.*"] },
+			params: { id: "non-existing-user-id" },
+		});
 
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.http.admin.GET_USER,
-				data: {},
-				user: { scopes: ["admin.*"] },
-				params: { id: "non-existing-user-id" }
-			});
-
-			done.fail();
-		} catch (err) {
-			expect(err.status).toBe(404);
-			done();
-		}
+		expect(err.status).toBe(404);
 	});
 
 	it("should get user by id", async () => {

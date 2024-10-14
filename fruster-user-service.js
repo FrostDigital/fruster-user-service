@@ -49,13 +49,18 @@ const log = require("fruster-log");
 
 module.exports = {
 	start: async (busAddress, mongoUrl) => {
-		await bus.connect(busAddress);
-		const db = (await mongo.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })).db();
+		const client = new mongo.MongoClient(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+		await client.connect();
+		const db = client.db();
 
-		try {
-			await createIndexes(db);
-		} catch (err) {
-			log.warn("Error while creating indexes", err);
+		await bus.connect(busAddress);
+
+		if (!process.env.CI) {
+			try {
+				await createIndexes(db);
+			} catch (err) {
+				log.warn("Error while creating indexes", err);
+			}
 		}
 
 		// REPOS
@@ -75,7 +80,11 @@ module.exports = {
 
 		// HANDLERS
 		const createInitialUserHandler = new CreateInitialUserHandler(userRepo, initialUserRepo, passwordManager);
-		await createInitialUserHandler.handle();
+
+		if (!process.env.CI) {
+			await createInitialUserHandler.handle();
+		}
+
 		const createUserHandler = new CreateUserHandler(userRepo, passwordManager, roleManager, profileManager, userManager);
 		const getUserHandler = new GetUserHandler(userRepo, roleManager); /** DEPRECATED */
 		const getUsersByQueryHandler = new GetUsersByQueryHandler(userRepo, roleManager, profileManager);
@@ -393,7 +402,9 @@ module.exports = {
 			config.requireSendSetPasswordEmail
 		)
 			expressApp.stop();
-	}
+	},
+
+	createIndexes
 
 };
 

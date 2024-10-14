@@ -66,7 +66,7 @@ describe("UpdatePasswordHandler", () => {
         expect(updatedUser.hashDate).not.toBe(startUser.hashDate, "updatedUser.hashDate");
     });
 
-    it("should not be possible to update someone else's password", async done => {
+    it("should not be possible to update someone else's password", async () => {
         const user = mocks.getUserObject();
         const response = await SpecUtils.createUser(user);
         const updatePassword = {
@@ -75,21 +75,16 @@ describe("UpdatePasswordHandler", () => {
             id: "someone else's id"
         };
 
-        try {
-            await SpecUtils.busRequest({
-                subject: constants.endpoints.service.UPDATE_PASSWORD,
-                user: response.data,
-                data: updatePassword
-            });
+        const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.UPDATE_PASSWORD,
+			user: response.data,
+			data: updatePassword
+		});
 
-            done.fail();
-        } catch (err) {
-            expect(err.error.code).toBe(deprecatedErrors.errorCodes.forbidden, "err.error.code");
-            done();
-        };
+		expect(err.error.code).toBe(deprecatedErrors.errorCodes.forbidden, "err.error.code");
     });
 
-    it("should not be possible to update password without validating the old password", async done => {
+    it("should not be possible to update password without validating the old password", async () => {
         const user = mocks.getUserObject();
         const response = await SpecUtils.createUser(user);
         const updatePassword = {
@@ -98,18 +93,13 @@ describe("UpdatePasswordHandler", () => {
             id: response.data.id
         };
 
-        try {
-            await SpecUtils.busRequest({
-                subject: constants.endpoints.service.UPDATE_PASSWORD,
-                user: response.data,
-                data: updatePassword
-            });
+        const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.UPDATE_PASSWORD,
+			user: response.data,
+			data: updatePassword
+		});
 
-            done.fail();
-        } catch (err) {
-            expect(err.error.code).toBe(deprecatedErrors.errorCodes.invalidUsernameOrPassword, "err.error.code");
-            done();
-        }
+		expect(err.error.code).toBe(deprecatedErrors.errorCodes.invalidUsernameOrPassword, "err.error.code");
     });
 
 });

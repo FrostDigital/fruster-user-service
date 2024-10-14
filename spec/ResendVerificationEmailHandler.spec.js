@@ -1,9 +1,7 @@
-const bus = require("fruster-bus");
 const Db = require("mongodb").Db;
 const conf = require('../config');
 const mocks = require('./support/mocks.js');
 const constants = require('../lib/constants.js');
-const MailServiceClient = require("../lib/clients/MailServiceClient");
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
 const SpecUtils = require("./support/SpecUtils");
@@ -18,9 +16,8 @@ describe("ResendVerificationEmailHandler", () => {
 		.startBeforeEach(specConstants
 			.testUtilsOptions((connection) => db = connection.db));
 
-	afterEach((done) => {
+	afterEach(() => {
 		conf.requireEmailVerification = false;
-		done();
 	});
 
 	it("should resend email", async () => {

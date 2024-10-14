@@ -9,8 +9,11 @@ module.exports = {
 	 */
 	testUtilsOptions: (afterStart) => {
 		return {
-			mockNats: true, bus, service, afterStart,
-			mongoUrl: `mongodb://localhost:27017/${constants.SERVICE_NAME}-test`
+			mockNats: true,
+			bus,
+			service,
+			afterStart,
+			mongoUrl: `mongodb://localhost:27017/${constants.SERVICE_NAME}-test`,
 		};
 	}
 

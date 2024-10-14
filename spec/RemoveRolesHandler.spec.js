@@ -58,21 +58,17 @@ describe("RemoveRolesHandler", () => {
             .toBeGreaterThan(new Date(createdUser.metadata.updated).getTime(), "userResponse.data.metadata.updated")
     });
 
-    it("should not be possible to remove all from a user", async done => {
+    it("should not be possible to remove all from a user", async () => {
         const user = mocks.getUserObject();
         const createdUser = (await SpecUtils.createUser(user)).data;
 
-        try {
-            await SpecUtils.busRequest({
+        const err = await SpecUtils.busRequestExpectError({
                 subject: constants.endpoints.service.REMOVE_ROLES,
                 data: { id: createdUser.id, roles: ["admin"] }
             });
-        } catch (err) {
-            expect(err.status).toBe(400, "err.status");
-            expect(err.error.code).toBe("user-service.400.14", "err.error.code");
 
-            done();
-        }
+		expect(err.status).toBe(400, "err.status");
+		expect(err.error.code).toBe("user-service.400.14", "err.error.code");
     });
 
 });

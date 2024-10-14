@@ -69,40 +69,31 @@ describe("SetPasswordHandler", () => {
 		expect(newUser.hashDate).toBeDefined("newUser.hashDate");
 	});
 
-	it("should throw bad request error if id or token not found", async done => {
-		try {
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.SET_PASSWORD,
-				data: {
-					newPassword: "Localhost:8081"
-				}
-			});
+	it("should throw bad request error if id or token not found", async () => {
+		const {status, error} = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.SET_PASSWORD,
+			data: {
+				newPassword: "Localhost:8081"
+			}
+		});
 
-			done.fail();
-		} catch ({ status, error }) {
-			expect(status).toBe(400, "status");
-			expect(error.code).toBe(errors.badRequest().error.code, "error.code");
-			expect(error.detail).toBe("The request need id or token", "error.detail");
-			done();
-		}
+		expect(status).toBe(400, "status");
+		expect(error.code).toBe(errors.badRequest().error.code, "error.code");
+		expect(error.detail).toBe("The request need id or token", "error.detail");
 	});
 
-	it("should throw not found error if id or token not found", async done => {
-		try {
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.service.SET_PASSWORD,
-				data: {
-					newPassword: "Localhost:8081",
-					token: "not-found"
-				}
-			});
+	it("should throw not found error if id or token not found", async () => {
+		const {status, error} = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.service.SET_PASSWORD,
+			data: {
+				newPassword: "Localhost:8081",
+				token: "not-found"
+			}
+		});
 
-			done.fail();
-		} catch ({ status, error }) {
-			expect(status).toBe(404, "status");
-			expect(error.code).toBe(errors.notFound().error.code, "error.code");
-			done();
-		}
+		expect(status).toBe(404, "status");
+		expect(error.code).toBe(errors.notFound().error.code, "error.code");
+
 	});
 
 	function getToken(message) {

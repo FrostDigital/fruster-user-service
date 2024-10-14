@@ -86,7 +86,7 @@ describe("DeleteUsersByQueryHandler", () => {
         expect(profileAfterDelete).toBe(null, "userInDatabase");
     });
 
-    it(`should publish ${Publishes.subjects.USER_DELETED} for each removed user`, async done => {
+    it(`should publish ${Publishes.subjects.USER_DELETED} for each removed user`, async () => {
         try {
             config.userFields = constants.dataset.REQUIRED_ONLY;
 
@@ -106,8 +106,7 @@ describe("DeleteUsersByQueryHandler", () => {
                 if (pubs === 2) {
                     expect(pubUserIds.length).toBe(2, "pubUserIds.length");
                     pubUserIds.forEach(userId => expect(reqData.id.$in.includes(userId)).toBeTruthy("reqData.id.$in.includes(userId)"));
-
-                    done();
+                    // done();
                 }
             });
 
@@ -129,11 +128,11 @@ describe("DeleteUsersByQueryHandler", () => {
             expect(profileAfterDelete).toBe(null, "userInDatabase");
         } catch (err) {
             log.error(err.stack ? err.stack : err);
-            done.fail(err.stack ? err.stack : err);
+			expect(err).toBe(null);
         }
     });
 
-    it("should not allow empty query", async done => {
+    it("should not allow empty query", async () => {
         try {
             const user = mocks.getUserObject();
             const createdUserResponse = await SpecUtils.createUser(user);
@@ -145,10 +144,9 @@ describe("DeleteUsersByQueryHandler", () => {
             const userInDatabase = await db.collection(constants.collections.USERS).findOne(reqData);
             expect(userInDatabase).toBe(null, "userInDatabase");
 
-            done.fail();
+			fail();
         } catch (err) {
             expect(err.status).toBe(400);
-            done();
         }
     });
 

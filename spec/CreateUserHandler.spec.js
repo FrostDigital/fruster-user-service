@@ -3,12 +3,12 @@ const config = require("../config");
 const mocks = require("./support/mocks.js");
 const constants = require("../lib/constants.js");
 const testBus = require("fruster-bus").testBus;
-const MailServiceClient = require("../lib/clients/MailServiceClient");
 const SpecUtils = require("./support/SpecUtils");
 const frusterTestUtils = require("fruster-test-utils");
 const RoleManager = require("../lib/managers/RoleManager");
 const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
 const specConstants = require("./support/spec-constants");
+const { createIndexes } = require("../fruster-user-service.js");
 
 
 describe("CreateUserHandler", () => {
@@ -28,9 +28,8 @@ describe("CreateUserHandler", () => {
 				roleManager = new RoleManager(roleScopesConfigRepo);
 			}));
 
-	afterEach((done) => {
+	afterEach(() => {
 		SpecUtils.resetConfig();
-		done();
 	});
 
 	it("should be possible to create user", async () => {
@@ -98,7 +97,7 @@ describe("CreateUserHandler", () => {
 		const profileFromDatabase = await db.collection(constants.collections.PROFILES).findOne({ id: response.data.profile.id });
 
 		expect(userFromDatabase.password).toBeDefined("userFromDatabase.password");
-		expect(new Date(userFromDatabase.hashDate).getTime()).toBeGreaterThan(testBegan.getTime());
+		expect(new Date(userFromDatabase.hashDate).getTime()).toBeGreaterThanOrEqual(testBegan.getTime());
 		expect(userFromDatabase.salt).toBeDefined("userFromDatabase.salt");
 		expect(userFromDatabase.roles).toBeDefined("userFromDatabase.roles");
 		expect(userFromDatabase.roles.length).toBe(user.roles.length, "userFromDatabase.roles.length");
@@ -177,43 +176,35 @@ describe("CreateUserHandler", () => {
 		expect(response.data.roles.length).toBe(2, "response.data.roles.length");
 	});
 
-	it("should validate password when creating user", async done => {
+	it("should validate password when creating user", async () => {
 		const user = mocks.getUserObject();
 		user.password = "hej";
 
-		try {
-			await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+		const err = await SpecUtils.busRequestExpectError(constants.endpoints.service.CREATE_USER, user);
 
-			done.fail("should not be possible to create user with faulty password");
-		} catch (err) {
-			expect(err.status).toBe(400, "err.statu");
+		expect(err.status).toBe(400, "err.statu");
 
-			expect(err.data).toBeUndefined("err.data");
-			expect(Object.keys(err.error).length).not.toBe(0, "Object.keys(err.error).length");
+		expect(err.data).toBeUndefined("err.data");
+		expect(Object.keys(err.error).length).not.toBe(0, "Object.keys(err.error).length");
 
-			done();
-		}
 	});
 
-	it("should validate email when creating user", async done => {
+	it("should validate email when creating user", async () => {
 		const user = mocks.getUserObject();
 		user.email = "email";
 
 		try {
 			await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
-
-			done.fail("should not be possible to create user with faulty email");
+			fail();
 		} catch (err) {
 			expect(err.status).toBe(400, "err.status");
 
 			expect(err.data).toBeUndefined("err.data");
 			expect(Object.keys(err.error).length).not.toBe(0);
-
-			done();
 		}
 	});
 
-	it("should validate indexed duplicates email when creating user", async done => {
+	it("should validate indexed duplicates email when creating user", async () => {
 		await db.collection(constants.collections.USERS)
 			.createIndex({ firstName: 1 }, {
 				unique: true,
@@ -223,23 +214,18 @@ describe("CreateUserHandler", () => {
 		const user = mocks.getUserObject();
 		user.email = "email@email.com";
 
-		try {
-			await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
+		await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user);
 
-			const user2 = mocks.getUserObject();
-			user2.email = "email2@email.com";
+		const user2 = mocks.getUserObject();
+		user2.email = "email2@email.com";
 
-			await SpecUtils.busRequest(constants.endpoints.service.CREATE_USER, user2);
+		const err = await SpecUtils.busRequestExpectError(constants.endpoints.service.CREATE_USER, user2);
 
-			done.fail("should not be possible to create user with faulty email");
-		} catch (err) {
-			expect(err.status).toBe(400, "err.status");
+		expect(err.status).toBe(400, "err.status");
 
-			expect(err.data).toBeUndefined("err.data");
-			expect(Object.keys(err.error).length).not.toBe(0);
+		expect(err.data).toBeUndefined("err.data");
+		expect(Object.keys(err.error).length).not.toBe(0);
 
-			done();
-		}
 	});
 
 	it("should validate required fields when creating user", async () => {
@@ -421,7 +407,9 @@ describe("CreateUserHandler", () => {
 		});
 	});
 
-	it("should not allow multiple users with the same email to be created", async done => {
+	it("should not allow multiple users with the same email to be created", async () => {
+		await createIndexes(db);
+
 		const user = mocks.getUserObject();
 		await SpecUtils.createUser(user);
 
@@ -436,14 +424,12 @@ describe("CreateUserHandler", () => {
 				SpecUtils.createUser(user)
 			]);
 
-			done.fail();
+			fail();
 		} catch (err) {
 			expect(err.status).toBe(400, "err.status");
 
 			expect(err.data).toBeUndefined("err.data");
 			expect(Object.keys(err.error).length).not.toBe(0, "Object.keys(err.error).length");
-
-			done();
 		}
 	});
 

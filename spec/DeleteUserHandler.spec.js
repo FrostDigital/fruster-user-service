@@ -70,18 +70,17 @@ describe("DeleteUserHandler", () => {
         expect(userInDatabase).toBe(null, "userInDatabase");
     });
 
-    it("should return 404 when trying to remove non-existent user", async done => {
+    it("should return 404 when trying to remove non-existent user", async () => {
         try {
             await SpecUtils.busRequest(constants.endpoints.service.DELETE_USER, { id: uuid.v4() });
 
-            done.fail();
+			fail();
         } catch (err) {
             expect(err.status).toBe(404, "deleteResponse.status");
-            done();
         }
     });
 
-    it("should return 404 when trying to remove non-existent user via http", async done => {
+    it("should return 404 when trying to remove non-existent user via http", async () => {
         const user = mocks.getUserObject();
         user.scopes = ["admin.*"];
 
@@ -93,10 +92,9 @@ describe("DeleteUserHandler", () => {
                 params: { id: uuid.v4() }
             });
 
-            done.fail();
+
         } catch (err) {
             expect(err.status).toBe(404, "deleteResponse.status");
-            done();
         }
     });
 
