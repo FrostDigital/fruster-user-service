@@ -12,7 +12,10 @@ describe("GetUsersByQueryHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions(connection => db = connection.db));
+			.testUtilsOptions(async connection => {
+				db = connection.db;
+				await db.collection(constants.collections.USERS).deleteMany({});
+			}));
 
 	afterEach(() => SpecUtils.resetConfig());
 
@@ -246,7 +249,7 @@ describe("GetUsersByQueryHandler", () => {
 
 		const user = await db.collection(constants.collections.USERS).findOne({ firstName: "user0-firstName" });
 		user.firstName = "Z" + user.firstName.toUpperCase(); // If this was sorted case sensitive, "Z" would be less than "a", thus be the first entry
-		await db.collection(constants.collections.USERS).update({ id: user.id }, user);
+		await db.collection(constants.collections.USERS).updateOne({ id: user.id }, {$set: user});
 
 		const { data: { users, totalCount }, status } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,
@@ -279,7 +282,7 @@ describe("GetUsersByQueryHandler", () => {
 
 		const user = await db.collection(constants.collections.PROFILES).findOne({});
 		user.firstName = "Z" + user.firstName.toUpperCase(); // If this was sorted case sensitive, "Z" would be less than "a"
-		await db.collection(constants.collections.PROFILES).update({ id: user.id }, user);
+		await db.collection(constants.collections.PROFILES).updateOne({ id: user.id }, {$set: user});
 
 		const { data: { users, totalCount }, status } = await SpecUtils.busRequest({
 			subject: constants.endpoints.service.GET_USERS_BY_QUERY,

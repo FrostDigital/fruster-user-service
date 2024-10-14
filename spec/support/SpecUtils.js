@@ -52,6 +52,15 @@ class SpecUtils {
 		return await bus.request(req);
 	}
 
+	static busRequestExpectError(options, inputData) {
+		return SpecUtils.busRequest(options, inputData)
+			.then(() => expect(true).toBe(false))
+			.catch(err => {
+				expect(err).toBeDefined()
+				return err;
+			});
+	}
+
 	static resetConfig() {
 		Object.keys(configBackup)
 			.forEach(conf => config[conf] = configBackup[conf]);

@@ -4,10 +4,10 @@ const config = require('../config');
 const mocks = require('./support/mocks.js');
 const SpecUtils = require('./support/SpecUtils');
 const constants = require('../lib/constants.js');
-const MailServiceClient = require("../lib/clients/MailServiceClient");
 const frusterTestUtils = require("fruster-test-utils");
 const specConstants = require("./support/spec-constants");
 const errors = require('../lib/errors');
+const { createIndexes } = require("../fruster-user-service.js");
 const Db = require("mongodb").Db;
 
 
@@ -90,21 +90,20 @@ describe("UpdateUserHandler", () => {
 		expect(testUser.emailVerificationToken).toBeUndefined("testUser.emailVerificationToken");
 	});
 
-	it("should return error when user can't be updated", async done => {
+	it("should return error when user can't be updated", async () => {
 		try {
 			await SpecUtils.busRequest({
 				subject: constants.endpoints.service.UPDATE_USER,
 				data: { id: "ID_", email: "hello" }
 			});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch (err) {
 			expect(err.status).toBe(400, "err.status");
-			done();
 		}
 	});
 
-	it("should return error when trying to update password", async done => {
+	it("should return error when trying to update password", async () => {
 		const user = mocks.getUserObject();
 		const createdUserResponse = await SpecUtils.createUser(user);
 
@@ -114,16 +113,14 @@ describe("UpdateUserHandler", () => {
 				data: { id: createdUserResponse.data.id, password: "new-password" }
 			});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch (err) {
 			expect(err.status).toBe(400, err.status);
 			expect(err.data).toBeUndefined("err.data");
-
-			done();
 		}
 	});
 
-	it("should return error when trying to update email with faulty email", async done => {
+	it("should return error when trying to update email with faulty email", async () => {
 		const user = mocks.getUserObject();
 		const createdUserResponse = await SpecUtils.createUser(user);
 
@@ -133,14 +130,15 @@ describe("UpdateUserHandler", () => {
 				data: { id: createdUserResponse.data.id, email: "hello" }
 			});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch (err) {
 			expect(err.status).toBe(400, "err.status");
-			done();
 		};
 	});
 
-	it("should return error when trying to update email with existing email", async done => {
+	it("should return error when trying to update email with existing email", async () => {
+		await createIndexes(db);
+
 		const user = mocks.getUserObject();
 		const email = "new-email" + Math.random() + "@gotmail.com";
 
@@ -156,10 +154,9 @@ describe("UpdateUserHandler", () => {
 				data: { id: id, email: email }
 			});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch (err) {
 			expect(err.status).toBe(400, "err.status");
-			done();
 		}
 	});
 
@@ -179,7 +176,7 @@ describe("UpdateUserHandler", () => {
 		expect(updateResponse.status).toBe(200, "updateResponse.status");
 	});
 
-	it("should require password when updating email if config.requirePasswordOnEmailUpdate is true", async done => {
+	it("should require password when updating email if config.requirePasswordOnEmailUpdate is true", async () => {
 		try {
 			config.requirePasswordOnEmailUpdate = true;
 
@@ -195,16 +192,14 @@ describe("UpdateUserHandler", () => {
 				data: { id, email }
 			});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch (err) {
 			expect(err.status).toBe(errors.get("fruster-user-service.PASSWORD_REQUIRED").status);
 			expect(err.error.code).toBe(errors.get("fruster-user-service.PASSWORD_REQUIRED").error.code);
-
-			done();
 		}
 	});
 
-	it("should not be possible to provide incorrect password when updating email if config.requirePasswordOnEmailUpdate is true", async done => {
+	it("should not be possible to provide incorrect password when updating email if config.requirePasswordOnEmailUpdate is true", async () => {
 		try {
 			config.requirePasswordOnEmailUpdate = true;
 
@@ -219,12 +214,10 @@ describe("UpdateUserHandler", () => {
 				subject: constants.endpoints.service.UPDATE_USER,
 				data: { id, email, password: "This is incorrect" }
 			});
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch (err) {
 			expect(err.status).toBe(errors.get("fruster-user-service.UNAUTHORIZED").status);
 			expect(err.error.code).toBe(errors.get("fruster-user-service.UNAUTHORIZED").error.code);
-
-			done();
 		}
 	});
 

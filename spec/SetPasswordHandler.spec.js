@@ -69,7 +69,7 @@ describe("SetPasswordHandler", () => {
 		expect(newUser.hashDate).toBeDefined("newUser.hashDate");
 	});
 
-	it("should throw bad request error if id or token not found", async done => {
+	it("should throw bad request error if id or token not found", async () => {
 		try {
 			await SpecUtils.busRequest({
 				subject: constants.endpoints.service.SET_PASSWORD,
@@ -78,16 +78,15 @@ describe("SetPasswordHandler", () => {
 				}
 			});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch ({ status, error }) {
 			expect(status).toBe(400, "status");
 			expect(error.code).toBe(errors.badRequest().error.code, "error.code");
 			expect(error.detail).toBe("The request need id or token", "error.detail");
-			done();
 		}
 	});
 
-	it("should throw not found error if id or token not found", async done => {
+	it("should throw not found error if id or token not found", async () => {
 		try {
 			await SpecUtils.busRequest({
 				subject: constants.endpoints.service.SET_PASSWORD,
@@ -97,11 +96,10 @@ describe("SetPasswordHandler", () => {
 				}
 			});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch ({ status, error }) {
 			expect(status).toBe(404, "status");
 			expect(error.code).toBe(errors.notFound().error.code, "error.code");
-			done();
 		}
 	});
 

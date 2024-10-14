@@ -9,7 +9,13 @@ describe("GetProfilesByQueryHandler", () => {
 	frusterTestUtils
 		.startBeforeEach({
 			beforeStart: () => config.userFields = constants.dataset.REQUIRED_ONLY,
-			...specConstants.testUtilsOptions()
+			...specConstants.testUtilsOptions(),
+			afterStart: async (connection) => {
+				try {
+					await connection.db.collection(constants.collections.USERS).deleteMany({});
+					console.log()
+				} catch(e) {}
+			}
 		});
 
 	afterEach(() => TestUtils.resetConfig());

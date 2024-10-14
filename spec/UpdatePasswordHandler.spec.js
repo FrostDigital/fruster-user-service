@@ -66,7 +66,7 @@ describe("UpdatePasswordHandler", () => {
         expect(updatedUser.hashDate).not.toBe(startUser.hashDate, "updatedUser.hashDate");
     });
 
-    it("should not be possible to update someone else's password", async done => {
+    it("should not be possible to update someone else's password", async () => {
         const user = mocks.getUserObject();
         const response = await SpecUtils.createUser(user);
         const updatePassword = {
@@ -82,14 +82,13 @@ describe("UpdatePasswordHandler", () => {
                 data: updatePassword
             });
 
-            done.fail();
+			expect(true).toBe(false, "Should not reach this point");
         } catch (err) {
             expect(err.error.code).toBe(deprecatedErrors.errorCodes.forbidden, "err.error.code");
-            done();
         };
     });
 
-    it("should not be possible to update password without validating the old password", async done => {
+    it("should not be possible to update password without validating the old password", async () => {
         const user = mocks.getUserObject();
         const response = await SpecUtils.createUser(user);
         const updatePassword = {
@@ -105,10 +104,9 @@ describe("UpdatePasswordHandler", () => {
                 data: updatePassword
             });
 
-            done.fail();
+            expect(true).toBe(false, "Should not reach this point");
         } catch (err) {
             expect(err.error.code).toBe(deprecatedErrors.errorCodes.invalidUsernameOrPassword, "err.error.code");
-            done();
         }
     });
 

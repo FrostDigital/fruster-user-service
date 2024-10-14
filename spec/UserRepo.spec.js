@@ -2,6 +2,7 @@ const frusterTestUtils = require("fruster-test-utils");
 const UserRepo = require("../lib/repos/UserRepo");
 const Db = require("mongodb").Db;
 const specConstants = require("./support/spec-constants");
+const { collections } = require("../lib/constants");
 
 describe("UserRepo", () => {
 
@@ -10,9 +11,10 @@ describe("UserRepo", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => {
+			.testUtilsOptions(async (connection) => {
+				await connection.db.collection(collections.USERS).deleteMany({});
 				userRepo = new UserRepo(connection.db);
-				return insertTestUsers(connection.db);
+				await insertTestUsers(connection.db);
 			}));
 
 	it("should get user by id", async () => {
@@ -31,7 +33,7 @@ describe("UserRepo", () => {
 
 	it("should get all users", async () => {
 		let [users] = await userRepo.getUsersByQuery({});
-		expect(users.length).toBe(3); // user1 + user2 + initial users = 3
+		expect(users.length).toBe(2); // user1 + user2
 	});
 
 	it("should get users by query", async () => {

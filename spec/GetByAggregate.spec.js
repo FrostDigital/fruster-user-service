@@ -13,7 +13,13 @@ describe("GetByAggregateHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions(connection => db = connection.db));
+			.testUtilsOptions(async connection => {
+				db = connection.db
+				try {
+					await db.collection(constants.collections.USERS).deleteMany({});
+				} catch (e) {
+				}
+		}));
 
 	let privateProperties;
 
@@ -40,12 +46,12 @@ describe("GetByAggregateHandler", () => {
 			}
 		});
 
-		expect(data.length).toBe(2, "data.length");
+		expect(data.length).toBe(1, "data.length");
 		expect(data[0]._id).toBe("user", "data[0]._id");
 		expect(data[0].count).toBe(10, "data[0].count");
 	});
 
-	it("should throw bad request error if trying to access private properties", async done => {
+	it("should throw bad request error if trying to access private properties", async () => {
 		await insertTestUsers(10);
 
 		config.privateProperties = privateProperties + "|firstName|lastName";
@@ -60,12 +66,11 @@ describe("GetByAggregateHandler", () => {
 				}
 			});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch ({ error, status }) {
 			expect(status).toBe(400, "status");
 			expect(error.code).toBe(errors.badRequest().error.code, "code");
 			expect(error.detail).toContain("Cannot expose password|salt|emailVerificationToken|hashDate", "detail");
-			done();
 		}
 	});
 

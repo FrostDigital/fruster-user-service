@@ -15,8 +15,9 @@ describe("AddSystemRoleHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => {
+			.testUtilsOptions(async (connection) => {
 				db = connection.db;
+				await db.collection(constants.collections.ROLE_SCOPES).deleteMany({});
 			}));
 
 	beforeAll(() => {
@@ -52,7 +53,7 @@ describe("AddSystemRoleHandler", () => {
 		expect(roles[0].scopes[1]).toBe(scopes[1], "roles[0].scopes[1]");
 	});
 
-	it("should return 400 if role already exists", async done => {
+	it("should return 400 if role already exists", async () => {
 		const role = "padmin";
 		const scopes = ["1", "2"];
 
@@ -60,10 +61,9 @@ describe("AddSystemRoleHandler", () => {
 
 		try {
 			await addRole();
-			done.fail();
+			expect(true).toBe(false);
 		} catch (err) {
 			expect(err.error.code).toBe(errors.get("fruster-user-service.SYSTEM_ROLE_ALREADY_EXISTS").error.code);
-			done();
 		}
 
 		async function addRole() {

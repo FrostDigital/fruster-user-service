@@ -11,55 +11,51 @@ describe("GetUserHandler", () => {
 
 	frusterTestUtils
 		.startBeforeEach(specConstants
-			.testUtilsOptions((connection) => {
-				return insertTestUsers(connection.db);
+			.testUtilsOptions(async (connection) => {
+				await connection.db.collection(constants.collections.USERS).deleteMany({});
+				await insertTestUsers(connection.db);
 			}));
 
-	it("should fail to get ALL users when passing in empty object as query", async done => {
+	it("should fail to get ALL users when passing in empty object as query", async () => {
 		try {
 			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch (err) {
 			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-			done();
 		}
 	});
 
 	it("should fail to get ALL users when query is empty", async () => {
 		try {
-			// @ts-ignore
 			await SpecUtils.busRequest(constants.endpoints.service.GET_USER);
-
-			fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch (err) {
 			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
 		}
 	});
 
-	it("should fail to query by password", async done => {
+	it("should fail to query by password", async () => {
 		try {
 			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
 				password: "foo"
 			});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch (err) {
 			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-			done();
 		}
 	});
 
-	it("should fail to query by salt", async done => {
+	it("should fail to query by salt", async () => {
 		try {
 			await SpecUtils.busRequest(constants.endpoints.service.GET_USER, {
 				salt: "foo"
 			});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch (err) {
 			expect(err.error.code).toBe("user-service.400.13", "err.error.code");
-			done();
 		}
 	});
 
@@ -96,7 +92,7 @@ describe("GetUserHandler", () => {
 			message: {
 				reqId: "reqId",
 				query: {
-					start: 1,
+					start: 0,
 					limit: 2
 				},
 				user: { scopes: ["admin.*"] }
@@ -126,7 +122,7 @@ describe("GetUserHandler", () => {
 		expect(res.data[0].id).toBe("user1", "res.data[0].id");
 	});
 
-	it("should get internal server error if passing an invalid query", async done => {
+	it("should get internal server error if passing an invalid query", async () => {
 		try {
 			await bus.request({
 				subject: constants.endpoints.http.admin.GET_USERS,
@@ -138,10 +134,9 @@ describe("GetUserHandler", () => {
 				}
 			});
 
-			done.fail();
+			expect(true).toBe(false, "Should not reach this point");
 		} catch (err) {
 			expect(err.status).toBe(500, "err.status");
-			done();
 		}
 	});
 

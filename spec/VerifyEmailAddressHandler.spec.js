@@ -1,4 +1,3 @@
-const bus = require("fruster-bus");
 const Db = require("mongodb").Db;
 const errors = require("../lib/errors");
 const userService = require("../fruster-user-service");
@@ -7,7 +6,6 @@ const mocks = require("./support/mocks.js");
 const frusterTestUtils = require("fruster-test-utils");
 const constants = require("../lib/constants.js");
 const specConstants = require("./support/spec-constants");
-const MailServiceClient = require("../lib/clients/MailServiceClient");
 const SpecUtils = require("./support/SpecUtils");
 
 
@@ -53,18 +51,13 @@ describe("VerifyEmailAddressHandler", () => {
 		expect(mockSendMailService.requests[0].data.to[0]).toBe(testUserData.email, "mockSendMailService.requests[0].data.to");
 	});
 
-	it("should not be able to verify email with faulty token", async done => {
-		try {
-			await SpecUtils.busRequest({
-				subject: constants.endpoints.http.VERIFY_EMAIL,
-				params: { tokenId: "ram.jam" }
-			});
+	it("should not be able to verify email with faulty token", async () => {
+		const err = await SpecUtils.busRequestExpectError({
+			subject: constants.endpoints.http.VERIFY_EMAIL,
+			params: { tokenId: "ram.jam" }
+		});
 
-			done.fail();
-		} catch (err) {
-			expect(err.error.code).toBe(errors.get("fruster-user-service.INVALID_TOKEN").error.code);
-			done();
-		}
+		expect(err.error.code).toBe(errors.get("fruster-user-service.INVALID_TOKEN").error.code);
 	});
 
 	it("should use sendgrid mail template if specified in config", async () => {
