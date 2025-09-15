@@ -20,7 +20,7 @@
 		"uuid": "^10.0.0"
 	},
 	"devDependencies": {
-		"fruster-test-utils": "^0.7.1",
+		"fruster-test-utils": "^0.7.2",
 		"jasmine": "5.4.0",
 		"jasmine-spec-reporter": "^7.0.0",
 		"nyc": "^17.1.0"
