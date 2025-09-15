@@ -17,7 +17,14 @@
         },
         "email": {
             "$ref": "User#/properties/email"
-        }
+        },
+		"$unset": {
+			"type": "object",
+			"description": "List of fields to unset (remove)",
+			"items": {
+				"type": "string"
+			}
+		}
     },
     "required": [
         "id"
