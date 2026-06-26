@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "phase": "pre-flight",
+  "currentTask": null,
+  "completedTasks": [],
+  "blockedTasks": [],
+  "planFile": "fruster-migration-plan-tasks.md",
+  "buildPassed": false,
+  "testsPassed": false,
+  "testsAttempted": 0,
+  "timestamp": "2026-06-26T00:00:00Z",
+  "startedAt": "2026-06-26T00:00:00Z"
+}
