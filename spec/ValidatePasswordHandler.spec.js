@@ -1,7 +1,7 @@
 const Db = require("mongodb").Db;
 const config = require('../config').default;
 const mocks = require('./support/mocks');
-const errors = require('../lib/errors').default;
+const { errors } = require("@fruster/bus");
 const constants = require('../lib/constants').default;
 const frusterTestUtils = require("@fruster/test-utils");
 const specConstants = require("./support/spec-constants").default;

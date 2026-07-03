@@ -1,6 +1,6 @@
 import UserModel from "../models/UserModel";
 import { Db, Collection } from "mongodb";
-import errors from "../errors";
+import { errors } from "@fruster/bus";
 import log from "@fruster/log";
 import constants from "../constants";
 import config from "../../config";

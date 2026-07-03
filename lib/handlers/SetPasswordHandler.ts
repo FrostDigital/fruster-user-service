@@ -1,7 +1,7 @@
 import { injectable, inject, subscribe } from "@fruster/decorators";
 import UserRepo from "../repos/UserRepo";
 import PasswordManager from "../managers/PasswordManager";
-import errors from "../errors";
+import { errors } from "@fruster/bus";
 import EmailUtils from "../utils/EmailUtils";
 import constants from "../constants";
 

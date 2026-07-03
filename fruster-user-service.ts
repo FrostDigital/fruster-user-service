@@ -38,6 +38,8 @@ import UpdateProfileHandler from "./lib/handlers/UpdateProfileHandler";
 
 import GetMeHandler from "./lib/handlers/GetMeHandler";
 
+import "./lib/errors";
+
 import { injections } from "@fruster/decorators";
 import bus from "@fruster/bus";
 import * as mongo from "mongodb";

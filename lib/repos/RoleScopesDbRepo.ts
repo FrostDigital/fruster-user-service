@@ -2,7 +2,7 @@ import { Db, Collection } from "mongodb";
 import constants from "../constants";
 import RoleModel from "../models/RoleModel";
 import AbstractRoleScopesRepo from "./AbstractRoleScopesRepo";
-import errors from "../errors";
+import { errors } from "@fruster/bus";
 
 /**
  * RoleScopesRepo getting its data from the db.

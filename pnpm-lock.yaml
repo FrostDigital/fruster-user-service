@@ -14,9 +14,6 @@ importers:
       '@fruster/decorators':
         specifier: ^1.2.0-alpha.0
         version: 1.2.0-alpha.0
-      '@fruster/errors':
-        specifier: 1.0.0-alpha.8
-        version: 1.0.0-alpha.8
       '@fruster/health':
         specifier: 1.2.0-alpha.0
         version: 1.2.0-alpha.0
@@ -39,14 +36,14 @@ importers:
         specifier: ^4.17.1
         version: 4.22.2
       mongodb:
-        specifier: 4.17.2
-        version: 4.17.2
+        specifier: ^5.9.2
+        version: 5.9.2(@aws-sdk/credential-providers@3.1077.0)
       request:
         specifier: ^2.88.2
         version: 2.88.2
       uuid:
-        specifier: ^10.0.0
-        version: 10.0.0
+        specifier: ^14.0.1
+        version: 14.0.1
     devDependencies:
       '@fruster/test-utils':
         specifier: 1.2.0-alpha.0
@@ -54,9 +51,6 @@ importers:
       '@types/jasmine':
         specifier: ^6.0.0
         version: 6.0.0
-      '@types/mongodb':
-        specifier: ^4.0.7
-        version: 4.0.7
       '@types/node':
         specifier: ^26.0.0
         version: 26.1.0
@@ -230,15 +224,8 @@ packages:
   '@fruster/decorators@1.2.0-alpha.0':
     resolution: {integrity: sha512-KAN7moVnF5XDbFd2IqpAtcVmrKspjsV0yQnkDML3PG3b5XoHU1FraGfYKJOHOTx9e1YwIqIemEsROE8dIR/Yew==}
 
-  '@fruster/errors@1.0.0-alpha.8':
-    resolution: {integrity: sha512-Z4RiDnHQombDzkycFXLBIttQDc8/ppgnwPsM4gj98ReVkNAJNxJYlKLEZ+jM6NboByGV1I99BVZ+6HtCzo4bxw==}
-    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
-
   '@fruster/health@1.2.0-alpha.0':
     resolution: {integrity: sha512-S/1wYAXn9f8Gi3pldsEB2nbexriqV3JIsVO5PF93y8k5o/dCBdDw11q9ffqD7CVP5JQj5hLMJYgBeuzrLbDBQA==}
-
-  '@fruster/log@1.2.0':
-    resolution: {integrity: sha512-xkrO2mzX/mUo1MNlSe6LuMurm+DO4wgD6UvJ0uDVJCpLtg0blmJuvvGexBqpt3xFyVdGeJUeL9LdNq2ECKezRg==}
 
   '@fruster/log@1.2.0-alpha.0':
     resolution: {integrity: sha512-YTbfOm3/nHvjJQwG7ETwWOCjBHc2gIzweScHwI4N+NwEDVA9/pEayZ//MIVumluhNOccZoPBo0t3TKeaFho3oQ==}
@@ -341,10 +328,6 @@ packages:
   '@types/minimatch@6.0.0':
     resolution: {integrity: sha512-zmPitbQ8+6zNutpwgcQuLcsEpn/Cj54Kbn7L5pX0Os5kdWplB7xPgEh/g+SWOB/qmows2gpuCaPyduq8ZZRnxA==}
     deprecated: This is a stub types definition. minimatch provides its own type definitions, so you do not need this installed.
-
-  '@types/mongodb@4.0.7':
-    resolution: {integrity: sha512-lPUYPpzA43baXqnd36cZ9xxorprybxXDzteVKCPAdp14ppHtFJHnXYvNpmBvtMUTb5fKXVv6sVbzo1LHkWhJlw==}
-    deprecated: mongodb provides its own types. @types/mongodb is no longer needed.
 
   '@types/node@20.19.43':
     resolution: {integrity: sha512-6oYBAi5ikg4Pl+kGsoYtawUMBT2zZMCvPNF7pVLnHZfd1zf38DRiWn/gT01RYCdUqkv7Fhr+C9ot4/tb+2sVvA==}
@@ -509,9 +492,6 @@ packages:
   bare-url@2.4.5:
     resolution: {integrity: sha512-K+y9xF1tN+CdPu4qWwr0QiK1Al07eFPGYK5M2pDXcmHdMdgC/tT/bpmMe1hrmRHaidKLkXrC+cRNYf3XVDUhSQ==}
 
-  base64-js@1.5.1:
-    resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
-
   baseline-browser-mapping@2.10.40:
     resolution: {integrity: sha512-BSSLZ9/Cjjv7Gtj5B68ZzXcXUg8iOf3fme+FCuh8rC/Go+Kmh8cox7M3A8dolou16s64QjLPOSdngh7GxXvkSw==}
     engines: {node: '>=6.0.0'}
@@ -545,10 +525,6 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
-  bson@4.7.2:
-    resolution: {integrity: sha512-Ry9wCtIZ5kGqkJoi6aD8KjxFZEx78guTQDnpXWiNthsxzrxAK/i8E6pCHAIZTbaEFWcOCvbecMukfK7XUvyLpQ==}
-    engines: {node: '>=6.9.0'}
-
   bson@5.5.1:
     resolution: {integrity: sha512-ix0EwukN2EpC0SRWIj/7B5+A6uQMQy6KMREI9qQqvgpkV2frH63T0UDVd1SYedL6dNCmDBYB3QtXi4ISk9YT+g==}
     engines: {node: '>=14.20.1'}
@@ -556,9 +532,6 @@ packages:
   bson@7.3.1:
     resolution: {integrity: sha512-h/C0qe6857pQhcSJHLfsR1uYGj98Ge3wKAD3Ed9KqH3wcVh+BM4Jq4xISD7vs9OPuT07n+q3QQVjslJ286j6ag==}
     engines: {node: '>=20.19.0'}
-
-  buffer@5.7.1:
-    resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
 
   bytes@3.1.2:
     resolution: {integrity: sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==}
@@ -964,9 +937,6 @@ packages:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
     engines: {node: '>=0.10.0'}
 
-  ieee754@1.2.1:
-    resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
-
   imurmurhash@0.1.4:
     resolution: {integrity: sha512-JmXMZ6wuvDmLiHEml9ykzqO6lwFbof0GG4IkcGaENdCRDDmMVnny7s5HsIgHCbaq0w2MyPhDqkhTUgS2LU2PHA==}
     engines: {node: '>=0.8.19'}
@@ -1198,10 +1168,6 @@ packages:
   mongodb-memory-server@11.2.0:
     resolution: {integrity: sha512-506AD8qvClVx8Raw/WhAUUWBgIXPyi856iC01aa5vAzHmn6WOXC6ulvudkTF7oTMzJxkyA0A84VpD4BpyfqJ9w==}
     engines: {node: '>=20.19.0'}
-
-  mongodb@4.17.2:
-    resolution: {integrity: sha512-mLV7SEiov2LHleRJPMPrK2PMyhXFZt2UQLC4VD4pnth3jMjYKHhtqfwwkkvS/NXuo/Fp3vbhaNcXrIDaLRb9Tg==}
-    engines: {node: '>=12.9.0'}
 
   mongodb@5.9.2:
     resolution: {integrity: sha512-H60HecKO4Bc+7dhOv4sJlgvenK4fQNqqUIlXxZYQNbfEWSALGAwGoyJd/0Qwk4TttFXUOHJ2ZJQe/52ScaUwtQ==}
@@ -1670,9 +1636,8 @@ packages:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
 
-  uuid@10.0.0:
-    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
-    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+  uuid@14.0.1:
+    resolution: {integrity: sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==}
     hasBin: true
 
   uuid@3.4.0:
@@ -2086,23 +2051,10 @@ snapshots:
     dependencies:
       uuid: 8.3.2
 
-  '@fruster/errors@1.0.0-alpha.8':
-    dependencies:
-      '@fruster/log': 1.2.0
-      uuid: 8.3.2
-
   '@fruster/health@1.2.0-alpha.0':
     dependencies:
       ms: 2.1.3
       uuid: 9.0.1
-
-  '@fruster/log@1.2.0':
-    dependencies:
-      moment: 2.30.1
-      moment-timezone: 0.5.48
-      uuid: 8.3.2
-      winston: 2.4.7
-      winston-papertrail: 1.0.5(winston@2.4.7)
 
   '@fruster/log@1.2.0-alpha.0':
     dependencies:
@@ -2264,10 +2216,6 @@ snapshots:
     dependencies:
       minimatch: 9.0.9
 
-  '@types/mongodb@4.0.7':
-    dependencies:
-      mongodb: 4.17.2
-
   '@types/node@20.19.43':
     dependencies:
       undici-types: 6.21.0
@@ -2414,8 +2362,6 @@ snapshots:
     dependencies:
       bare-path: 3.0.1
 
-  base64-js@1.5.1: {}
-
   baseline-browser-mapping@2.10.40: {}
 
   bcrypt-pbkdf@1.0.2:
@@ -2465,18 +2411,9 @@ snapshots:
       node-releases: 2.0.50
       update-browserslist-db: 1.2.3(browserslist@4.28.4)
 
-  bson@4.7.2:
-    dependencies:
-      buffer: 5.7.1
-
   bson@5.5.1: {}
 
   bson@7.3.1: {}
-
-  buffer@5.7.1:
-    dependencies:
-      base64-js: 1.5.1
-      ieee754: 1.2.1
 
   bytes@3.1.2: {}
 
@@ -2878,8 +2815,6 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
-  ieee754@1.2.1: {}
-
   imurmurhash@0.1.4: {}
 
   indent-string@4.0.0: {}
@@ -3129,15 +3064,6 @@ snapshots:
       - snappy
       - socks
       - supports-color
-
-  mongodb@4.17.2:
-    dependencies:
-      bson: 4.7.2
-      mongodb-connection-string-url: 2.6.0
-      socks: 2.8.9
-    optionalDependencies:
-      '@aws-sdk/credential-providers': 3.1077.0
-      '@mongodb-js/saslprep': 1.4.12
 
   mongodb@5.9.2(@aws-sdk/credential-providers@3.1077.0):
     dependencies:
@@ -3627,7 +3553,7 @@ snapshots:
 
   utils-merge@1.0.1: {}
 
-  uuid@10.0.0: {}
+  uuid@14.0.1: {}
 
   uuid@3.4.0: {}
 

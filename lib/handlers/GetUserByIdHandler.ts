@@ -1,5 +1,5 @@
 import { injectable, inject, subscribe } from "@fruster/decorators";
-import errors from "../errors";
+import { errors } from "@fruster/bus";
 import log from "@fruster/log";
 import UserModel from "../models/UserModel";
 import UserRepo from "../repos/UserRepo";

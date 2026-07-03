@@ -1,6 +1,6 @@
 import { injectable, inject, subscribe } from "@fruster/decorators";
 import RoleScopesDbRepo from "../../repos/RoleScopesDbRepo";
-import errors from "../../errors";
+import { errors } from "@fruster/bus";
 import constants from "../../constants";
 
 

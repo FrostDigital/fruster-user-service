@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import crypto from "crypto";
 import secureRandom from "csprng";
 import config from "../../config";
-import errors from "../errors";
+import { errors } from "@fruster/bus";
 import UserModel from "../models/UserModel";
 
 class EmailUtils {

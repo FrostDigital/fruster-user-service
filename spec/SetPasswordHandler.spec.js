@@ -4,7 +4,7 @@ const SpecUtils = require('./support/SpecUtils');
 const specConstants = require("./support/spec-constants").default;
 const config = require('../config').default;
 const constants = require('../lib/constants').default;
-const errors = require("../lib/errors").default;
+const { errors } = require("@fruster/bus");
 
 
 describe("SetPasswordHandler", () => {

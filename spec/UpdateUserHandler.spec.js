@@ -6,7 +6,7 @@ const SpecUtils = require('./support/SpecUtils');
 const constants = require('../lib/constants').default;
 const frusterTestUtils = require("@fruster/test-utils");
 const specConstants = require("./support/spec-constants").default;
-const errors = require('../lib/errors').default;
+const { errors } = require("@fruster/bus");
 const { createIndexes } = require("../fruster-user-service");
 const Db = require("mongodb").Db;
 

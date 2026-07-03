@@ -3,8 +3,8 @@ import log from "@fruster/log";
 import UserRepo from "../repos/UserRepo";
 import ProfileRepo from "../repos/ProfileRepo";
 import Publishes from "../Publishes";
-import errors from "../errors";
 import constants from "../constants";
+import { errors } from "@fruster/bus";
 
 
 @injectable()

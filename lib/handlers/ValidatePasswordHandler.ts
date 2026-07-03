@@ -1,7 +1,7 @@
 import { injectable, inject, subscribe } from "@fruster/decorators";
 import UserRepo from "../repos/UserRepo";
 import config from "../../config";
-import errors from "../errors";
+import { errors } from "@fruster/bus";
 import deprecatedErrors from "../deprecatedErrors";
 import log from "@fruster/log";
 import UserModel from "../models/UserModel";

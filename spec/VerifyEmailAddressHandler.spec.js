@@ -1,5 +1,5 @@
 const Db = require("mongodb").Db;
-const errors = require("../lib/errors").default;
+const { errors } = require("@fruster/bus");
 const userService = require("../fruster-user-service");
 const config = require("../config").default;
 const mocks = require("./support/mocks");

@@ -1,5 +1,5 @@
 import config from "../../config";
-import errors from "../errors";
+import { errors } from "@fruster/bus";
 import constants from "../constants";
 import deprecatedErrors from "../deprecatedErrors";
 import PasswordManager from "./PasswordManager";

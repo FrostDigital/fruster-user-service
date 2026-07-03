@@ -4,7 +4,7 @@ import Utils from "../utils/Utils";
 import EmailUtils from "../utils/EmailUtils";
 import config from "../../config";
 import deprecatedErrors from "../deprecatedErrors";
-import errors from "../errors";
+import { errors } from "@fruster/bus";
 import PasswordManager from "../managers/PasswordManager";
 import RoleManager from "../managers/RoleManager";
 import ProfileManager from "../managers/ProfileManager";

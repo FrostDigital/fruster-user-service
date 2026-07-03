@@ -1,4 +1,4 @@
-import frusterErrors from "@fruster/errors";
+import { buildErrors } from "@fruster/bus";
 
 /** NOTE: all prefixed `fruster-user-service.` errors are from an old version of fruster errors and should not be renamed! */
 
@@ -27,7 +27,5 @@ const errorModels = [
 ];
 
 /** frusterErrors only wants strings for details, but it works with functions too; hence @ts-ignore */
-// @ts-ignore
-const errors = frusterErrors(errorModels);
+buildErrors(errorModels);
 
-export default errors;
