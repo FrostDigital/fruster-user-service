@@ -46,8 +46,7 @@ import * as mongo from "mongodb";
 import { Db } from "mongodb";
 import config from "./config";
 import constants from "./lib/constants";
-// @ts-ignore - web/ stays as CommonJS, not migrated to TypeScript
-const expressApp = require("./web/express-app");
+import * as expressApp from "./web/express-app";
 import docs from "./lib/docs";
 import log from "@fruster/log";
 

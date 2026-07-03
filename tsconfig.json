@@ -21,6 +21,7 @@
   "include": [
     "lib/**/*",
     "spec/**/*",
+    "web/**/*",
     "app.ts",
     "fruster-user-service.ts",
     "config.ts"
@@ -28,7 +29,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "web",
     "coverage"
   ]
 }

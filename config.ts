@@ -54,7 +54,7 @@ const config = {
 	emailVerificationForRoles: parseArray(process.env.EMAIL_VERIFICATION_FOR_ROLES || "*") as string[],
 
 	/** HTTP port where email verification web will run */
-	port: process.env.PORT || 3120,
+	port: Number(process.env.PORT) || 3120,
 
 	/** :user-{field}: can be used to display user information in the email. e.g. :user-firstName:
 		 :token is the email verification token to be used to validate the email address. */
