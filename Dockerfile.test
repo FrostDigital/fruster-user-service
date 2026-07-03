@@ -1,6 +1,6 @@
-FROM node:26-alpine
+FROM node:26-bookworm-slim
 
-RUN apk add --update bash && rm -rf /var/cache/apk/*
+RUN apt-get update && apt-get install -y --no-install-recommends libcurl4 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 ADD . .
