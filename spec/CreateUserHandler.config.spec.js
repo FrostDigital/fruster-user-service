@@ -1,10 +1,10 @@
-const conf = require('../config');
+const conf = require('../config').default;
 const mocks = require('./support/mocks');
-const constants = require('../lib/constants');
-const RoleManager = require('../lib/managers/RoleManager');
-const specConstants = require('./support/spec-constants');
-const frusterTestUtils = require("fruster-test-utils");
-const RoleScopesConfigRepo = require('../lib/repos/RoleScopesConfigRepo');
+const constants = require('../lib/constants').default;
+const RoleManager = require('../lib/managers/RoleManager').default;
+const specConstants = require('./support/spec-constants').default;
+const frusterTestUtils = require("@fruster/test-utils");
+const RoleScopesConfigRepo = require('../lib/repos/RoleScopesConfigRepo').default;
 const SpecUtils = require("./support/SpecUtils");
 
 /** This is a seperate test because we need to set the config before  frusterTestUtils.startBeforeEach which means all other tests fail if set in the other test file 🤔 */

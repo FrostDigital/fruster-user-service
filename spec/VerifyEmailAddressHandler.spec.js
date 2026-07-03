@@ -1,11 +1,11 @@
 const Db = require("mongodb").Db;
-const errors = require("../lib/errors");
+const errors = require("../lib/errors").default;
 const userService = require("../fruster-user-service");
-const config = require("../config");
-const mocks = require("./support/mocks.js");
-const frusterTestUtils = require("fruster-test-utils");
-const constants = require("../lib/constants.js");
-const specConstants = require("./support/spec-constants");
+const config = require("../config").default;
+const mocks = require("./support/mocks");
+const frusterTestUtils = require("@fruster/test-utils");
+const constants = require("../lib/constants").default;
+const specConstants = require("./support/spec-constants").default;
 const SpecUtils = require("./support/SpecUtils");
 
 

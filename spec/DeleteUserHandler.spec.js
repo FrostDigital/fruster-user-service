@@ -1,11 +1,11 @@
 const Db = require("mongodb").Db;
 const uuid = require("uuid");
 const SpecUtils = require('./support/SpecUtils');
-const constants = require('../lib/constants.js');
-const frusterTestUtils = require("fruster-test-utils");
+const constants = require('../lib/constants').default;
+const frusterTestUtils = require("@fruster/test-utils");
 const mocks = require("./support/mocks");
-const specConstants = require("./support/spec-constants");
-const config = require("../config");
+const specConstants = require("./support/spec-constants").default;
+const config = require("../config").default;
 
 
 describe("DeleteUserHandler", () => {

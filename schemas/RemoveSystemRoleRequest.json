@@ -1,0 +1,15 @@
+{
+    "id": "RemoveSystemRoleRequest",
+    "description": "Request for removing a system role.",
+    "additionalProperties": false,
+    "properties": {
+        "role": {
+            "type": "string",
+            "description": "The role name to remove.",
+            "faker": "name.jobType"
+        }
+    },
+    "required": [
+        "role"
+    ]
+}

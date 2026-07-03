@@ -1,7 +1,7 @@
-const frusterTestUtils = require("fruster-test-utils")
-const constants = require("../lib/constants");
+const frusterTestUtils = require("@fruster/test-utils")
+const constants = require("../lib/constants").default;
 const Db = require("mongodb").Db;
-const specConstants = require("./support/spec-constants");
+const specConstants = require("./support/spec-constants").default;
 const SpecUtils = require("./support/SpecUtils");
 
 describe("GetUsersByAggregateHandler", () => {

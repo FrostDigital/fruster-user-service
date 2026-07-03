@@ -6,6 +6,7 @@ WORKDIR /app
 ADD . .
 
 RUN npm install
+RUN npm run build
 EXPOSE 3200
 
-CMD ["node", "app.js"]
+CMD ["npm", "run", "start:dist"]

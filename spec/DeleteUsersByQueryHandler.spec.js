@@ -1,13 +1,13 @@
-const log = require("fruster-log");
+const log = require("@fruster/log");
 const Db = require("mongodb").Db;
 const SpecUtils = require('./support/SpecUtils');
-const constants = require('../lib/constants.js');
-const frusterTestUtils = require("fruster-test-utils");
+const constants = require('../lib/constants').default;
+const frusterTestUtils = require("@fruster/test-utils");
 const mocks = require("./support/mocks");
-const specConstants = require("./support/spec-constants");
-const config = require("../config");
-const Publishes = require("../lib/Publishes");
-const bus = require("fruster-bus");
+const specConstants = require("./support/spec-constants").default;
+const config = require("../config").default;
+const Publishes = require("../lib/Publishes").default;
+const bus = require("@fruster/bus").default || require("@fruster/bus");
 
 describe("DeleteUsersByQueryHandler", () => {
 

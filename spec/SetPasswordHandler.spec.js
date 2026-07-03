@@ -1,10 +1,10 @@
-const frusterTestUtils = require("fruster-test-utils");
-const mocks = require('./support/mocks.js');
+const frusterTestUtils = require("@fruster/test-utils");
+const mocks = require('./support/mocks');
 const SpecUtils = require('./support/SpecUtils');
-const specConstants = require("./support/spec-constants");
-const config = require('../config.js');
-const constants = require('../lib/constants.js');
-const errors = require("../lib/errors.js");
+const specConstants = require("./support/spec-constants").default;
+const config = require('../config').default;
+const constants = require('../lib/constants').default;
+const errors = require("../lib/errors").default;
 
 
 describe("SetPasswordHandler", () => {

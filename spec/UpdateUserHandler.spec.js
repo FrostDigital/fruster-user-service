@@ -1,13 +1,13 @@
 const uuid = require("uuid");
-const testBus = require("fruster-bus").testBus;
-const config = require('../config');
-const mocks = require('./support/mocks.js');
+const testBus = require("@fruster/bus").testBus;
+const config = require('../config').default;
+const mocks = require('./support/mocks');
 const SpecUtils = require('./support/SpecUtils');
-const constants = require('../lib/constants.js');
-const frusterTestUtils = require("fruster-test-utils");
-const specConstants = require("./support/spec-constants");
-const errors = require('../lib/errors');
-const { createIndexes } = require("../fruster-user-service.js");
+const constants = require('../lib/constants').default;
+const frusterTestUtils = require("@fruster/test-utils");
+const specConstants = require("./support/spec-constants").default;
+const errors = require('../lib/errors').default;
+const { createIndexes } = require("../fruster-user-service");
 const Db = require("mongodb").Db;
 
 

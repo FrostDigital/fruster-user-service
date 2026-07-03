@@ -1,8 +1,8 @@
-const frusterTestUtils = require("fruster-test-utils");
-const UserRepo = require("../lib/repos/UserRepo");
+const frusterTestUtils = require("@fruster/test-utils");
+const UserRepo = require("../lib/repos/UserRepo").default;
 const Db = require("mongodb").Db;
-const specConstants = require("./support/spec-constants");
-const { collections } = require("../lib/constants");
+const specConstants = require("./support/spec-constants").default;
+const { collections } = require("../lib/constants").default;
 
 describe("UserRepo", () => {
 

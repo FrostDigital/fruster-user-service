@@ -1,6 +1,6 @@
-const constants = require('../lib/constants.js');
-const frusterTestUtils = require("fruster-test-utils");
-const specConstants = require("./support/spec-constants");
+const constants = require('../lib/constants').default;
+const frusterTestUtils = require("@fruster/test-utils");
+const specConstants = require("./support/spec-constants").default;
 const SpecUtils = require("./support/SpecUtils");
 
 

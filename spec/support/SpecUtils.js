@@ -1,8 +1,7 @@
-const bus = require("fruster-bus");
-const constants = require("../../lib/constants.js");
+const bus = require("@fruster/bus").default || require("@fruster/bus");
+const constants = require("../../lib/constants").default;
 const uuid = require("uuid");
-const FrusterResponse = require("fruster-bus").FrusterResponse;
-const config = require("../../config");
+const config = require("../../config").default;
 const configBackup = Object.assign({}, config);
 
 

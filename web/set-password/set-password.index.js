@@ -1,8 +1,8 @@
-const bus = require("fruster-bus");
+const bus = require("@fruster/bus").default;
 const uuid = require("uuid");
 const fs = require("fs");
-const constants = require("../../lib/constants");
-const { passwordValidationRegex } = require("../../config");
+const constants = require("../../lib/constants").default;
+const { passwordValidationRegex } = require("../../config").default;
 
 module.exports.get = async (req, res) => {
 	fs.readFile("./web/set-password/index.html", {}, (err, data) => {

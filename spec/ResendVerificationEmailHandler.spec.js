@@ -1,9 +1,9 @@
 const Db = require("mongodb").Db;
-const conf = require('../config');
-const mocks = require('./support/mocks.js');
-const constants = require('../lib/constants.js');
-const frusterTestUtils = require("fruster-test-utils");
-const specConstants = require("./support/spec-constants");
+const conf = require('../config').default;
+const mocks = require('./support/mocks');
+const constants = require('../lib/constants').default;
+const frusterTestUtils = require("@fruster/test-utils");
+const specConstants = require("./support/spec-constants").default;
 const SpecUtils = require("./support/SpecUtils");
 
 

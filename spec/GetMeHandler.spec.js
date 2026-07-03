@@ -1,8 +1,8 @@
-const constants = require('../lib/constants.js');
-const frusterTestUtils = require("fruster-test-utils");
-const specConstants = require("./support/spec-constants");
-const bus = require("fruster-bus").testBus;
-const config = require("../config");
+const constants = require('../lib/constants').default;
+const frusterTestUtils = require("@fruster/test-utils");
+const specConstants = require("./support/spec-constants").default;
+const bus = require("@fruster/bus").testBus;
+const config = require("../config").default;
 
 describe("GetMeHandler", () => {
 
@@ -28,7 +28,7 @@ describe("GetMeHandler", () => {
 
 	it("should return 403 if not logged in", async () => {
 		try {
-			await bus.request(constants.endpoints.http.GET_ME);
+			await bus.request({ subject: constants.endpoints.http.GET_ME, message: {} });
 		} catch ({ status, error: { code } }) {
 			expect(status).toBe(403, "error status");
 			expect(code).toBe("MUST_BE_LOGGED_IN", "error code");

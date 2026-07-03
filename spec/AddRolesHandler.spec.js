@@ -1,8 +1,8 @@
-const mocks = require('./support/mocks.js');
+const mocks = require('./support/mocks');
 const SpecUtils = require('./support/SpecUtils');
-const constants = require('../lib/constants.js');
-const frusterTestUtils = require("fruster-test-utils").default;
-const specConstants = require("./support/spec-constants");
+const constants = require('../lib/constants').default;
+const frusterTestUtils = require("@fruster/test-utils").default;
+const specConstants = require("./support/spec-constants").default;
 const { v4 } = require('uuid');
 
 describe("AddRolesHandler", () => {

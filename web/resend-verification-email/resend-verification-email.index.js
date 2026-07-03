@@ -1,7 +1,7 @@
-const bus = require("fruster-bus");
+const bus = require("@fruster/bus").default;
 const uuid = require("uuid");
 const fs = require("fs");
-const constants = require("../../lib/constants");
+const constants = require("../../lib/constants").default;
 
 
 module.exports.get = async (req, res) => {

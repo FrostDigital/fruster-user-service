@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "lib": ["esnext", "es2016"],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "rootDir": ".",
+    "strict": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "sourceMap": true,
+    "experimentalDecorators": true
+  },
+  "fruster": {
+    "handlersPath": "**/lib/handlers/**/*.ts"
+  },
+  "include": [
+    "lib/**/*",
+    "spec/**/*",
+    "app.ts",
+    "fruster-user-service.ts",
+    "config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "web",
+    "coverage"
+  ]
+}

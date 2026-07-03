@@ -1,9 +1,9 @@
-const config = require('../config');
-const mocks = require('./support/mocks.js');
+const config = require('../config').default;
+const mocks = require('./support/mocks');
 const SpecUtils = require('./support/SpecUtils');
-const constants = require('../lib/constants.js');
-const frusterTestUtils = require("fruster-test-utils");
-const specConstants = require("./support/spec-constants");
+const constants = require('../lib/constants').default;
+const frusterTestUtils = require("@fruster/test-utils");
+const specConstants = require("./support/spec-constants").default;
 
 
 describe("UpdateProfileHandler", () => {

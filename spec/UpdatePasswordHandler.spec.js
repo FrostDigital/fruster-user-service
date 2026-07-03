@@ -1,11 +1,11 @@
 const mongo = require("mongodb");
 const Db = mongo.Db;
-const mocks = require('./support/mocks.js');
+const mocks = require('./support/mocks');
 const SpecUtils = require('./support/SpecUtils');
-const constants = require('../lib/constants.js');
-const frusterTestUtils = require("fruster-test-utils");
-const deprecatedErrors = require("../lib/deprecatedErrors");
-const specConstants = require("./support/spec-constants");
+const constants = require('../lib/constants').default;
+const frusterTestUtils = require("@fruster/test-utils");
+const deprecatedErrors = require("../lib/deprecatedErrors").default;
+const specConstants = require("./support/spec-constants").default;
 
 
 describe("UpdatePasswordHandler", () => {

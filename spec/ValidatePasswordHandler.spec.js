@@ -1,12 +1,12 @@
 const Db = require("mongodb").Db;
-const config = require('../config');
-const mocks = require('./support/mocks.js');
-const errors = require('../lib/errors.js');
-const constants = require('../lib/constants.js');
-const frusterTestUtils = require("fruster-test-utils");
-const specConstants = require("./support/spec-constants");
+const config = require('../config').default;
+const mocks = require('./support/mocks');
+const errors = require('../lib/errors').default;
+const constants = require('../lib/constants').default;
+const frusterTestUtils = require("@fruster/test-utils");
+const specConstants = require("./support/spec-constants").default;
 const SpecUtils = require("./support/SpecUtils");
-const deprecatedErrors = require("../lib/deprecatedErrors");
+const deprecatedErrors = require("../lib/deprecatedErrors").default;
 
 
 describe("ValidatePasswordHandler", () => {

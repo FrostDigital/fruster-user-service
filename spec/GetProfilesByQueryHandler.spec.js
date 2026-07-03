@@ -1,8 +1,8 @@
-const frusterTestUtils = require("fruster-test-utils");
-const constants = require("../lib/constants");
-const specConstants = require("./support/spec-constants");
+const frusterTestUtils = require("@fruster/test-utils");
+const constants = require("../lib/constants").default;
+const specConstants = require("./support/spec-constants").default;
 const TestUtils = require("./support/SpecUtils");
-const config = require("../config");
+const config = require("../config").default;
 
 describe("GetProfilesByQueryHandler", () => {
 

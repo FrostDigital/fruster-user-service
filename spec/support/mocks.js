@@ -1,8 +1,8 @@
 const uuid = require("uuid");
-const frusterTestUtils = require("fruster-test-utils");
-const constants = require("../../lib/constants.js");
+const frusterTestUtils = require("@fruster/test-utils");
+const constants = require("../../lib/constants").default;
 const SpecUtils = require("./SpecUtils");
-const MailServiceClient = require("../../lib/clients/MailServiceClient");
+const MailServiceClient = require("../../lib/clients/MailServiceClient").default;
 
 module.exports = {
 

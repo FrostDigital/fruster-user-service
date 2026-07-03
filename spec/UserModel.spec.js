@@ -1,8 +1,8 @@
-const UserModel = require("../lib/models/UserModel");
-const RoleManager = require("../lib/managers/RoleManager");
-const config = require("../config");
+const UserModel = require("../lib/models/UserModel").default;
+const RoleManager = require("../lib/managers/RoleManager").default;
+const config = require("../config").default;
 const mocks = require("./support/mocks");
-const Utils = require("../lib/utils/Utils");
+const Utils = require("../lib/utils/Utils").default;
 const SpecUtils = require("./support/SpecUtils");
 
 

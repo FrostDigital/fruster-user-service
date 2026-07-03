@@ -1,14 +1,14 @@
 const Db = require("mongodb").Db;
-const config = require("../config");
-const mocks = require("./support/mocks.js");
-const constants = require("../lib/constants.js");
-const testBus = require("fruster-bus").testBus;
+const config = require("../config").default;
+const mocks = require("./support/mocks");
+const constants = require("../lib/constants").default;
+const testBus = require("@fruster/bus").testBus;
 const SpecUtils = require("./support/SpecUtils");
-const frusterTestUtils = require("fruster-test-utils");
-const RoleManager = require("../lib/managers/RoleManager");
-const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
-const specConstants = require("./support/spec-constants");
-const { createIndexes } = require("../fruster-user-service.js");
+const frusterTestUtils = require("@fruster/test-utils");
+const RoleManager = require("../lib/managers/RoleManager").default;
+const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo").default;
+const specConstants = require("./support/spec-constants").default;
+const { createIndexes } = require("../fruster-user-service");
 
 
 describe("CreateUserHandler", () => {

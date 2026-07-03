@@ -1,5 +1,5 @@
-const PasswordManager = require("../lib/managers/PasswordManager");
-const config = require("../config");
+const PasswordManager = require("../lib/managers/PasswordManager").default;
+const config = require("../config").default;
 
 
 describe("PasswordManager", () => {

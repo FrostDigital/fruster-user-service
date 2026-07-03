@@ -1,12 +1,12 @@
 const Db = require("mongodb").Db;
-const frusterTestUtils = require("fruster-test-utils");
-const RoleScopesDbRepo = require("../lib/repos/RoleScopesDbRepo");
-const RoleManager = require("../lib/managers/RoleManager");
-const constants = require("../lib/constants");
-const config = require("../config");
-const RoleModel = require("../lib/models/RoleModel");
-const specConstants = require("./support/spec-constants");
-const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo");
+const frusterTestUtils = require("@fruster/test-utils");
+const RoleScopesDbRepo = require("../lib/repos/RoleScopesDbRepo").default;
+const RoleManager = require("../lib/managers/RoleManager").default;
+const constants = require("../lib/constants").default;
+const config = require("../config").default;
+const RoleModel = require("../lib/models/RoleModel").default;
+const specConstants = require("./support/spec-constants").default;
+const RoleScopesConfigRepo = require("../lib/repos/RoleScopesConfigRepo").default;
 const SpecUtils = require("./support/SpecUtils");
 
 
