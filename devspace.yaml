@@ -1,0 +1,114 @@
+version: v2beta1
+name: oo-fruster-user-service
+
+# Variables for easy customization
+vars:
+  NAMESPACE:
+    value: origo
+  POD_LABEL:
+    value: app=oo-fruster-user-service
+
+# Development configuration
+dev:
+  oo-fruster-user-service:
+    # Target the existing deployment
+    labelSelector:
+      app: oo-fruster-user-service
+    namespace: ${NAMESPACE}
+
+    # Port forwarding for NATS (from default namespace)
+    # Note: This only forwards from selected pod, we'll use pipeline for NATS
+
+    # Don't attach/open terminal automatically
+    terminal:
+      enabled: false
+
+    # Don't stream logs automatically
+    logs:
+      enabled: false
+
+# Development pipelines
+pipelines:
+  # Main development pipeline - Simple mode with just port forwarding
+  dev: |-
+    echo "🚀 Setting up local development environment for oo-fruster-user-service"
+    echo ""
+
+    # Get current replica count first
+    echo "📊 Checking deployment status..."
+    CURRENT_REPLICAS=$(kubectl get deployment -n ${NAMESPACE} oo-fruster-user-service -o jsonpath='{.spec.replicas}')
+    echo "   Current replicas: $CURRENT_REPLICAS"
+
+    # Check if we need to scale up first to extract env vars
+    if [ "$CURRENT_REPLICAS" -eq 0 ]; then
+      echo "   Deployment is scaled to 0, scaling up temporarily to extract env vars..."
+      kubectl scale deployment -n ${NAMESPACE} oo-fruster-user-service --replicas=1
+      echo "   Waiting for pod to be ready..."
+      kubectl wait --for=condition=ready pod -l ${POD_LABEL} -n ${NAMESPACE} --timeout=60s
+    fi
+    echo ""
+
+    # Extract environment variables from running pod
+    echo "📡 Extracting environment variables from cluster pod..."
+    POD_NAME=$(kubectl get pod -n ${NAMESPACE} -l ${POD_LABEL} -o jsonpath='{.items[0].metadata.name}')
+
+    if [ -z "$POD_NAME" ]; then
+      echo "❌ Error: No oo-fruster-user-service pod found in namespace ${NAMESPACE}"
+      exit 1
+    fi
+
+    echo "   Found pod: $POD_NAME"
+
+    MONGO_URL=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv MONGO_URL || echo "")
+    USER_ATTRS_WHITELIST=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv USER_ATTRS_WHITELIST || echo "")
+    USER_DATA_RESPONSE_KEY=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv USER_DATA_RESPONSE_KEY || echo "")
+    USER_SERVICE_GET_USER_SUBJECT=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv USER_SERVICE_GET_USER_SUBJECT || echo "")
+    ENABLE_TFA=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv ENABLE_TFA || echo "")
+    TWO_FACTOR_SMS_PHONE_FIELD=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv TWO_FACTOR_SMS_PHONE_FIELD || echo "")
+    PASSWORD_VALIDATION_REGEX=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv PASSWORD_VALIDATION_REGEX || echo "")
+    PORT=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv PORT || echo "")
+    PRIVATE_PROPERTIES=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv PRIVATE_PROPERTIES || echo "")
+    REQUIRE_PASSWORD=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv REQUIRE_PASSWORD || echo "")
+    SKIP_EMAIL_UNIQUE_INDEX=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv SKIP_EMAIL_UNIQUE_INDEX || echo "")
+    API_ROOT=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv API_ROOT || echo "")
+    BUS=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv BUS || echo "")
+    INITIAL_USER_PASSWORD=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv INITIAL_USER_PASSWORD || echo "")
+    USE_DB_ROLES_AND_SCOPES=$(kubectl exec -n ${NAMESPACE} $POD_NAME -- printenv USE_DB_ROLES_AND_SCOPES || echo "")
+
+    if [ -z "$MONGO_URL" ]; then
+      echo "❌ Error: Could not extract MONGO_URL from pod"
+      exit 1
+    fi
+
+    echo "   ✅ Environment variables extracted successfully"
+    echo ""
+
+    # Scale down cluster deployment
+    echo "⏸️  Scaling down cluster deployment..."
+    kubectl scale deployment -n ${NAMESPACE} oo-fruster-user-service --replicas=0
+    echo "   ✅ Scaled to 0 replicas"
+    echo ""
+
+    # Start port forwarding for NATS only
+    echo "🔌 Starting port forwarding..."
+    echo "   NATS: oo-nats.default:4222 → localhost:4222"
+    kubectl port-forward -n default svc/oo-nats 4222:4222 &
+    PF_PID=$!
+
+    # Wait a moment for port forwarding to establish
+    sleep 2
+
+    echo ""
+    echo "✅ Development environment ready!"
+    echo ""
+    echo "🚀 Start your service with:"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "BUS=nats://localhost:4222 MONGO_URL='$MONGO_URL' USER_ATTRS_WHITELIST='$USER_ATTRS_WHITELIST' USER_DATA_RESPONSE_KEY='$USER_DATA_RESPONSE_KEY' USER_SERVICE_GET_USER_SUBJECT='$USER_SERVICE_GET_USER_SUBJECT' ENABLE_TFA='$ENABLE_TFA' TWO_FACTOR_SMS_PHONE_FIELD='$TWO_FACTOR_SMS_PHONE_FIELD' PASSWORD_VALIDATION_REGEX='$PASSWORD_VALIDATION_REGEX' PORT='$PORT' PRIVATE_PROPERTIES='$PRIVATE_PROPERTIES' REQUIRE_PASSWORD='$REQUIRE_PASSWORD' SKIP_EMAIL_UNIQUE_INDEX='$SKIP_EMAIL_UNIQUE_INDEX' API_ROOT='$API_ROOT' INITIAL_USER_PASSWORD='$INITIAL_USER_PASSWORD' USE_DB_ROLES_AND_SCOPES='$USE_DB_ROLES_AND_SCOPES' npm start"
+    echo ""
+    echo "⚠️  Press Ctrl+C to stop - scale up with:"
+    echo "kubectl scale deployment -n ${NAMESPACE} oo-fruster-user-service --replicas=1"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+    # Wait for port forwarding (cleanup happens in hooks section)
+    wait $PF_PID
+

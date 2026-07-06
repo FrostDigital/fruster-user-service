@@ -1,11 +1,15 @@
-FROM node:20.9.0-alpine
+FROM node:26-alpine
 
-RUN apk add --update bash && rm -rf /var/cache/apk/*
+RUN apk add --update --no-cache curl && rm -rf /var/cache/apk/*
 
 WORKDIR /app
 ADD . .
 
+ENV NODE_OPTIONS=--no-experimental-strip-types
+
 RUN npm install
+RUN npm run build
+
 EXPOSE 3200
 
-CMD ["node", "app.js"]
+CMD ["npm", "run", "start:dist"]

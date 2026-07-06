@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "phase": "complete",
+  "currentTask": null,
+  "completedTasks": [
+    "1.1", "1.2", "1.3", "1.4", "1.5",
+    "2.1", "2.2", "2.3", "2.4",
+    "3.1", "3.2", "3.3", "3.4",
+    "4.1", "4.2", "4.3", "4.4", "4.5", "4.6",
+    "5.1", "5.2", "5.3", "5.4", "5.5", "5.6", "5.7", "5.8", "5.9",
+    "6.1-6.26",
+    "7.1", "7.2", "7.3",
+    "8.1", "8.2", "8.3", "8.4", "8.5",
+    "9.1", "9.2"
+  ],
+  "blockedTasks": [],
+  "planFile": "fruster-migration-plan-tasks.md",
+  "buildPassed": true,
+  "testsPassed": true,
+  "testsAttempted": 1,
+  "testsSummary": "148 of 148 specs passing; nyc coverage gate --lines 90 satisfied",
+  "resolutionNotes": "User chose 'finalize only' at the Phase 1 pre-flight gate: the migration was found already complete on disk (all lib/**, app, config, fruster-user-service already TypeScript-only, no legacy .js equivalents remaining except spec/*.spec.js by design). No planning or implementation subagents were spawned. This pass reconciled fruster-migration-plan-tasks.md (marked the 12 previously-unchecked items, which described a transient pre-Phase-9 test-execution blocker and a now-moot nyc.exclude task, as resolved/superseded with explanatory notes; all 193 checklist items now checked) and produced fruster-modernization-report.md. No code or business-logic changes were made in this pass, per explicit user instruction — this was documentation/state reconciliation only.",
+  "outOfScopeItemsNoted": [
+    "web/ directory (express-app.js, routes.js, middleware/, role-admin-web/, etc.) remains CommonJS JavaScript, not migrated to TypeScript — intentionally excluded per the migration plan",
+    "Dockerfile already contains 'RUN npm run build' before CMD and correctly runs 'npm run start:dist' — verified fine, no action needed, listed here only because it was flagged as worth double-checking",
+    "package-lock.json and pnpm-lock.yaml (plus pnpm-workspace.yaml) coexist — dual package-manager lockfile artifacts not reconciled, worth clarifying which package manager is canonical",
+    "schemas/*.json files still use \"id\" instead of \"$id\" in at least 5 files (AddSystemRoleRequest.json, GetProfilesByQueryRequest.json, GetScopesForRolesRequest.json, StringArrayResponse.json, VerifyEmailAddressServiceRequest.json) — @fruster/bus patches this at load time with a deprecation warning; cosmetic cleanup only, not functionally blocking"
+  ],
+  "timestamp": "2026-07-03T11:25:00Z",
+  "startedAt": "2026-07-03T11:10:00Z",
+  "completedAt": "2026-07-03T11:25:00Z"
+}

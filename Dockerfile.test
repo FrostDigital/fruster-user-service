@@ -1,6 +1,6 @@
-FROM node:20.9.0-alpine
+FROM node:26-bookworm-slim
 
-RUN apk add --update bash && rm -rf /var/cache/apk/*
+RUN apt-get update && apt-get install -y --no-install-recommends libcurl4 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 ADD . .
@@ -8,5 +8,6 @@ ADD . .
 RUN npm install
 
 ENV CI=1
+ENV NODE_OPTIONS=--no-experimental-strip-types
 
 CMD ["npm", "test"]

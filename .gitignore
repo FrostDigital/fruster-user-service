@@ -41,3 +41,8 @@ jspm_packages
 
 # vs code
 .vscode
+
+# TypeScript build output
+dist
+
+.devspace
