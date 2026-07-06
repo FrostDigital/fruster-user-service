@@ -1,12 +1,15 @@
-FROM node:26-bookworm-slim
+FROM node:26-alpine
 
-RUN apt-get update && apt-get install -y --no-install-recommends libcurl4 && rm -rf /var/lib/apt/lists/*
+RUN apk add --update --no-cache curl && rm -rf /var/cache/apk/*
 
 WORKDIR /app
 ADD . .
 
+ENV NODE_OPTIONS=--no-experimental-strip-types
+
 RUN npm install
 RUN npm run build
+
 EXPOSE 3200
 
 CMD ["npm", "run", "start:dist"]
